@@ -35,7 +35,6 @@ Support for STCN KMCs.
 :- use_module(kmc(kmc_4062)). % Meta-calls.
 :- use_module(kmc(kmc_6511)). % Meta-calls.
 :- use_module(server(web_console)).
-:- use_module(standards(abnf)).
 
 :- register_module(kmc_0500).
 
@@ -66,7 +65,7 @@ kmc(KMC, G, PPN) -->
 
   dcg_call(DCG_Rule, G, PPN).
 kmc(_KMC, _G, _PPN) -->
-  dcg_until([end_mode(exclusive),output_format(atom)], 'CRLF', _).
+  dcg_until([end_mode(exclusive),output_format(atom)], line_feed, _).
 
 %! kmc_code(?KMC:atom, ?Active:boolean, ?Suffix:atom) is nondet.
 % This predicate is needed since for some KMCs the predicate suffix is

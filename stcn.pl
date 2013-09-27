@@ -18,6 +18,7 @@ These predicate should be converted to some other module or be removed.
 :- use_module(library(debug)).
 :- use_module(os(datetime_ext)).
 :- use_module(rdf(rdf_serial)).
+:- use_module(stcn(collect_lines)).
 :- use_module(stcn(stcn_parse)).
 :- use_module(stcn(stcn_schema)).
 
@@ -34,7 +35,7 @@ stcn_script:-
   rdf_save2('STCNV'),
 
   collect_lines,
-gtrace,
+  
   parse_redactiebladen('STCN'),
   rdf_save2('STCN'),
 
