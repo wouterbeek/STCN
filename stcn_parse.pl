@@ -62,7 +62,7 @@ collect_lines(Out) -->
   collect_lines(Out).
 % Done!
 collect_lines(Out) -->
-  [], !,
+  {gtrace}, dcg_end, !,
   {nl(Out)}.
 
 collect_line(L) -->

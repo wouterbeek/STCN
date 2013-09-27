@@ -8,7 +8,7 @@
 :- use_module(server(dev_server)).
 :- use_module(server(web_console)).
 
-:- start_dev_server.
+:- start_dev_server(6666).
 
 :- use_module(rdf(rdf_web)).
 :- register_module(rdf_web).
