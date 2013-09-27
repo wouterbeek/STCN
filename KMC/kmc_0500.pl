@@ -124,7 +124,9 @@ assert_schema_kmc_0500(G):-
   rdfs_assert_label(stcnv:status, nl, status, G),
   rdf_assert_literal(stcnv:status, stcnv:kb_name, 'KMC 0500', G),
   rdf_assert(stcnv:status, stcnv:documentation,
-    'http://www.kb.nl/kbhtml/stcnhandleiding/0500.html', G).
+    'http://www.kb.nl/kbhtml/stcnhandleiding/0500.html', G),
+  rdfs_assert_domain(stcnv:status, stcnv:'Publication', G),
+  rdfs_assert_range(stcnv:status, stcnv:'StatusValue', G).
 
 
 

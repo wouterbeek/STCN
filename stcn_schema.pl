@@ -17,7 +17,6 @@ Schema for the STCN database.
 :- use_module(picarta(picarta_query)). % Make private call.
 :- use_module(rdf(rdf_build)).
 :- use_module(rdfs(rdfs_build)).
-:- use_module(stcn(stcn_generic)).
 :- use_module(stcn(stcn_kmc)).
 :- use_module(xml(xml_namespace)).
 
@@ -26,8 +25,6 @@ Schema for the STCN database.
 
 
 stcn_schema(G):-
-  stcn_graph(G), !.
-stcn_schema(G):-
   rdfs_assert_class(stcnv:'Publication', G),
   rdfs_assert_label(stcnv:'Publication', en, publication, G),
   rdfs_assert_label(stcnv:'Publication', nl, publicatie, G),
@@ -35,14 +32,14 @@ stcn_schema(G):-
   rdfs_assert_class(stcnv:'Topic', G),
   rdfs_assert_label(stcnv:'Topic', en, topic, G),
   rdfs_assert_label(stcnv:'Topic', nl, onderwerp, G),
-  
+
   % Denotes relations between a PPN and the location from which information
   % about that PPN was extracted.
   rdf_assert_property(stcnv:scrapedFrom, G),
   rdfs_assert_label(stcnv:scrapedFrom, en, 'scraped from', G),
   rdfs_assert_comment(stcnv:scrapedFrom, en,
     'Some information of this PPN was scraped from this location.', G),
-  rdfs_assert_domain(stcnv:scrapedFrom, stcnv:'PPN', G),
+  rdfs_assert_domain(stcnv:scrapedFrom, stcnv:'Publication', G),
 
   % Picarta-derived properties
   forall(

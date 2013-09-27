@@ -1,5 +1,41 @@
 # Vragen bij het converteren van de STCN
 
+## Regelonderbrekingen
+
+Regelonderbrekeingen zorgen vaak voor ambiguiteit.
+
+De eerste vorm van ambiguiteit komt doordat het onduidelijk is of een regel
+een nieuwe KMC code begint of een continuering is van de vorige (zie [1]).
+
+~~~
+[1] 4043 !075556677!Putte, Abraham van der (I) Amsterdam, 1665-1688, 1696, 1706-
+    1711
+~~~
+
+De meest voorkomende ambiguiteit (aanwezig in bijna alle PPN entries)
+is dat spaties aan het begin van een continuerende regel lijken te zijn
+weggehaald. Bijvoorbeeld bij [2] moeten we een spatie invoegen tussen
+de eerste en de tweede regel, maar bij [3] moeten we geen spatie invoegen.
+
+~~~
+[2] 4000 De @historie der vry-metzelaars [...]. Uit de nagelaten schriften van een
+    lid van het genootschap
+[3] 4043 !075556677!Putte, Abraham van der (I) Amsterdam, 1665-1688, 1696, 1706-
+    1711
+~~~
+
+## Onherkenbare karakters
+
+Een groot aantal karakters lijkt te duiden op een probleem in de encodering
+van het tekstbestand (zie [4]-[6]).
+
+~~~
+[4] 4000 [@Christelyke doods-betrachting, bestaende in verscheyde sterf-gesangen. /
+    `IT`By Willem Sluiter`LO`]
+[5] 4060 A-B`SUP`8`LO`
+[6] 4062 8Â°
+~~~
+
 ## SET-regel
 
 ~~~
@@ -50,4 +86,5 @@ Hoe moeten de waardes in deze regel gelezen worden?
 
 Jaar, maand, day, uur, minuut, seconde?
 M.b.t. welke calender en tijdzone?
+
 

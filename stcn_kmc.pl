@@ -2,9 +2,13 @@
   stcn_kmc,
   [
     assert_schema_kmcs/1, % +Graph:atom
-    kmc//3 % -KMC:atom
-           % -Active:boolean
-           % -Suffix:atom
+    kmc//3, % +KMC:atom
+            % +Graph:atom
+            % +PPN:iri
+    kmc_code/3, % ?KMC:atom
+                % ?Active:boolean
+                % ?Suffix:atom
+    kmc_start//1 % -KMC:atom
   ]
 ).
 
@@ -16,7 +20,9 @@ Support for STCN KMCs.
 @version 2013/06, 2013/09
 */
 
+:- use_module(dcg(dcg_ascii)).
 :- use_module(dcg(dcg_generic)).
+:- use_module(dcg(dcg_multi)).
 :- use_module(kmc(kmc_0500)). % Meta-calls.
 :- use_module(kmc(kmc_1100)). % Meta-calls.
 :- use_module(kmc(kmc_1200)). % Meta-calls.
@@ -61,6 +67,16 @@ kmc(KMC, G, PPN) -->
   dcg_call(DCG_Rule, G, PPN).
 kmc(_KMC, _G, _PPN) -->
   dcg_until([end_mode(exclusive),output_format(atom)], 'CRLF', _).
+
+%! kmc_code(?KMC:atom, ?Active:boolean, ?Suffix:atom) is nondet.
+% This predicate is needed since for some KMCs the predicate suffix is
+% different from the KMC itself. This is the case for KMC ranges.
+%
+% This predicate occurs before kmc_code/2 for efficiency.
+
+kmc_code(KMC, Active, Suffix):-
+  once(kmc_code(KMC, Active)),
+  Suffix = KMC.
 
 kmc_code('0500', true). % Type
 kmc_code('1100', false). % Years
@@ -110,13 +126,9 @@ kmc_code('7134', false).
 kmc_code('7800', false).
 kmc_code('7900', false).
 
-%! kmc_code(?KMC:atom, ?Active:boolean, ?Suffix:atom) is nondet.
-% This predicate is needed since for some KMCs the predicate suffix is
-% different from the KMC itself. This is the case for KMC ranges.
-%
-% This predicate occurs before kmc_code/2 for efficiency.
-
-kmc_code(KMC, Active, Suffix):-
-  once(kmc_code(KMC, Active)),
-  Suffix = KMC.
+kmc_start(KMC) -->
+  dcg_multi(decimal_digit, 4, Codes, []),
+  " ",
+  {atom_codes(KMC, Codes)},
+  {stcn_kmc:kmc_code(KMC, _Active, _Suffix)}, !.
 

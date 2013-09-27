@@ -1,9 +1,7 @@
 :- module(
   stcn_load,
   [
-    load_stcn/1, % +Request:list
-    parse_redactiebladen/2 % +Options:list(nvpair)
-                           % ?Dummy
+    load_stcn/1 % +Request:list
   ]
 ).
 
@@ -25,7 +23,6 @@ are present, then these are parsed and turned into the STCN dataset.
 :- use_module(library(pce)).
 :- use_module(rdf(rdf_graph)).
 :- use_module(rdf(rdf_serial)).
-:- use_module(stcn(stcn_parse)).
 :- use_module(stcn(stcn_statistics)).
 :- use_module(vocabularies('VoID')).
 
@@ -98,20 +95,5 @@ master_script3:-
   forall(
     member(Row, Rows),
     format(user, '~w\n', [Row])
-  ).
-
-parse_redactiebladen(Options, _Dummy):-
-  absolute_file_name(
-    data_stcn(redactiebladen),
-    File,
-    [access(read), file_type(text)]
-  ),
-  open(File, read, Stream, []),
-  (
-    option(thread(true), Options, false)
-  ->
-    thread_create(parse_redactiebladen(Stream), _Id, [])
-  ;
-    parse_redactiebladen(Stream)
   ).
 

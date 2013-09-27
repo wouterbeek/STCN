@@ -64,19 +64,5 @@ ppn_resource(Graph, Category, PPN, Individual):-
   ;
     rdf_assert_individual(Individual, Class, Graph)
   ).
-
-%! stcn_graph(+Graph:atom) is semidet.
-
-% Already loaded.
-stcn_graph(Graph):-
-  rdf_graph(Graph), !.
-% Already in a file, load it.
-stcn_graph(Graph):-
-  catch(
-    absolute_file_name(data(Graph), File, [access(read),file_type(rdf)]),
-    _Exception,
-    fail
-  ),
-  rdf_load2(File).
 */
 

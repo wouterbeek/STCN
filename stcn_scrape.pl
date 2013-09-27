@@ -46,9 +46,6 @@ Fully automated scrape for the STCN.
 %   * `publications`
 %   * `translator_editor`
 
-% Already loaded or already stored in file. Load from file.
-stcn_content(_Category, G):-
-  stcn_graph(G), !.
 % Scrape from remote Website (Picarta),
 % Based on an existing TODO file.
 stcn_content(publications, G):-
