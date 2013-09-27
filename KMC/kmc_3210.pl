@@ -4,7 +4,7 @@
     assert_schema_kmc_3210/1, % +Graph:graph
     kmc_3210//2, % +Graph:atom
                  % +PPN:uri
-    statistics_kmc_3210/2 % +Graph:atom
+    statistics_kmc3210/2 % +Graph:atom
                           % -Rows:list(list)
   ]
 ).
@@ -342,7 +342,7 @@ language(G, PPN) -->
     )
   }.
 
-statistics_kmc_3210(G, [[A1,V1]]):-
+statistics_kmc3210(G, [[A1,V1]]):-
   A1 = 'Publications with title',
   count_subjects(stcnv:title, _, G, V1),
   debug(stcn_statistics, '~w: ~w', [A1,V1]).

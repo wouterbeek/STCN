@@ -4,7 +4,7 @@
     assert_schema_kmc_4062/1, % +Graph:graph
     kmc_4062//2, % +Graph:atom
                  % +PPN:uri
-    statistics_kmc_4062/2, % +Graph:atom
+    statistics_kmc4062/2, % +Graph:atom
                            % -Rows:list(list)
     translate_format/3 % ?Format:uri
                        % ?Number:integer
@@ -307,7 +307,7 @@ kmc_4062_malformed('°', unknown_format).
 kmc_4062_malformed('?', unknown_format).
 kmc_4062_malformed('0', unknown_format).
 
-statistics_kmc_4062(G, [[A1, V1], [A2, V2] | T]):-
+statistics_kmc4062(G, [[A1, V1], [A2, V2] | T]):-
   A1 = 'Publications with an STCN format',
   count_subjects(stcnv:format, _, G, V1),
   debug(stcn_statistics, '~w: ~w', [A1, V1]),

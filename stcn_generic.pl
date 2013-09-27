@@ -1,16 +1,11 @@
 :- module(
   stcn_generic,
   [
-    ppn//1, % -PPN:atom
-    ppn_resource/4, % +Graph:atom
-                    % +Category:atom
-                    % +PPN:atom
-                    % -Individual:uri
-    stcn_graph/1 % +Graph:atom
+    ppn//1 % -PPN:atom
   ]
 ).
 
-/** <module> STCN generic stuff
+/** <module> STCN generics
 
 Things that are used throughout the STCN project,
 but are not generic enough to be in PGC.
@@ -19,14 +14,9 @@ but are not generic enough to be in PGC.
 @version 2013/06, 2013/09
 */
 
-:- use_module(dcg(dcg_ascii)). % Used in phrase/[2,3].
-:- use_module(dcg(dcg_cardinal)).
-:- use_module(dcg(dcg_generic)). % Used in phrase/[2,3].
+:- use_module(dcg(dcg_ascii)).
+:- use_module(dcg(dcg_multi)).
 :- use_module(library(semweb/rdf_db)).
-:- use_module(library(semweb/rdfs)).
-:- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_serial)).
-:- use_module(rdfs(rdfs_build)).
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(foaf,  'http://xmlns.com/foaf/0.1/').
@@ -37,6 +27,27 @@ but are not generic enough to be in PGC.
 
 
 
+%! ppn(-PPN:iri)// is det.
+% Parses a PPN identifier and returns its IRI.
+%
+% There are 3*10**8 possibilities, so don't use this for generation, please.
+
+ppn(PPN) -->
+  dcg_multi(ppn_char, 9, Codes, []),
+  {
+    atom_codes(Name1, Codes),
+    atomic_list_concat([ppn,Name1], '/', Name2),
+    rdf_global_id(stcn:Name2, PPN)
+  }.
+
+ppn_char(C) -->
+  decimal_digit(C).
+ppn_char(C) -->
+  x(C).
+
+
+
+/*
 %! category_class(?Category:atom, ?Class:uri) is nondet.
 
 category_class(author, foaf:'Agent').
@@ -44,20 +55,6 @@ category_class(printer_publisher, foaf:'Agent').
 category_class(publications, stcnv:'Publication').
 category_class(topical_keyword, stcnv:'Topic').
 category_class(translator_editor, foaf:'Agent').
-
-%! ppn// is nondet.
-% There are 3*10**8 possibilities, so don't use this for generation, please.
-
-ppn(PPN) -->
-  {Codes = [_X1,_X2,_X3,_X4,_X5,_X6,_X7,_X8,_X9]},
-  Codes,
-  {
-    forall(
-      member(Code, Codes),
-      phrase((digit(_) ; x), [Code])
-    ),
-    atom_codes(PPN, Codes)
-  }.
 
 ppn_resource(Graph, Category, PPN, Individual):-
   rdf_global_id(stcn:PPN, Individual),
@@ -81,4 +78,5 @@ stcn_graph(Graph):-
     fail
   ),
   rdf_load2(File).
+*/
 

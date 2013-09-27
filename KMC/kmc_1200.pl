@@ -6,7 +6,7 @@
                  % +PPN:uri
     kmc_1200_picarta//2, % +Graph:atom
                          % +PPN:uri
-    statistics_kmc_1200/2 % +Graph:atom
+    statistics_kmc1200/2 % +Graph:atom
                           % -Rows:list(list)
   ]
 ).
@@ -307,7 +307,7 @@ kmc_1200_picarta(G, PPN) -->
 kmc_1200_picarta(_Graph, _PPN) -->
   dcg_debug.
 
-statistics_kmc_1200(
+statistics_kmc1200(
   G,
   [[A1, V1], [A2, V2], [A3, V3], [A4, V4], [A5, V5], [A6, V6]]
 ):-

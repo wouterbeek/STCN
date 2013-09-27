@@ -4,7 +4,7 @@
     assert_schema_kmc_3011/1, % +Graph:graph
     kmc_3011//2, % +Graph:atom
                 % +PPN:uri
-    statistics_kmc_3011/2 % +Graph:atom
+    statistics_kmc3011/2 % +Graph:atom
                           % -Rows:list(list)
   ]
 ).
@@ -46,7 +46,7 @@ kmc_3011(G, PPN) -->
   {rdf_global_id(stcnv:secondary_author, Predicate)},
   kmc_30xx(G, PPN, Predicate).
 
-statistics_kmc_3011(G, [[A1,V1]]):-
+statistics_kmc3011(G, [[A1,V1]]):-
   A1 = 'Publications with at least one secondary author',
   count_subjects(stcnv:secondary_author, _, G, V1),
   debug(stcn_statistics, '-- ~w: ~w', [A1, V1]).

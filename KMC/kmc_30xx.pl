@@ -6,7 +6,7 @@
                  % +PPN:uri
                  % +Predicate
     populate_dbpedia/1, % +DBpedia_Graph:atom
-    statistics_kmc_30xx/2 % +Graph:atom
+    statistics_kmc30xx/2 % +Graph:atom
                           % -Rows:list(list)
   ]
 ).
@@ -135,7 +135,7 @@ populate_dbpedia(DBpediaG):-
     )
   ).
 
-statistics_kmc_30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
+statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   A1 = 'Publications with at least one author',
   count_subjects(stcnv:author, _, G, V1),
   debug(stcn_statistics, '~w: ~w', [A1,V1]),

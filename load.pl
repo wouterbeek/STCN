@@ -28,5 +28,5 @@ load_stcn:-
   ),
   
   % STCN main module.
-  ensure_loaded(stcn(stcn)).
+  ensure_loaded(stcn(stcn_parse)).
 

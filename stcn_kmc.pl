@@ -2,12 +2,9 @@
   stcn_kmc,
   [
     assert_schema_kmcs/1, % +Graph:atom
-    kmc//3, % -KMC:atom
-            % -Active:boolean
-            % -Suffix:atom
-    parse_kmc//3 % +Suffix:atom
-                 % +Graph:atom
-                 % +PPN:uri
+    kmc//3 % -KMC:atom
+           % -Active:boolean
+           % -Suffix:atom
   ]
 ).
 
@@ -19,9 +16,7 @@ Support for STCN KMCs.
 @version 2013/06, 2013/09
 */
 
-:- use_module(dcg(dcg_cardinal)).
 :- use_module(dcg(dcg_generic)).
-:- use_module(generics(meta_ext)).
 :- use_module(kmc(kmc_0500)). % Meta-calls.
 :- use_module(kmc(kmc_1100)). % Meta-calls.
 :- use_module(kmc(kmc_1200)). % Meta-calls.
@@ -33,6 +28,10 @@ Support for STCN KMCs.
 :- use_module(kmc(kmc_4043)). % Meta-calls.
 :- use_module(kmc(kmc_4062)). % Meta-calls.
 :- use_module(kmc(kmc_6511)). % Meta-calls.
+:- use_module(server(web_console)).
+:- use_module(standards(abnf)).
+
+:- register_module(kmc_0500).
 
 :- discontiguous(kmc_code/2).
 :- discontiguous(kmc_code/3).
@@ -40,54 +39,37 @@ Support for STCN KMCs.
 
 
 assert_schema_kmcs(G):-
-  % Only for active KMCs are the schemas added.
+  % Only for active KMCs the corresponmding schemas are added.
   forall(
-    kmc_code(_Code, _Parsed, Suffix),
+    kmc_code(_, true, Suffix),
     (
-      format(atom(Predicate), 'assert_schema_kmc_~w', [Suffix]),
-      if_then(
-        current_predicate(stcn_kmc:Predicate/1),
-        call(Predicate, G)
-      )
+      format(atom(Predicate), 'assert_schema_kmc~w', [Suffix]),
+      (  current_predicate(stcn_kmc:Predicate/1)
+      -> call(Predicate, G)
+      ;  true)
     )
   ).
 
-%! kmc(-KMC:atom, -Active:boolean, -Suffix:atom)// is semidet.
-% Parses a KMC code.
+kmc(KMC, G, PPN) -->
+  {kmc_code(KMC, true, Suffix)}, !,
 
-kmc(KMC, Active, Suffix) -->
-  digit(D1),
-  digit(D2),
-  digit(D3),
-  digit(D4),
-  % Make sure that this is not a non-KMC that occurs accidentally at the
-  % start of a newline, e.g., PPN 863540996 that has a line that starts
-  % with the year 1700. Also PPN 271591978.
-  " ",
-  {
-    atom_codes(KMC, [D1,D2,D3,D4]),
-    % Make sure that this is an existing KMC.
-    kmc_code(KMC, Active, Suffix)
-  }.
+  % The suffix under which a KMC is processed is not always the exact
+  % numeric code that was parsed, since some codes occur in ranges,
+  % e.g. =|7000-7099|=, where each code is treated similarly.
+  {atomic_list_concat([kmc,Suffix], '_', DCG_Rule)},
 
-%! kmc_code(?KMC:atom, ?Active:boolean, ?Suffix:atom) is nondet.
-% This predicate is needed since for some KMCs the predicate suffix is
-% different from the KMC itself. This is the case for KMC ranges.
-%
-% This predicate occurs before kmc_code/2 for efficiency.
-
-kmc_code(KMC, Active, Suffix):-
-  once(kmc_code(KMC, Active)),
-  Suffix = KMC.
+  dcg_call(DCG_Rule, G, PPN).
+kmc(_KMC, _G, _PPN) -->
+  dcg_until([end_mode(exclusive),output_format(atom)], 'CRLF', _).
 
 kmc_code('0500', true). % Type
 kmc_code('1100', false). % Years
 kmc_code('1200', false). % Typographic properties
-kmc_code('1500', true). % Language
-kmc_code('1700', true). % Countries
+kmc_code('1500', false). % Language
+kmc_code('1700', false). % Countries
 kmc_code('2275', false). % Fingerprint
-kmc_code('3000', true). % Primary author
-kmc_code(KMC_Code, true, '3011'):- % Secondary authors
+kmc_code('3000', false). % Primary author
+kmc_code(KMC_Code, false, '3011'):- % Secondary authors
   between(3011, 3019, KMC),
   atom_number(KMC_Code, KMC).
 kmc_code('3210', false). % Sorting title
@@ -99,9 +81,9 @@ kmc_code('3400', false).
 kmc_code('4000', false).
 kmc_code('4020', false).
 kmc_code('4040', false).
-kmc_code('4043', true). % Printers
+kmc_code('4043', false). % Printers
 kmc_code('4060', false).
-kmc_code('4062', true). % Format
+kmc_code('4062', false). % Format
 kmc_code('4064', false).
 kmc_code('4160', false).
 kmc_code('4201', false).
@@ -117,7 +99,7 @@ kmc_code('5300', false).
 kmc_code('5301', false).
 kmc_code('5421', false).
 kmc_code('6501', false).
-kmc_code(KMC_Code, true, '6511'):- % Topic
+kmc_code(KMC_Code, false, '6511'):- % Topic
   between(6511, 6519, KMC),
   atom_number(KMC_Code, KMC).
 kmc_code(KMC_Code, false, '7000'):-
@@ -128,10 +110,13 @@ kmc_code('7134', false).
 kmc_code('7800', false).
 kmc_code('7900', false).
 
-parse_kmc(Suffix, Graph, PPN) -->
-  {
-    format(atom(DCGName), 'kmc_~w', [Suffix]),
-    DCG =.. [DCGName, Graph, PPN]
-  },
-  DCG.
+%! kmc_code(?KMC:atom, ?Active:boolean, ?Suffix:atom) is nondet.
+% This predicate is needed since for some KMCs the predicate suffix is
+% different from the KMC itself. This is the case for KMC ranges.
+%
+% This predicate occurs before kmc_code/2 for efficiency.
+
+kmc_code(KMC, Active, Suffix):-
+  once(kmc_code(KMC, Active)),
+  Suffix = KMC.
 

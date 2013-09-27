@@ -4,7 +4,7 @@
     assert_schema_kmc_4043/1, % +Graph:graph
     kmc_4043//2, % +Graph:atom
                  % +PPN:uri
-    statistics_kmc_4043/2 % +Graph:atom
+    statistics_kmc4043/2 % +Graph:atom
                           % -Rows:list(list)
   ]
 ).
@@ -255,5 +255,5 @@ kmc_4043(G, PPN) -->
     rdf_assert(PPN, stcnv:printer, Printer, G)
   }.
 
-statistics_kmc_4043(_G, []).
+statistics_kmc4043(_G, []).
 

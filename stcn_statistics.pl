@@ -121,13 +121,13 @@ stcn_statistics([[A1, V1] | Rows]):-
   debug(stcn_statistics, '~w: ~w', [A1, V1]),
 
   statistics_kmc_0500(_, Rows0500),
-  statistics_kmc_1100(_, Rows1100),
-  statistics_kmc_1200(_, Rows1200),
-  statistics_kmc_1500(_, Rows1500),
-  statistics_kmc_1700(_, Rows1700),
-  statistics_kmc_3000(_, Rows3000),
-  statistics_kmc_3011(_, Rows3011),
-  statistics_kmc_4062(_, Rows4062),
+  statistics_kmc1100(_, Rows1100),
+  statistics_kmc1200(_, Rows1200),
+  statistics_kmc1500(_, Rows1500),
+  statistics_kmc1700(_, Rows1700),
+  statistics_kmc3000(_, Rows3000),
+  statistics_kmc3011(_, Rows3011),
+  statistics_kmc4062(_, Rows4062),
   append(
     [
       Rows0500,

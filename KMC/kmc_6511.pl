@@ -4,7 +4,7 @@
     assert_schema_kmc_6511/1, % +Graph:graph
     kmc_6511//2, % +Graph:atom
                  % +PPN:uri
-    statistics_kmc_6511/2 % +Graph:atom
+    statistics_kmc6511/2 % +Graph:atom
                           % -Rows:list(list)
   ]
 ).
@@ -82,5 +82,5 @@ ppn_to_topic(G, TopicPPN, Topic):-
   rdf_global_id(stcnv:TopicPPN, Topic),
   rdf_assert_individual(Topic, stcnv:'Topic', G).
 
-statistics_kmc_6511(_G, []).
+statistics_kmc6511(_G, []).
 
