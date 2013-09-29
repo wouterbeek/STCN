@@ -61,7 +61,7 @@ assert_schema_kmc_6511(G):-
   rdf_assert_property(stcnv:topic, G),
   rdfs_assert_label(stcnv:topic, nl, onderwerp, G),
   rdf_assert_literal(stcnv:topic, stcnv:kb_name, 'KMC 6511', G),
-  rdf_assert(stcnv:topic, stcnv:documentation,
+  rdfs_assert_seeAlso(stcnv:topic,
     'http://www.kb.nl/kbhtml/stcnhandleiding/6511.html', G),
   rdf_assert_literal(stcnv:topic, stcnv:picarta_name, nl,
     'Onderwerpstrefwoord', G).

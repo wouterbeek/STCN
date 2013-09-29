@@ -20,7 +20,6 @@ and the STCN graph files are in =|/Data|=.
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_clean)).
 :- use_module(rdf(rdf_lit)).
-:- use_module(rdf(rdf_year)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(xml(xml_namespace)).
 
@@ -29,19 +28,6 @@ and the STCN graph files are in =|/Data|=.
 
 
 stcn_clean:-
-  % 1. Process KMC 1100 for year of publication.
-  %    From untyped literal to typed gYear literal.
-  %    Uncertainty (indicated by =X=) results in two properties (one for
-  %    the beginning and one for the end of the uncertainty interval).
-  rdf_clean_year(
-    _Subject,
-    stcnv:year,
-    Graph,
-    stcnv:earliest_publication_year,
-    stcnv:latest_publication_year,
-    stcnv:exact_publication_year
-  ),
-
   % KMC 1200
   forall(
     rdf_literal(PPN, stcnv:typographic_information, Lit, Graph),

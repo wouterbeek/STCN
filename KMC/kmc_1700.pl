@@ -9,7 +9,7 @@
   ]
 ).
 
-/** <module> KMC 1700 - COUNTRIES
+/** <module> KMC 1700 - Country
 
 Required field. Cannot be repeated.
 
@@ -39,6 +39,8 @@ country options).
      to an OCLC-specific module.
 @tbd Cover the unrecognized country codes by including support for
      ISO 3166-3, i.e. the list of codes for past countries.
+@see http://www.kb.nl/kbhtml/stcnhandleiding/1700.html
+@see http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1700
 @version 2013/01-2013/06, 2013/09
 */
 
@@ -59,66 +61,64 @@ country options).
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
 
-:- nodebug(kmc_1700).
+:- debug(kmc_1700).
 
 
 
 assert_schema_kmc_1700(G):-
-  rdfs_assert_class(stcnv:'CountryProperty', G),
-  rdfs_assert_property_class(stcnv:'CountryProperty', G),
-  
-  rdf_assert_property(stcnv:country, G),
-  rdfs_assert_label(stcnv:country, nl, 'heeft land', G),
-  rdf_assert_literal(stcnv:country, stcnv:kb_name, 'KMC 1700', G),
-  rdf_assert(stcnv:country, stcnv:documentation,
+  rdf_assert_property(stcnv:landcode, G),
+  rdfs_assert_label(stcnv:landcode, nl, 'land van uitgave', G),
+  rdf_assert_literal(stcnv:landcode, stcnv:kb_name, 'KMC 1700', G),
+  rdfs_assert_seeAlso(stcnv:landcode,
     'http://www.kb.nl/kbhtml/stcnhandleiding/1700.html', G),
+  rdfs_assert_seeAlso(stcnv:landcode,
+    'http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1700', G),
+  rdfs_assert_domain(stcnv:landcode, stcnv:'Publication', G),
+  rdfs_assert_range(stcnv:landcode, 'iso3166-1':'Country', G),
+
+  rdfs_assert_subproperty(stcnv:displayed_country, stcnv:landcode, G),
+  rdfs_assert_label(stcnv:displayed_country, nl,
+    'weergegeven land van uitgave', G),
+  rdfs_assert_comment(stcnv:displayed_country, nl,
+    'In geval van een gefingeerd of onjuist impressum wordt in /2 de\c
+     landcode opgenomen die hoort bij het juiste impressum zoals dat in\c
+     een annotatie is verantwoord.', G),
   
-  rdf_assert_individual(stcnv:displayed_country, stcnv:'CountryProperty', G),
-  rdfs_assert_label(stcnv:displayed_country, nl, 'weergegeven land', G),
-  rdfs_assert_subproperty(stcnv:displayed_country, stcnv:country, G),
+  rdfs_assert_subproperty(stcnv:actual_country, stcnv:landcode, G),
+  rdfs_assert_label(stcnv:actual_country, nl,
+    'daadwerkelijk land van uitgave', G),
   
-  rdf_assert_individual(stcnv:actual_country, stcnv:'CountryProperty', G),
-  rdfs_assert_label(stcnv:actual_country, nl, 'daadwerkelijk land', G),
-  rdfs_assert_subproperty(stcnv:actual_country, stcnv:country, G).
+  'assert_iso3166-1_schema'(G),
+  % Add Dutch labels for countries that occur in the OCLC.
+  forall(
+    (
+      recognized_country(Atom, NL_Name),
+      atom_codes(Atom, Codes),
+      phrase('iso3166-1'(_EN_Name, Country), Codes)
+    ),
+    rdfs_assert_label(Country, nl, NL_Name, G)
+  ).
 
 %! kmc_1700(+Graph:atom, +PPN:uri)// is det.
 
 kmc_1700(G, PPN) -->
-  forward_slash,
-  country_property(Predicate),
-  country(Country),
+  "/", country_property(Pred),
+  'iso3166-1'(_Name, Country1),
   {
-    (
-      Country == false
-    ->
-      true
-    ;
-      rdf_assert(PPN, Predicate, Country, G)
-    )
-  },
+    rdf_global_id(Country1, Country2),
+    rdf_assert(PPN, Pred, Country2, G)
+  }, !,
   kmc_1700(G, PPN).
-kmc_1700(_Graph, _PPN) --> [].
-
-%! country(-Country:uri)// is semidet.
-% Parses two-character country codes.
-
-country(Country) -->
-  [X,Y],
-  {
-    code_type(X, alpha),
-    code_type(Y, alpha),
-    atom_codes(Atom, [X,Y]),
-    'iso3166-1'(Atom, _Name, Country)
-  }.
+kmc_1700(_G, _PPN) --> [].
 
 % The country that is mentioned in the publication itself.
-country_property(Predicate) -->
-  {rdf_equal(stcnv:displayed_country, Predicate)},
-  one.
+country_property(Pred) -->
+  "1",
+  {rdf_global_id(stcnv:displayed_country, Pred)}.
 % Actual country of publication.
-country_property(Predicate) -->
-  {rdf_equal(stcnv:actual_country, Predicate)},
-  two.
+country_property(Pred) -->
+  "2",
+  {rdf_global_id(stcnv:actual_country, Pred)}.
 
 % KMC 1700 country codes that are in ISO 3166-1.
 recognized_country(ad, 'Andorra').
@@ -406,7 +406,7 @@ same_country('Zuid-West Afrika', 'Namibië').
 
 statistics_kmc1700(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4]]):-
   A1 = 'Publications with some country',
-  count_subjects(stcnv:country, _, G, V1),
+  count_subjects(stcnv:landcode, _, G, V1),
   debug(stcn_statistics, '~w: ~w', [A1, V1]),
 
   A2 = 'Publication with at least one displayed country',
@@ -443,4 +443,3 @@ unrecognized_country(wk, 'Wake').
 unrecognized_country(xx, 'Onbekend').
 unrecognized_country(yd, 'Jemen [Volksrepubliek]').
 unrecognized_country(zr, 'Zaïre', period(date(1971,10,27),date(1997,05,17))).
-

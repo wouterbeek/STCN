@@ -77,11 +77,11 @@ kmc_code(KMC, Active, Suffix):-
   once(kmc_code(KMC, Active)),
   Suffix = KMC.
 
-kmc_code('0500', true). % Type
-kmc_code('1100', false). % Years
-kmc_code('1200', false). % Typographic properties
-kmc_code('1500', false). % Language
-kmc_code('1700', false). % Countries
+kmc_code('0500', true ). % Status
+kmc_code('1100', true ). % Year
+kmc_code('1200', true ). % Typographic property
+kmc_code('1500', true ). % Language
+kmc_code('1700', true ). % Country
 kmc_code('2275', false). % Fingerprint
 kmc_code('3000', false). % Primary author
 kmc_code(KMC_Code, false, '3011'):- % Secondary authors
@@ -126,7 +126,7 @@ kmc_code('7800', false).
 kmc_code('7900', false).
 
 kmc_start(KMC) -->
-  dcg_multi(decimal_digit, 4, Codes, []),
+  dcg_multi1(decimal_digit, 4, Codes),
   " ",
   {atom_codes(KMC, Codes)},
   {stcn_kmc:kmc_code(KMC, _Active, _Suffix)}, !.

@@ -33,10 +33,10 @@ but are not generic enough to be in PGC.
 % There are 3*10**8 possibilities, so don't use this for generation, please.
 
 ppn(PPN) -->
-  dcg_multi(ppn_char, 9, Codes, []),
+  dcg_multi1(ppn_char, 9, Codes),
   {
     atom_codes(Name1, Codes),
-    atomic_list_concat([ppn,Name1], '/', Name2),
+    atomic_list_concat(['Publication',Name1], '/', Name2),
     rdf_global_id(stcn:Name2, PPN)
   }.
 

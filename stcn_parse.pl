@@ -1,7 +1,8 @@
 :- module(
   stcn_parse,
   [
-    parse_redactiebladen/1 % +Graph:atom
+    parse_redactiebladen/2 % +File:atom
+                           % +Graph:atom
   ]
 ).
 
@@ -9,11 +10,12 @@
 
 Parser for the STCN redactiebladen file.
 
+This parses 139.817 PPN entries in the redactiebladen file.
+
 @author Wouter Beek
 @version 2013/09
 */
 
-:- use_module(dcg(dcg_ascii)).
 :- use_module(dcg(dcg_content)).
 :- use_module(dcg(dcg_generic)).
 :- use_module(library(debug)).
@@ -32,18 +34,11 @@ Parser for the STCN redactiebladen file.
 
 
 
-parse_redactiebladen(G):-
-  absolute_file_name(
-    data(redactiebladen2),
-    File,
-    [access(read),file_type(text)]
-  ),
-
-  phrase_from_file(
-    redactiebladen(G, _PPN),
-    File,
-    [encoding(utf8),type(text)]
-  ).
+parse_redactiebladen(F, G):-
+  access_file(F, read),
+  phrase_from_file(redactiebladen(G, _PPN), F, [encoding(utf8),type(text)]),
+  flag(publications, N, N),
+  debug(stcn_parse, '~w PPNs were processed.', [N]).
 
 redactiebladen(G, PPN) -->
   end_of_line, !,
@@ -52,7 +47,11 @@ redactiebladen(G, _PPN) -->
   "SET", !,
   dcg_until([end_mode(inclusive)], atom('PPN: '), _),
   ppn(PPN),
-  {rdf_assert_individual(PPN, stcnv:'Publication', G)},
+  {
+    flag(publications, N, N + 1),
+    (N rem 1000 =:= 0 -> debug(stcn_parse, '~w PPNs parsed.', [N]) ; true),
+    rdf_assert_individual(PPN, stcnv:'Publication', G)
+  },
   dcg_until([end_mode(inclusive)], end_of_line, _),
   redactiebladen(G, PPN).
 redactiebladen(G, PPN) -->
@@ -61,7 +60,6 @@ redactiebladen(G, PPN) -->
   redactiebladen(G, PPN).
 redactiebladen(G, PPN) -->
   kmc_start(KMC), !,
-  {gtrace},
   kmc(KMC, G, PPN),
   end_of_line,
   redactiebladen(G, PPN).
@@ -71,5 +69,4 @@ redactiebladen(G, PPN) -->
   end_of_line,
   redactiebladen(G, PPN).
 redactiebladen(_G, _PPN) -->
-  dcg_end, {gtrace}, !.
-
+  dcg_end, !.

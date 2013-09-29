@@ -52,7 +52,7 @@ assert_schema_kmc_4043(G):-
   rdf_assert_property(stcnv:printer, G),
   rdfs_assert_label(stcnv:printer, nl, 'heeft drukker', G),
   rdf_assert_literal(stcnv:printer, stcnv:kb_name, 'KMC 4043', G),
-  rdf_assert(stcnv:printer, stcnv:documentation,
+  rdfs_assert_seeAlso(stcnv:printer,
     'http://www.kb.nl/kbhtml/stcnhandleiding/4043.html', G),
   rdf_assert_literal(stcnv:printer, stcnv:picarta_name, nl,
     'Drukker / Uitgever', G),

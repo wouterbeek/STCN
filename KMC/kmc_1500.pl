@@ -4,12 +4,12 @@
     assert_schema_kmc_1500/1, % +Graph:graph
     kmc_1500//2, % +Graph:atom
                  % +PPN:uri
-    statistics_kmc1500/2 % +Graph:atom
+    statistics_kmc_1500/2 % +Graph:atom
                           % -Rows:list(list)
   ]
 ).
 
-/** <module> KMC 1500 - LANGUAGES
+/** <module> KMC 1500 - Language
 
 Format:
 ~~~{.txt}
@@ -57,10 +57,12 @@ are mapped to ISO 639-3 for language families.
 TODO: See whether languages can be related to their language families.
 
 @author Wouter Beek
+@tbd http://www.kb.nl/kbhtml/stcnhandleiding/1500.html
+@tbd http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1500
 @version 2013/01-2013/04, 2013/06, 2013/09
 */
 
-:- use_module(dcg(dcg_ascii)).
+:- use_module(dcg(dcg_content)).
 :- use_module(lang('iso639-3')).
 :- use_module(lang('iso639-5')).
 :- use_module(library(debug)).
@@ -68,76 +70,90 @@ TODO: See whether languages can be related to their language families.
 :- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_statistics)).
 :- use_module(rdfs(rdfs_build)).
+:- use_module(rdfs(rdfs_read)).
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
 
-:- nodebug(kmc_1500).
+:- debug(kmc_1500).
 
 
+
+% SCHEMA
 
 assert_schema_kmc_1500(G):-
-  rdfs_assert_property_class(stcnv:'LanguageProperty', G),
   rdf_assert_property(stcnv:language, G),
+  rdfs_assert_label(stcnv:language, en, language, G),
+  rdfs_assert_label(stcnv:language, nl, taal, G),
   rdf_assert_literal(stcnv:language, stcnv:kb_name, 'KMC 1500', G),
-  rdf_assert(stcnv:language, stcnv:documentation,
+  rdfs_assert_seeAlso(stcnv:language,
     'http://www.kb.nl/kbhtml/stcnhandleiding/1500.html', G),
-  
+  rdfs_assert_seeAlso(stcnv:language,
+    'http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1500', G),
+
   rdf_assert_individual(stcnv:actual_language, stcnv:'LanguageProperty', G),
+  rdfs_assert_label(stcnv:actual_language, en, 'actual language', G),
   rdfs_assert_label(stcnv:actual_language, nl, 'daadwerkelijke taal', G),
   rdfs_assert_subproperty(stcnv:actual_language, stcnv:language, G),
-  
-  rdf_assert_individual(stcnv:translated_via, stcnv:'LanguageProperty', G),
+
   rdfs_assert_subproperty(stcnv:translated_via, stcnv:language, G),
+  rdfs_assert_label(stcnv:actual_language, en, 'translated via', G),
   rdfs_assert_label(stcnv:translated_via, nl, 'vertaald via', G),
-  
-  rdf_assert_individual(stcnv:translated_from, stcnv:'LanguageProperty', G),
+
+  rdfs_assert_subproperty(stcnv:translated_from, stcnv:language, G),
+  rdfs_assert_label(stcnv:actual_language, en, 'translated from', G),
   rdfs_assert_label(stcnv:translated_from, nl, 'vertaald uit', G),
-  rdfs_assert_subproperty(stcnv:translated_from, stcnv:language, G).
+  
+  'assert_iso639-3_schema'(G),
+  % Use OCLC information to add Dutch labels to ISO 639-3 language codes.
+  forall(
+    (
+      rdfs_individual(m(t,f,f), Lang1, 'iso639-3':'Language', G),
+      rdf_global_id('iso639-3':Lang2, Lang1)
+    ),
+    (
+      recognized_language(Lang2, Name),
+      rdfs_assert_label(Lang1, nl, Name, G)
+    )
+  ),
+  'assert_iso639-5_schema'(G).
 
 kmc_1500(G, PPN) -->
-  forward_slash,
-  language_property(Predicate),
-  language(Language),
-  {
-    (  Language == false
-    -> true
-    ;  rdf_assert(PPN, Predicate, Language, G)),
-    debug(kmc_1500, 'Actual language ~w for PPN ~w.', [Language, PPN])
-  }, !,
+  "/", language_property(Pred),
+  language(PPN, Lang),
+  {rdf_assert(PPN, Pred, Lang, G)}, !,
   kmc_1500(G, PPN).
 kmc_1500(_G, _PPN) --> [].
 
-%! language(-Language:iri)// is det.
+%! language(+PPN:iri, -Language:iri)// is det.
 % Processes STCN language codes and returns their ISO 639-3 correlate.
 
-% Case 1: The STCN language codes do not conform with ISO standards.
-%         I have translated these myself.
-language('iso639-3':hye) --> "arm", !.
-language('iso639-3':cmn) --> "chi", !.
-% Middlehigh German (ca. 1050-1500).
-language('iso639-3':gmh) --> "dmh", !.
-% ISO 639-3 distinguishes between the West-Frisian language
-% (spoken in The Netherlands) and the North-Frisian language
-% (spoken in Germany).
-language('iso639-3':fry) --> "fri", !.
-language('iso639-3':grc) --> "grk", !.
-language('iso639-3':hun) --> "hon", !.
-language('iso639-3':jpn) --> "jap", !.
-language('iso639-3':nld) --> "ned", !.
-language('iso639-3':fas) --> "per", !.
-language('iso639-3':swe) --> "zwe", !.
+% Case 1: The STCN language codes stand for languages that are in the
+%         ISO standards, but under different names.
+%         Wouter Beek has made these translations (i.e. they may be wrong).
+language(_PPN, Lang) -->
+  word(STCN_Lang),
+  {
+    translate_language(STCN_Lang, ISO_Lang),
+    rdf_global_id('iso639-3':ISO_Lang, Lang)
+  }.
 % Case 2: The STCN language codes do not denote a language but a family of
 %         languages. These are found in the ISO 639-5 standard.
-language(Lang) --> 'iso639-5'(_Name, Lang),
-  {debug(kmc_1500, 'Found a language family code: ~w', [Lang])}.
+language(PPN, Lang2) -->
+  'iso639-5'(_Name, Lang1),
+  {rdf_global_id(Lang1, Lang2)},
+  {debug(kmc_1500, '[PPN ~w] Found a language family code: ~w', [PPN,Lang2])}.
 % Case 3: Special language codes defined by GGC and STCN for KMC 1500
 %         that do not identify any specific language.
-language(stcnv:'unknown_language') --> ("mis" ; "mul"), !,
-  {debug(kmc_1500, 'Found a non-language code.', [])}.
+language(PPN, Lang) -->
+  ("mis" ; "mul"), !,
+  {rdf_global_id(stcnv:'unknown_language', Lang)},
+  {debug(kmc_1500, '[PPN ~w] Found a non-language code (\'mis\' or \'mul\').', [PPN])}.
 % Case 4: A language code as defined by ISO 639-3.
-language(Lang) --> 'iso639-3'(Lang).
+language(_PPN, Lang2) -->
+  'iso639-3'(Lang1),
+  {rdf_global_id(Lang1, Lang2)}.
 
 %! language_property(-Predicate:uri) is nondet.
 % Parses a language code indicator (prefix) and returns
@@ -145,20 +161,20 @@ language(Lang) --> 'iso639-3'(Lang).
 
 % Language code '/1<language>'.
 % Language used in the book.
-language_property(Predicate) -->
-  {rdf_equal(stcnv:actual_language, Predicate)},
-  one.
+language_property(Pred) -->
+  "1",
+  {rdf_global_id(stcnv:actual_language, Pred)}.
 % Language code '/2<language>'.
 % Language translated from, which is not the original language, i.e., an
 % in-between language.
-language_property(Predicate) -->
-  {rdf_equal(stcnv:translated_via, Predicate)},
-  two.
+language_property(Pred) -->
+  "2",
+  {rdf_global_id(stcnv:translated_via, Pred)}.
 % Language code '/3<language>'.
 % Language translated from, which is the original language of the work.
-language_property(Predicate) -->
-  {rdf_equal(stcnv:translated_from, Predicate)},
-  three.
+language_property(Pred) -->
+  "3",
+  {rdf_global_id(stcnv:translated_from, Pred)}.
 
 %! recognized_language(?Code:atom, ?Name:atom) is nondet.
 % GGC-defined KMC 1500 codes and language names that relate to ISO 639-3
@@ -621,30 +637,40 @@ same_language('Vlaams', 'Nederlands').
 same_language('Wendisch', 'Sorbisch').
 same_language('Yoruba', 'Joruba').
 
-statistics_kmc1500(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
+statistics_kmc_1500(
+  G,
+  [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]|L]
+):-
+  rdf_property_table(stcnv:actual_language, G, L1),
+  rdf_property_table(stcnv:translated_via, G, L2),
+  rdf_property_table(stcnv:translated_from, G, L3),
+  append(
+    [
+      [['Actual language (KMC 1500)','Occurrences']|L1],
+      [['Translated via language (KMC 1500)','Occurrences']|L2],
+      [['Translated from language (KMC 1500)','Occurrences']|L3]
+    ],
+    L
+  ),
+
   A1 = 'Publications with at least one language',
-  count_subjects(stcnv:language, _, G, V1),
-  debug(stcn_statistics, '~w: ~w', [A1, V1]),
+  count_subjects(stcnv:actual_language, _, G, V1),
 
   A2 = 'Publications with at least one actual language',
   count_subjects(stcnv:actual_language, _, G, V2),
-  debug(stcn_statistics, '-- ~w: ~w', [A2, V2]),
 
   A3 = 'Publications that are translated via at least one value',
   count_subjects(stcnv:translated_via, _, G, V3),
-  debug(stcn_statistics, '-- ~w: ~w', [A3, V3]),
 
   A4 = 'Publications translated from at least one language',
   count_subjects(stcnv:translated_from, _, G, V4),
-  debug(stcn_statistics, '-- ~w: ~w', [A4, V4]),
+  debug(stcn_statistics, '-- ~w: ~w', [A4,V4]),
 
   A5 = 'Publications that have no language information',
   count_subjects(stcnv:language, stcn:'Unknown', G, V5),
-  debug(stcn_statistics, '-- ~w: ~w', [A5, V5]),
 
   A6 = 'Number of languages used',
-  count_objects(_, stcnv:language, G, V6),
-  debug(stcn_statistics, '-- ~w: ~w', [A6, V6]).
+  count_objects(_, stcnv:language, G, V6).
 
 %! translate_language(?STCN:atom, ?ISO:atom) is nondet.
 % Translations between STCN and ISO codes as verified by Wouter Beek.
@@ -760,4 +786,3 @@ unrecognized_language(ypk, 'Yupik').
 unrecognized_language(znd, 'Zande').
 unrecognized_language(zig, 'Zigeunertalen').
 unrecognized_language(zxx, 'Geen taalkundige inhoud').
-

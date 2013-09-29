@@ -1,5 +1,17 @@
 # Vragen bij het converteren van de STCN
 
+## Vreemde regels
+
+Regel 2.946.252 wijkt af van alle andere regels.
+De karakter sequentie is:
+~~~
+<239,187,191>
+~~~
+Volgens de Unicode standaard bestaat deze sequentie uit de volgende karakters:
+  1. Latin Small Letter I With Diaeresis
+  2. Right-Pointing Double Angle Quotation Mark
+  3. Inverted Question Mark
+
 ## Regelonderbrekingen
 
 Regelonderbrekeingen zorgen vaak voor ambiguiteit.
@@ -35,6 +47,12 @@ van het tekstbestand (zie [4]-[6]).
 [5] 4060 A-B`SUP`8`LO`
 [6] 4062 8Â°
 ~~~
+
+Ik heb de volgende vervangingen uitgevoerd om dit soort problemen zo goed als
+mogelijk te ondervangen:
+  1. "Â°" staat voor "°".
+  2. "Ãª" staat voor "°".
+  3. "  " staat voor " ".
 
 ## SET-regel
 
@@ -87,4 +105,58 @@ Hoe moeten de waardes in deze regel gelezen worden?
 Jaar, maand, day, uur, minuut, seconde?
 M.b.t. welke calender en tijdzone?
 
+## KMC 1100
 
+### Preposition intervals
+
+Intervals indicated by prepositions are currently not handled at all.
+
+Some examples include:
+  * "before 1907"
+  * "after the 17th century"
+  * "in the midst of 1780"
+
+The problem is that open intervals like [11] do not normally
+have the same meaning as [12] but have a meaning that is
+(i) context dependent and (ii) fuzzy. I will treat these separately.
+
+~~~{.html}
+[11] before 1808
+~~~
+
+~~~{.html}
+[12] from the Big Bang until 1808
+~~~
+
+#### Context-dependency of preposition intervals
+
+The meaning of preposition intervals is (at least in some cases)
+context-dependent.
+
+For instance, the interval that occurs in the meaning of [13]
+is allowed to be bigger than the interval that occurs in the meaning of [14],
+where the latter is at least bounded by Einstein's birth year.
+
+~~~{.html}
+[13] The first dinosaurs walked the earth before 300 million years B.C.
+~~~
+
+~~~{.html}
+[14] Einstein came up with the idea of general relativity before 1937
+~~~
+
+#### Fuzzyness of preposition intervals
+
+The meaning of preposition intervals is (at least in some cases) fuzzy.
+
+For instance, the book mentioned in [15] is (based on the meaning of [15]
+solely) more likely to be published in 1924 than in 1901, even though both
+are physically possible (given the birth and death years of James Joyce).
+
+~~~{.html}
+[15] James Joyce's Ulyssus was published before 1925.
+~~~
+
+### Alternatieven
+
+Een werk is in 1701 of in 1708 gepubliceerd.

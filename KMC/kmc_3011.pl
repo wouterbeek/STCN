@@ -37,7 +37,7 @@ assert_schema_kmc_3011(G):-
   rdfs_assert_label(stcnv:secondary_author, nl, 'secundaire auteur', G),
   rdfs_assert_subproperty(stcnv:secondary_author, stcnv:author, G),
   rdf_assert_literal(stcnv:secondary_author, stcnv:kb_name, 'KMC 301X', G),
-  rdf_assert(stcnv:secondary_author, stcnv:documentation,
+  rdfs_assert_seeAlso(stcnv:secondary_author,
     'http://www.kb.nl/kbhtml/stcnhandleiding/301X.html', G),
   rdf_assert_literal(stcnv:secondary_author, stcnv:picarta_name, nl,
     'Vertaler / Bewerker', G).

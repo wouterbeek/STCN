@@ -60,7 +60,7 @@ assert_schema_kmc_3000(G):-
   rdfs_assert_subproperty(stcnv:primary_author, stcnv:author, G),
   rdfs_assert_label(stcnv:primary_author, nl, 'primaire autheur', G),
   rdf_assert_literal(stcnv:primary_author, stcnv:kb_name, 'KMC 3000', G),
-  rdf_assert(stcnv:primary_author, stcnv:documentation,
+  rdfs_assert_seeAlso(stcnv:primary_author,
     'http://www.kb.nl/kbhtml/stcnhandleiding/3000.html', G),
   rdf_assert_literal(stcnv:primary_author, stcnv:picarta_name, nl, 'Auteur',
     G).

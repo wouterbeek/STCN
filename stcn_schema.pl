@@ -10,6 +10,7 @@
 Schema for the STCN database.
 
 @author Wouter Beek
+@tbd Use XLink for resources that denote Web pages.
 @version 2013/01-2013/03, 2013/06, 2013/09
 */
 
@@ -25,10 +26,12 @@ Schema for the STCN database.
 
 
 stcn_schema(G):-
+  % Publication
   rdfs_assert_class(stcnv:'Publication', G),
   rdfs_assert_label(stcnv:'Publication', en, publication, G),
   rdfs_assert_label(stcnv:'Publication', nl, publicatie, G),
-
+  
+  % Topic
   rdfs_assert_class(stcnv:'Topic', G),
   rdfs_assert_label(stcnv:'Topic', en, topic, G),
   rdfs_assert_label(stcnv:'Topic', nl, onderwerp, G),
@@ -40,7 +43,17 @@ stcn_schema(G):-
   rdfs_assert_comment(stcnv:scrapedFrom, en,
     'Some information of this PPN was scraped from this location.', G),
   rdfs_assert_domain(stcnv:scrapedFrom, stcnv:'Publication', G),
-
+  
+  % The KB uses this predicate letter to denote the same property.
+  rdf_assert_property(stcnv:kb_name, G),
+  rdfs_assert_domain(stcnv:kb_name, rdf:'Property', G),
+  rdfs_assert_range(stcnv:kb_name, rdfs:'Literal', G),
+  
+  % Picarta uses this predicate letter to denote the same property.
+  rdf_assert_property(stcnv:picarta_name, G),
+  rdfs_assert_domain(stcnv:picarta_name, rdf:'Property', G),
+  rdfs_assert_range(stcnv:picarta_name, rdfs:'Literal', G),
+  
   % Picarta-derived properties
   forall(
     picarta_query:picarta_attribute(_Match, AttributeName),
