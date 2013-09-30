@@ -79,7 +79,7 @@ picarta_query_ppn(PPN, URI, Pairs):-
   atom_concat('ppn+', PPN, TRM_Value),
   uri_query_components(
     Search,
-    ['ACT'='SRCHA','IKT'=1016, 'REC'='*', 'SRT'='YOP', 'TRM'=TRM_Value]
+    ['ACT'='SRCHA','IKT'=1016,'REC'='*','SRT'='YOP','TRM'=TRM_Value]
   ),
   uri_components(
     URI,
@@ -110,8 +110,7 @@ picarta_query_ppn(PPN, URI, Pairs):-
       translate_attribute(UntranslatedAttribute, TranslatedAttribute)
     ),
     Pairs
-  ),
-  !.
+  ), !.
 picarta_query_ppn(PPN, _URI, []):-
   debug(picarta_query, 'PPN ~w could not be parsed in Picarta.', [PPN]).
 

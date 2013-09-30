@@ -67,7 +67,7 @@ assert_schema_kmc_30xx(G):-
   rdfs_assert_label(stcnv:author, nl, 'heeft auteur', G),
   
   rdf_assert_property(stcn:author_name, G),
-  rdfs_assert_label(stcnv:author_name, en, 'has author name', G).
+  rdfs_assert_label(stcnv:author_name, en, 'has author name', G),
   rdfs_assert_label(stcnv:author_name, nl, 'heeft auteursnaam', G).
 
 link_to_dbpedia_agent(G, Agent):-

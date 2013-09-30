@@ -104,7 +104,7 @@ assert_schema_kmc_1500(G):-
   rdfs_assert_subproperty(stcnv:translated_from, stcnv:language, G),
   rdfs_assert_label(stcnv:actual_language, en, 'translated from', G),
   rdfs_assert_label(stcnv:translated_from, nl, 'vertaald uit', G),
-  
+
   'assert_iso639-3_schema'(G),
   % Use OCLC information to add Dutch labels to ISO 639-3 language codes.
   forall(
@@ -146,10 +146,10 @@ language(PPN, Lang2) -->
   {debug(kmc_1500, '[PPN ~w] Found a language family code: ~w', [PPN,Lang2])}.
 % Case 3: Special language codes defined by GGC and STCN for KMC 1500
 %         that do not identify any specific language.
-language(PPN, Lang) -->
+language(_PPN, Lang) -->
   ("mis" ; "mul"), !,
-  {rdf_global_id(stcnv:'unknown_language', Lang)},
-  {debug(kmc_1500, '[PPN ~w] Found a non-language code (\'mis\' or \'mul\').', [PPN])}.
+  {rdf_global_id(stcnv:unknown, Lang)}.
+  %{debug(kmc_1500, '[PPN ~w] Found a non-language code (\'mis\' or \'mul\').', [PPN])}.
 % Case 4: A language code as defined by ISO 639-3.
 language(_PPN, Lang2) -->
   'iso639-3'(Lang1),

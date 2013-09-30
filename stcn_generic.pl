@@ -61,7 +61,7 @@ ppn_char(C) -->
 %! ) is det.
 
 ppn_resource(G, Category1, PPN1, PPN3):-
-  atomic_list_concat([Category,PPN1], '/', PPN2),
+  atomic_list_concat([Category1,PPN1], '/', PPN2),
   rdf_global_id(stcn:PPN2, PPN3),
   rdf_global_id(stcnv:Category1, Category2),
   (
