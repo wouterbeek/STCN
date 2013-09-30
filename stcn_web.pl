@@ -20,15 +20,19 @@ Web front-end for STCN methods.
 :- use_module(generics(db_ext)).
 :- use_module(generics(list_ext)).
 :- use_module(graph_theory(graph_web)).
+:- use_module(html(html)).
+:- use_module(html(html_table)).
+:- use_module(library(http/http_dispatch)).
 :- use_module(library(http/html_head)).
+:- use_module(library(http/http_server_files)).
 :- use_module(library(http/html_write)).
 :- use_module(server(error_web)).
-:- use_module(html(html)).
-:- use_module(library(http/http_dispatch)).
-:- use_module(library(http/http_server_files)).
+:- use_module(server(web_console)).
 :- use_module(stcn(stcn_statistics)).
 
-:- http_handler(root(stcn), stcn, [prefix, priority(10)]).
+:- register_module(stcn_web).
+
+:- http_handler(root(stcn), stcn, [prefix,priority(10)]).
 
 % Fixate the location of the HTML pages.
 :- db_add_novel(http:location(html, root(html), [])).
@@ -46,7 +50,6 @@ user:head(stcn, Head) -->
   html(head([\html_requires(css('wallace.css')) | Head])).
 
 ppn_web(PPN, Markup):-
-  load_stcn,
   catch_web(vertex_web(stcn, PPN), Markup).
 
 stcn(Request):-
@@ -66,17 +69,10 @@ stcn(Request):-
   ).
 
 stcn_statistics_web([HTML_Table]):-
-  load_stcn,
   stcn_statistics(Rows),
-  list_to_table([header(false)], Rows, HTML_Table).
+  html_table([header(false)], Rows, HTML_Table).
 
 stcn_web(Body):-
-  load_stcn,
-  absolute_file_name(
-    html(stcn),
-    File,
-    [access(read), file_type(html)]
-  ),
-  file_to_html(File, HTML_DOM),
-  contains_term(element(body, _, Body), HTML_DOM).
-
+  absolute_file_name(html(stcn), File, [access(read),file_type(html)]),
+  file_to_html(File, DOM),
+  contains_term(element(body, _, Body), DOM).

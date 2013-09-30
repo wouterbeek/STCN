@@ -1,11 +1,11 @@
 :- module(
   stcn_clean,
   [
-    stcn_clean/0
+    stcn_clean/1 % +Graph:atom
   ]
 ).
 
-/** <module> STCN_CLEAN
+/** <module> STCN clean
 
 Cleaning the STCN database.
 
@@ -18,25 +18,34 @@ and the STCN graph files are in =|/Data|=.
 
 :- use_module(kmc(kmc_1200)).
 :- use_module(library(semweb/rdf_db)).
+:- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_clean)).
 :- use_module(rdf(rdf_lit)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(xml(xml_namespace)).
 
+:- xml_register_namespace(picarta, 'http://picarta.pica.nl/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
 
 
 
-stcn_clean:-
+stcn_clean(G):-
+  % Assert occurrences in literal enumerations as separate triples.
+  rdf_split_literal(_, stcnv:printer_publisher, G, '; '),
+  rdf_strip_literal([' '], _, stcnv:printer_publisher, G),
+  rdf_split_literal(_, stcnv:topical_keyword, G, '; '),
+  rdf_split_literal(_, stcnv:typographic_information, G, ' , '),
+  
   % KMC 1200
   forall(
-    rdf_literal(PPN, stcnv:typographic_information, Lit, Graph),
+    rdf_literal(PPN, picarta:typographic_information, Lit, G),
     (
       atom_codes(Lit, Codes),
-      phrase(kmc_1200_picarta(Graph, PPN), Codes)
+      phrase(kmc_1200_picarta(G, PPN), Codes),
+      rdf_retractall_literal(PPN, picarta:typographic_information, Lit, G)
     )
   ),
-  rdf_literal_to_uri(_PPN1, stcnv:author, stcn, Graph),
-  rdf_literal_to_uri(_PPN2, stcnv:printer_publisher, stcn, Graph),
-  rdf_literal_to_uri(_PPN3, stcnv:translator_editor, stcn, Graph).
-
+  
+  rdf_literal_to_uri(_PPN1, stcnv:author, stcn, G),
+  rdf_literal_to_uri(_PPN2, stcnv:printer_publisher, stcn, G),
+  rdf_literal_to_uri(_PPN3, stcnv:translator_editor, stcn, G).

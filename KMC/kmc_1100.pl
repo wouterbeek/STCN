@@ -7,7 +7,7 @@
     kmc_1100//2, % +Graph:atom
                  % +PPN:uri
 % STATISTICS
-    statistics_kmc1100/2 % +Graph:atom
+    statistics_kmc_1100/2 % +Graph:atom
                          % -Rows:list(list)
   ]
 ).
@@ -125,7 +125,7 @@ kmc_1100(_G, PPN) -->
   dcg_until([end_mode(exclusive),output_format(atom)], end_of_line, Line),
   {debug(kmc_1100, '[PPN ~w] Could not parse KMC 1100: ~w', [PPN,Line])}.
 
-statistics_kmc1100(G, [[A1,V1],[A2,V2],[A3,V3]|T]):-
+statistics_kmc_1100(G, [[A1,V1],[A2,V2],[A3,V3]|T]):-
   A1 = 'Publications that are dated',
   count_subjects(stcnv:publication_year, _, G, V1),
   debug(stcn_statistics, '~w: ~w', [A1,V1]),

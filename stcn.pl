@@ -25,6 +25,7 @@ These predicate should be converted to some other module or be removed.
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_read)).
 :- use_module(stcn(collect_lines)).
+:- use_module(stcn(stcn_clean)).
 :- use_module(stcn(stcn_parse)).
 :- use_module(stcn(stcn_schema)).
 :- use_module(stcn(stcn_scrape)).
@@ -60,13 +61,12 @@ stcn_script:-
     rdf_save2('STCN')
   ),
 
-  thread_create(
-    stcn_scrape('Publication','STCN'),
-    _Id,
-    []
-  ),
+  thread_create(stcn_scrape('Publication','STCN'), _Id, []),
+  stcn_scrape(author, G),
+  stcn_scrape(printer_publisher, G),
+  stcn_scrape(translator_editor, G),
 
-  %stcn_clean,
+  stcn_clean(G),
 
   % End time.
   date_time(End),

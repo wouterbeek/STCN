@@ -27,6 +27,6 @@ load_stcn:-
     ensure_loaded(pgc(load))
   ),
   
-  % STCN main module.
-  ensure_loaded(stcn(stcn)).
-
+  use_module(server(dev_server)),
+  start_dev_server(8686),
+  ensure_loaded(stcn(stcn_web)).

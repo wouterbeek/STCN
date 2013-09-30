@@ -4,8 +4,8 @@
     assert_schema_kmc_1200/1, % +Graph:graph
     kmc_1200//2, % +Graph:atom
                  % +PPN:uri
-    %kmc_1200_picarta//2, % +Graph:atom
-    %                     % +PPN:uri
+    kmc_1200_picarta//2, % +Graph:atom
+                         % +PPN:uri
     statistics_kmc_1200/2 % +Graph:atom
                           % -Rows:list(list)
   ]
@@ -201,6 +201,7 @@ kopie van de tp. (zie ook kmc 7134)
 :- use_module(rdfs(rdfs_build)).
 :- use_module(xml(xml_namespace)).
 
+:- xml_register_namespace(picarta, 'http://picarta.pica.nl/').
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
 
@@ -456,35 +457,31 @@ kmc_1200_translate('X', x).
 kmc_1200_translate('Y', y).
 
 
-/*
+
 % PICARTA GRAMMAR %
 
 %! kmc_1200_picarta(+Graph:atom, +PPN:iri)//
 % This applies to KMC 1200 values as they occur in content that
 % was scraped from Picarta.
-%
-% @tbd
 
 kmc_1200_picarta(G, PPN) -->
   [Code],
   {code_type(Code, alnum)},
-  space,
-  opening_bracket,
-  dcg_until(
-    [end_mode(exclusive),output_format(atom)],
-    closing_bracket,
-    LabelNL
-  ),
-  closing_bracket,
+  " (",
+  dcg_until([end_mode(inclusive),output_format(atom)], closing_bracket, _),
+  ")",
   {
-    char_code(Char, Code),
-    typographic_property(G, PPN, Char),
-    rdf_has(PPN, stcnv:typographic_property, TypographicProperty),
-    rdfs_assert_label(TypographicProperty, nl, LabelNL, G)
+    char_code(Char1, Code),
+    kmc_1200_table(Category, Char1, _Label, _Comment1),
+    kmc_1200_table(Category, Relation1, _Comment2),
+    rdf_global_id(picarta:Relation1, Relation2),
+    atomic_list_concat(['TypografischKenmerk',Category,Char1], '/', Char2),
+    rdf_global_id(stcnv:Char2, Char3),
+    rdf_assert(PPN, Relation2, Char3, G)
   }.
-kmc_1200_picarta(_Graph, _PPN) -->
-  dcg_debug.
-*/
+kmc_1200_picarta(_G, PPN) -->
+  {debug(kmc_1200, '[PPN ~w] Cannot parse Picarta value.', [PPN])}.
+
 
 
 % STATISTICS %

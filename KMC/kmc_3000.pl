@@ -4,7 +4,7 @@
     assert_schema_kmc_3000/1, % +Graph:graph
     kmc_3000//2, % +Graph:atom
                  % +PPN:uri
-    statistics_kmc3000/2 % +Graph:atom
+    statistics_kmc_3000/2 % +Graph:atom
                           % -Rows:list(list)
   ]
 ).
@@ -68,7 +68,7 @@ kmc_3000(G, PPN) -->
   {rdf_global_id(stcnv:primary_author, Predicate)},
   kmc_30xx(G, PPN, Predicate).
 
-statistics_kmc3000(G, [[A1,V1]|T]):-
+statistics_kmc_3000(G, [[A1,V1]|T]):-
   statistics_kmc30xx(G, T),
   A1 = 'Publications with at least one primary author',
   count_subjects(stcnv:primary_author, _, G, V1).

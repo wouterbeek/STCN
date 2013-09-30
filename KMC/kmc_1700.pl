@@ -4,7 +4,7 @@
     assert_schema_kmc_1700/1, % +Graph:graph
     kmc_1700//2, % +Graph:atom
                  % +PPN:uri
-    statistics_kmc1700/2 % +Graph:atom
+    statistics_kmc_1700/2 % +Graph:atom
                           % -Rows:list(list)
   ]
 ).
@@ -429,7 +429,7 @@ same_country('Svalbard', 'Spitsbergen').
 same_country('Verenigde Arabische Republiek', 'Egypte').
 same_country('Zuid-West Afrika', 'Namibië').
 
-statistics_kmc1700(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4]]):-
+statistics_kmc_1700(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4]]):-
   A1 = 'Publications with some country',
   count_subjects(stcnv:landcode, _, G, V1),
   debug(stcn_statistics, '~w: ~w', [A1, V1]),
