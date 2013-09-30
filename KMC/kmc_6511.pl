@@ -68,7 +68,7 @@ assert_schema_kmc_6511(G):-
 
 kmc_6511(G, PPN) -->
   exclamation_mark,
-  ppn(TopicPPN),
+  ppn(G, 'Topic', TopicPPN),
   exclamation_mark,
   {
     ppn_to_topic(G, TopicPPN, Topic),

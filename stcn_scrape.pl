@@ -59,7 +59,7 @@ stcn_content(Category, G):-
     PPN,
     (
       rdf_literal(_PublicationPPN, Predicate, Literal, _OtherGraph),
-      dcg_phrase(ppn(PPN), Literal)
+      dcg_phrase(ppn('Publication', PPN), Literal)
     ),
     PPNs
   ),

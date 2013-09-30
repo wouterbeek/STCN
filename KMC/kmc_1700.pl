@@ -44,7 +44,7 @@ country options).
 @version 2013/01-2013/06, 2013/09
 */
 
-:- use_module(dcg(dcg_ascii)).
+:- use_module(dcg(dcg_content)).
 :- use_module(geo('iso3166-1')).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
@@ -53,10 +53,10 @@ country options).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(xml(xml_namespace)).
 
-:- discontiguous(recognized_country(_Code, _Name)).
-:- discontiguous(recognized_country(_Code, _Name, _Period)).
-:- discontiguous(unrecognized_country(_Code, _Name)).
-:- discontiguous(unrecognized_country(_Code, _Name, _Period)).
+:- discontiguous(recognized_country/2).
+:- discontiguous(recognized_country/3).
+:- discontiguous(unrecognized_country/2).
+:- discontiguous(unrecognized_country/3).
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
@@ -83,11 +83,23 @@ assert_schema_kmc_1700(G):-
     'In geval van een gefingeerd of onjuist impressum wordt in /2 de\c
      landcode opgenomen die hoort bij het juiste impressum zoals dat in\c
      een annotatie is verantwoord.', G),
-  
+
   rdfs_assert_subproperty(stcnv:actual_country, stcnv:landcode, G),
   rdfs_assert_label(stcnv:actual_country, nl,
     'daadwerkelijk land van uitgave', G),
-  
+
+  rdfs_assert_class(stcnv:'Country', G),
+  rdfs_assert_label(stcnv:'Country', en, 'OCLC country code not supported by ISO', G),
+  forall(
+     unrecognized_country(Abbr1, Name),
+     (
+        atomic_list_concat(['Country',Abbr1], '/', Abbr2),
+        rdf_global_id(stcnv:Abbr2, Abbr3),
+        rdf_assert_individual(Abbr3, stcnv:'Country', G),
+        rdfs_assert_label(Abbr3, en, Name, G)
+     )
+  ),
+
   'assert_iso3166-1_schema'(G),
   % Add Dutch labels for countries that occur in the OCLC.
   forall(
@@ -103,11 +115,21 @@ assert_schema_kmc_1700(G):-
 
 kmc_1700(G, PPN) -->
   "/", country_property(Pred),
-  'iso3166-1'(_Name, Country1),
-  {
-    rdf_global_id(Country1, Country2),
-    rdf_assert(PPN, Pred, Country2, G)
-  }, !,
+  (
+     'iso3166-1'(_Name, Country1)
+  ->
+    {rdf_global_id(Country1, Country3)}
+  ;
+    {unrecognized_country(Country1, _Name)},
+    atom(Country1),
+    {
+      debug(kmc_1700, '[PPN ~w] Unrecognized country code: ~w.', [PPN,Country1]),
+      atomic_list_concat(['Country',Country1], '/', Country2),
+      rdf_global_id(stcnv:Country2, Country3)
+    }
+  ),
+
+  {rdf_assert(PPN, Pred, Country3, G)}, !,
   kmc_1700(G, PPN).
 kmc_1700(_G, _PPN) --> [].
 
@@ -121,6 +143,9 @@ country_property(Pred) -->
   {rdf_global_id(stcnv:actual_country, Pred)}.
 
 % KMC 1700 country codes that are in ISO 3166-1.
+
+recognized_country(Code, Name):-
+  recognized_country(Code, Name, _Period).
 recognized_country(ad, 'Andorra').
 recognized_country(ae, 'Verenigde Arabische Emiraten').
 recognized_country(af, 'Afganistan').
@@ -422,6 +447,8 @@ statistics_kmc1700(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4]]):-
   debug(stcn_statistics, '-- ~w: ~w', [A4, V4]).
 
 % Not in ISO 3166-1.
+unrecognized_country(Code, Name):-
+  unrecognized_country(Code, Name, _Period).
 unrecognized_country(ac, 'Ashmore en Cartier Eilanden').
 unrecognized_country(an, 'Nederlandse Antillen').
 unrecognized_country(bu, 'Birma').
@@ -443,3 +470,4 @@ unrecognized_country(wk, 'Wake').
 unrecognized_country(xx, 'Onbekend').
 unrecognized_country(yd, 'Jemen [Volksrepubliek]').
 unrecognized_country(zr, 'Zaïre', period(date(1971,10,27),date(1997,05,17))).
+

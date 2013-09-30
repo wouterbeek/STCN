@@ -59,15 +59,15 @@ These are considered to be the same. Mapped to upper case X using option
 
 assert_schema_kmc_30xx(G):-
   rdfs_assert_subclass(stcnv:'Author', foaf:'Agent', G),
+  rdfs_assert_label(stcnv:'Author', en, author, G),
   rdfs_assert_label(stcnv:'Author', nl, auteur, G),
   
-  rdfs_assert_property_class(stcnv:'AuthorProperty', G),
-  rdfs_assert_label(stcnv:'AuthorProperty', nl, autheurseigenschap, G),
-  
   rdf_assert_property(stcnv:author, G),
+  rdfs_assert_label(stcnv:author, en, 'has author', G),
   rdfs_assert_label(stcnv:author, nl, 'heeft auteur', G),
   
   rdf_assert_property(stcn:author_name, G),
+  rdfs_assert_label(stcnv:author_name, en, 'has author name', G).
   rdfs_assert_label(stcnv:author_name, nl, 'heeft auteursnaam', G).
 
 link_to_dbpedia_agent(G, Agent):-
@@ -101,16 +101,14 @@ link_to_dbpedia_agents(G):-
 link_to_dbpedia_agents(G, Agents):-
   maplist(link_to_dbpedia_agent(G), Agents).
 
-kmc_30xx(G, PPN, Predicate) -->
+kmc_30xx(G, PPN, Pred) -->
   dcg_until([end_mode(exclusive)], exclamation_mark, _Codes),
-  % PPN codes for authors can contain non-numbers,
-  % e.g., '14895961X' for 'Livinus van der Minnen'.
-  ppn(AuthorPPN),
-  exclamation_mark,
+  ppn(G, 'Author', AuthorPPN),
+  "!",
   {
     rdf_global_id(stcn:AuthorPPN, Author),
-    rdf_assert_individual(Author, foaf:'Agent', G),
-    rdf_assert(PPN, Predicate, Author, G)
+    rdf_assert_individual(Author, stcnv:'Author', G),
+    rdf_assert(PPN, Pred, Author, G)
   }.
 
 % @tbd Use threading via run_on_sublists/2.

@@ -9,7 +9,7 @@
   ]
 ).
 
-/** <module> KMC 3000 - PRIMARY AUTHOR
+/** <module> KMC 3000 - Primary author
 
 KMC 3000 contains the primary author.
 
@@ -56,14 +56,13 @@ http://picarta.pica.nl/DB=3.11/SET=1/TTL=1/CMD?
 
 assert_schema_kmc_3000(G):-
   assert_schema_kmc_30xx(G),
-  rdf_assert_individual(stcnv:primary_author, stcnv:'AuthorProperty', G),
   rdfs_assert_subproperty(stcnv:primary_author, stcnv:author, G),
+  rdfs_assert_label(stcnv:primary_author, en, 'primary author', G),
   rdfs_assert_label(stcnv:primary_author, nl, 'primaire autheur', G),
   rdf_assert_literal(stcnv:primary_author, stcnv:kb_name, 'KMC 3000', G),
   rdfs_assert_seeAlso(stcnv:primary_author,
     'http://www.kb.nl/kbhtml/stcnhandleiding/3000.html', G),
-  rdf_assert_literal(stcnv:primary_author, stcnv:picarta_name, nl, 'Auteur',
-    G).
+  rdf_assert_literal(stcnv:primary_author, stcnv:picarta_name, nl, 'Auteur', G).
 
 kmc_3000(G, PPN) -->
   {rdf_global_id(stcnv:primary_author, Predicate)},
@@ -72,6 +71,5 @@ kmc_3000(G, PPN) -->
 statistics_kmc3000(G, [[A1,V1]|T]):-
   statistics_kmc30xx(G, T),
   A1 = 'Publications with at least one primary author',
-  count_subjects(stcnv:primary_author, _, G, V1),
-  debug(stcn_statistics, '-- ~w: ~w', [A1,V1]).
+  count_subjects(stcnv:primary_author, _, G, V1).
 

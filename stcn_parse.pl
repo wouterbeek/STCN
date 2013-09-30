@@ -46,7 +46,7 @@ redactiebladen(G, PPN) -->
 redactiebladen(G, _PPN) -->
   "SET", !,
   dcg_until([end_mode(inclusive)], atom('PPN: '), _),
-  ppn(PPN),
+  ppn('Publication', PPN),
   {
     flag(publications, N, N + 1),
     (N rem 1000 =:= 0 -> debug(stcn_parse, '~w PPNs parsed.', [N]) ; true),
@@ -70,3 +70,4 @@ redactiebladen(G, PPN) -->
   redactiebladen(G, PPN).
 redactiebladen(_G, _PPN) -->
   dcg_end, !.
+

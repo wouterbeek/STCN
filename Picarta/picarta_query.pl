@@ -2,7 +2,7 @@
   picarta_query,
   [
     picarta_query_ppn/3 % +PPN:atom
-                        % -URI:uri
+                        % -PicartaURI:uri
                         % -Pairs:list(pair)
   ]
 ).
@@ -67,7 +67,7 @@ picarta_attribute('Zie\240\ook:\240\',                  see_also               )
 
 picarta_path('/DB=3.11/SET=1/TTL=1/CMD').
 
-%! picarta_query_ppn(+PPN:atom, -URI:uri, -Pairs:list) is det.
+%! picarta_query_ppn(+PPN:atom, -PicartaURI:uri, -Pairs:list) is det.
 % Queries for the given PPN code, returning the attribute/value-pairs that
 % are contained in the Picarta dataset for the given PPN code.
 
