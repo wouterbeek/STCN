@@ -75,7 +75,7 @@ Also see kmc_4040.pl for dating.
 :- use_module(xsd(xsd_gYear)).
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
+:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 :- debug(kmc_1100).
 

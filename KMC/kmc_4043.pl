@@ -39,7 +39,7 @@ E.g. PPN 234597046.
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
+:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 :- debug(kmc_4043).
 

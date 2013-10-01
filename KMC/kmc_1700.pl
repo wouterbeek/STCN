@@ -59,7 +59,7 @@ country options).
 :- discontiguous(unrecognized_country/3).
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
+:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 :- debug(kmc_1700).
 

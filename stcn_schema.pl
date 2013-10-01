@@ -21,7 +21,7 @@ Schema for the STCN database.
 :- use_module(stcn(stcn_kmc)).
 :- use_module(xml(xml_namespace)).
 
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
+:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 
 

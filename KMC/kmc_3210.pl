@@ -101,7 +101,7 @@ are not included in a 4-2-2-1 search. [?]
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
+:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 :- debug(kmc_3210).
 

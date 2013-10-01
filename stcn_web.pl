@@ -18,7 +18,6 @@ Web front-end for STCN methods.
 
 :- use_module(generics(atom_ext)).
 :- use_module(generics(db_ext)).
-:- use_module(generics(list_ext)).
 :- use_module(graph_theory(graph_web)).
 :- use_module(html(html)).
 :- use_module(html(html_table)).

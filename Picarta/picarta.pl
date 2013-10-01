@@ -60,7 +60,7 @@ We make a distinction between three portions of code in this module:
 :- rdf_register_namespace(rdf).
 :- rdf_register_namespace(rdfs).
 :- rdf_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
-:- rdf_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
+:- rdf_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 :- rdf_register_namespace(xsd).
 
 :- debug(picarta).

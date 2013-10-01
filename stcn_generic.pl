@@ -29,7 +29,7 @@ but are not generic enough to be in PGC.
 
 :- xml_register_namespace(foaf,  'http://xmlns.com/foaf/0.1/').
 :- xml_register_namespace(stcn,  'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
+:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 :- rdf_meta(category_class(?,r)).
 

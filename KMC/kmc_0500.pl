@@ -37,7 +37,7 @@ Encodes the 'status' of a work.
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(stcn,  'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
+:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 :- meta_predicate(kmc_0500_oclc(+,+,+,3)).
 :- meta_predicate(kmc_0500_status_value(3,+,-,-)).
@@ -144,7 +144,7 @@ assert_schema_kmc_0500(G):-
     'Het correct invullen van positie 2 van kmc 0500 is van groot belang.\c
      Wijzig positie 2 alleen als dat noodzakelijk is en breng bij een\c
      belangrijke wijziging (bijv. \'a\' wordt veranderd in \'b\') de\c
-     medegebruikers van de titel via Picamail op de hoogte (zie PAR 052).'),
+     medegebruikers van de titel via Picamail op de hoogte (zie PAR 052).', G),
   rdfs_assert_seeAlso(stcnv:status_pos2,
     'http://support.oclc.org/ggc/richtlijnen/php/showPresentation.php?id=12&ln=nl&sec=k-0500#positie_2_kmc_0500', G),
 

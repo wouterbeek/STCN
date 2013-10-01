@@ -110,7 +110,7 @@ New parse results are coming soon!
 
 :- debug(stcn_statistics).
 
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
+:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 
 

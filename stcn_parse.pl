@@ -26,7 +26,7 @@ This parses 139.817 PPN entries in the redactiebladen file.
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(stcn,  'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/resource/vocab/').
+:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 :- assert(user:prolog_file_type(txt, text)).
 
