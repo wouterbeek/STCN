@@ -113,8 +113,11 @@ assert_schema_kmc_1500(G):-
       rdf_global_id('iso639-3':Lang2, Lang1)
     ),
     (
-      recognized_language(Lang2, Name),
+      recognized_language(Lang2, Name)
+    ->
       rdfs_assert_label(Lang1, nl, Name, G)
+    ;
+      true
     )
   ),
   'assert_iso639-5_schema'(G).

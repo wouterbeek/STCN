@@ -74,7 +74,7 @@ kmc(_KMC, _G, _PPN) -->
 % This predicate occurs before kmc_code/2 for efficiency.
 
 kmc_code(KMC, Active, Suffix):-
-  once(kmc_code(KMC, Active)),
+  kmc_code(KMC, Active),
   Suffix = KMC.
 
 kmc_code('0500', true ). % Status

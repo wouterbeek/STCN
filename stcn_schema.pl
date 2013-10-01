@@ -11,7 +11,7 @@ Schema for the STCN database.
 
 @author Wouter Beek
 @tbd Use XLink for resources that denote Web pages.
-@version 2013/01-2013/03, 2013/06, 2013/09
+@version 2013/01-2013/03, 2013/06, 2013/09-2013/10
 */
 
 :- use_module(library(semweb/rdf_db)).
@@ -20,12 +20,16 @@ Schema for the STCN database.
 :- use_module(rdfs(rdfs_build)).
 :- use_module(stcn(stcn_kmc)).
 :- use_module(xml(xml_namespace)).
+:- use_module(xsd(xsd_rdf)).
 
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 
 
 stcn_schema(G):-
+  % Add the RDFS statements for XSD.
+  xsd_assert_schema(G),
+  
   % Publication
   rdfs_assert_class(stcnv:'Publication', G),
   rdfs_assert_label(stcnv:'Publication', en, publication, G),

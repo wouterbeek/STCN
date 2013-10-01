@@ -90,6 +90,7 @@ assert_schema_kmc_1700(G):-
 
   rdfs_assert_class(stcnv:'Country', G),
   rdfs_assert_label(stcnv:'Country', en, 'OCLC country code not supported by ISO', G),
+  
   forall(
      unrecognized_country(Abbr1, Name),
      (
