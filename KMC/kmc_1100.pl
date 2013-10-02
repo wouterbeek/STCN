@@ -92,17 +92,17 @@ assert_schema_kmc_1100(G):-
     'http://www.kb.nl/kbhtml/stcnhandleiding/1100.html', G),
   rdf_assert_literal(stcnv:publication_year, stcnv:picarta_name, nl, 'Jaar', G),
 
-  rdfs_assert_subproperty(stcn:exact_publication_year, stcnv:publication_year, G),
-  rdfs_assert_label(stcn:exact_publication_year, en, 'exact publication year', G),
-  rdfs_assert_label(stcn:exact_publication_year, nl, 'exact publicatiejaar', G),
+  rdfs_assert_subproperty(stcnv:exact_publication_year, stcnv:publication_year, G),
+  rdfs_assert_label(stcnv:exact_publication_year, en, 'exact publication year', G),
+  rdfs_assert_label(stcnv:exact_publication_year, nl, 'exact publicatiejaar', G),
 
-  rdfs_assert_subproperty(stcn:earliest_publication_year, stcnv:publication_year, G),
-  rdfs_assert_label(stcn:earliest_publication_year, en, 'earliest publication year', G),
-  rdfs_assert_label(stcn:earliest_publication_year, nl, 'vroegste publicatiejaar', G),
+  rdfs_assert_subproperty(stcnv:earliest_publication_year, stcnv:publication_year, G),
+  rdfs_assert_label(stcnv:earliest_publication_year, en, 'earliest publication year', G),
+  rdfs_assert_label(stcnv:earliest_publication_year, nl, 'vroegste publicatiejaar', G),
 
-  rdfs_assert_subproperty(stcn:latest_publication_year, stcnv:publication_year, G),
-  rdfs_assert_label(stcn:latest_publication_year, en, 'latest publicationyear', G),
-  rdfs_assert_label(stcn:latest_publication_year, nl, 'laatste publicatiejaar', G).
+  rdfs_assert_subproperty(stcnv:latest_publication_year, stcnv:publication_year, G),
+  rdfs_assert_label(stcnv:latest_publication_year, en, 'latest publicationyear', G),
+  rdfs_assert_label(stcnv:latest_publication_year, nl, 'laatste publicatiejaar', G).
 
 % Year interval.
 kmc_1100(G, PPN) -->

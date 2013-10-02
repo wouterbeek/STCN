@@ -27,7 +27,7 @@ These predicate should be converted to some other module or be removed.
 :- use_module(stcn(stcn_schema)).
 :- use_module(stcn(stcn_scrape)).
 
-:- debug(stcn).
+:- debug(stcn_script).
 
 
 
@@ -60,7 +60,12 @@ stcn_script:-
     % Performs some in-file replacements.
     trim_spaces(F2, F3),
     replace_in_file(F3, "Â°", "°", F4),
-    replace_in_file(F4, "Ãª", "°", F5)
+    replace_in_file(F4, "Ãª", "°", F5),
+    debug(
+      stcn_script,
+      'Done with preparing the redactiebladen file for scraping.',
+      []
+    )
   ),
 
   % Parse the redactiebladen.
@@ -70,36 +75,69 @@ stcn_script:-
       F6,
       [access(read),file_type(turtle)]
     ),
-    rdf_load2(F6, [format(turtle),graph('Redactiebladen')]), !
+    rdf_load2(F6, [format(turtle),graph('Redactiebladen')]),
+    debug(stcn_script, 'The redactiebladen parse were loaded from file.', []),
+    !
   ;
     parse_redactiebladen(F5, 'Redactiebladen'),
+    debug(stcn_script, 'Done parsing the redactiebladen.', []),
     absolute_file_name(
       data('Redactiebladen'),
       F6,
       [access(write),file_type(turtle)]
     ),
-    rdf_save2(F6, [format(turtle),graph('Redactiebladen')])
+    rdf_save2(F6, [format(turtle),graph('Redactiebladen')]),
+    debug(stcn_script, 'Done saving the parsed redactiebladen.', [])
   ),
   
   % Picarta scraping.
-  stcn_scrape('Redactiebladen', 'Publication', 'PicartaPublications'),
-  forall_thread(
-    (
-      member(
-        Category-ToG,
-        [
-          author-'PicartaAuthors',
-          printer_publisher-'PicartaPrintersPublishers',
-          translator_editor-'PicartaTranslatorEditor'
-        ]
-      ),
-      format(atom(Msg), 'Scraping Picarta for ~w', [Category])
+  (
+    absolute_file_name2(
+      data('PicartaPublications'),
+      F7,
+      [access(read),file_type(turtle)]
     ),
-    stcn_scrape('Redactiebladen', Category, ToG),
-    stcn,
-    Msg
+    rdf_load2(F7, [format(turtle),graph('PicartaPublications')]),
+    debug(stcn_script, 'The Picarta scrape was loaded from file.', []), !
+  ;
+    stcn_scrape('Redactiebladen', 'Publication', 'PicartaPublications'),
+    debug(stcn_script, 'Done scraping the redactiebladen.', []),
+    absolute_file_name(
+      data('PicartaPublications'),
+      F7,
+      [access(write),file_type(turtle)]
+    ),
+    rdf_save2(F7, [format(turtle),graph('PicartaPublications')]),
+    debug(stcn_script, 'Done saving the scraped redactiebladen.', []),
+    
+    forall_thread(
+      (
+        member(
+          Category-ToG,
+          [
+            author-'PicartaAuthors',
+            printer_publisher-'PicartaPrintersPublishers',
+            translator_editor-'PicartaTranslatorEditor'
+          ]
+        ),
+        format(atom(Msg), 'Scraping Picarta for ~w', [Category])
+      ),
+      (
+        stcn_scrape('Redactiebladen', Category, ToG),
+        debug(stcn_script, 'Done scraping ~w from Picarta.', [Category]),
+        absolute_file_name(data(ToG), F8, [access(write),file_type(turtle)]),
+        rdf_save2(F8, [format(turtle),graph(ToG)]),
+        debug(
+          stcn_script,
+          'Done saving the scraped ~w from Picarta.',
+          [Category]
+        )
+      ),
+      stcn,
+      Msg
+    )
   ),
-
+  
   %stcn_clean('STCN'),
 
   % End time.
