@@ -52,7 +52,6 @@ The STCN SW package.
 
 :- use_module(cliopatria(hooks)).
 :- use_module(library(http/http_dispatch)).
-:- use_module(stcn(void_load)).
 
 :- db_add_novel(http:location(stcn, cliopatria(stcn), [])).
 

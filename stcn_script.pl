@@ -101,13 +101,13 @@ stcn_script:-
       [access(read),file_type(turtle)]
     ),
     rdf_load2(F7, [format(turtle),graph('PicartaPublications')]),
-    debug(stcn_script, 'The Picarta scrape was loaded from file.', []), !
-  ;
+    debug(stcn_script, 'The Picarta scrape was loaded from file.', []),
+  %;
     G = 'PicartaPublications',
     
-    stcn_scrape('Redactiebladen', 'Publication', G),
-    debug(stcn_script, 'Done scraping the redactiebladen.', []),
-    absolute_file_name(data(G), F7, [access(write),file_type(turtle)]),
+    %stcn_scrape('Redactiebladen', 'Publication', G),
+    %debug(stcn_script, 'Done scraping the redactiebladen.', []),
+    %absolute_file_name(data(G), F7, [access(write),file_type(turtle)]),
     
     % Assert occurrences in literal enumerations as separate triples.
     rdf_split_literal([answer('A')], _, picarta:printer_publisher, G, '; '),
@@ -165,6 +165,10 @@ stcn_script:-
     stcn_script,
     Msg
   ),
+  
+  absolute_file_name(data('VoID'), F9, [access(write),file_type(turtle)]),
+  stcn_void('VoID'),
+  void_save_library('VoID', F9),
 
   % End time.
   date_time(End),
