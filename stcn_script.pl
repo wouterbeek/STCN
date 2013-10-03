@@ -18,11 +18,15 @@ These predicate should be converted to some other module or be removed.
 :- use_module(generics(replace_in_file)).
 :- use_module(generics(thread_ext)).
 :- use_module(library(debug)).
+:- use_module(library(semweb/rdf_db)).
 :- use_module(os(datetime_ext)).
 :- use_module(os(file_ext)).
+:- use_module(rdf(rdf_build)).
+:- use_module(rdf(rdf_clean)).
+:- use_module(rdf(rdf_lit)).
 :- use_module(rdf(rdf_serial)).
 :- use_module(stcn(collect_lines)).
-:- use_module(stcn(stcn_clean)).
+:- use_module(stcn(stcn_generic)).
 :- use_module(stcn(stcn_parse)).
 :- use_module(stcn(stcn_schema)).
 :- use_module(stcn(stcn_scrape)).
@@ -76,8 +80,7 @@ stcn_script:-
       [access(read),file_type(turtle)]
     ),
     rdf_load2(F6, [format(turtle),graph('Redactiebladen')]),
-    debug(stcn_script, 'The redactiebladen parse were loaded from file.', []),
-    !
+    debug(stcn_script, 'The redactiebladen parse were loaded from file.', []), !
   ;
     parse_redactiebladen(F5, 'Redactiebladen'),
     debug(stcn_script, 'Done parsing the redactiebladen.', []),
@@ -90,7 +93,7 @@ stcn_script:-
     debug(stcn_script, 'Done saving the parsed redactiebladen.', [])
   ),
   
-  % Picarta scraping.
+  % Picarta scraping 1: publications.
   (
     absolute_file_name2(
       data('PicartaPublications'),
@@ -100,45 +103,68 @@ stcn_script:-
     rdf_load2(F7, [format(turtle),graph('PicartaPublications')]),
     debug(stcn_script, 'The Picarta scrape was loaded from file.', []), !
   ;
-    stcn_scrape('Redactiebladen', 'Publication', 'PicartaPublications'),
-    debug(stcn_script, 'Done scraping the redactiebladen.', []),
-    absolute_file_name(
-      data('PicartaPublications'),
-      F7,
-      [access(write),file_type(turtle)]
-    ),
-    rdf_save2(F7, [format(turtle),graph('PicartaPublications')]),
-    debug(stcn_script, 'Done saving the scraped redactiebladen.', []),
+    G = 'PicartaPublications',
     
-    forall_thread(
-      (
-        member(
-          Category-ToG,
-          [
-            author-'PicartaAuthors',
-            printer_publisher-'PicartaPrintersPublishers',
-            translator_editor-'PicartaTranslatorEditor'
-          ]
-        ),
-        format(atom(Msg), 'Scraping Picarta for ~w', [Category])
+    stcn_scrape('Redactiebladen', 'Publication', G),
+    debug(stcn_script, 'Done scraping the redactiebladen.', []),
+    absolute_file_name(data(G), F7, [access(write),file_type(turtle)]),
+    
+    % Assert occurrences in literal enumerations as separate triples.
+    rdf_split_literal([answer('A')], _, picarta:printer_publisher, G, '; '),
+    debug(stcn_script, 'Printer-publishers were split.', []),
+    rdf_strip_literal([answer('A')], [' '], _, picarta:printer_publisher, G),
+    debug(stcn_script, 'Printer-publishers were stripped.', []),
+    rdf_split_literal([answer('A')], _, picarta:topical_keyword, G, '; '),
+    debug(stcn_script, 'Topics were split.', []),
+    rdf_split_literal([answer('A')], _, picarta:typographic_information, G, ' , '),
+    debug(stcn_script, 'Typographic information was split.', []),
+    
+    % Turn PPN literals into IRIs.
+    forall(
+      member(
+        P1-C1,
+        [
+          author-'Author',
+          printer_publisher-'PrintersPublisher',
+          translator_editor-'TranslatorEditor'
+        ]
       ),
       (
-        stcn_scrape('Redactiebladen', Category, ToG),
-        debug(stcn_script, 'Done scraping ~w from Picarta.', [Category]),
-        absolute_file_name(data(ToG), F8, [access(write),file_type(turtle)]),
-        rdf_save2(F8, [format(turtle),graph(ToG)]),
-        debug(
-          stcn_script,
-          'Done saving the scraped ~w from Picarta.',
-          [Category]
+        rdf_global_id(picarta:P1, P2),
+        forall(
+          rdf_literal(PublicationPPN, P2, Lit, G),
+          (
+            ppn_resource(G, C1, Lit, PPN),
+            rdf_assert(PublicationPPN, P2, PPN, G),
+            rdf_retractall_literal(PublicationPPN, P2, Lit, G)
+          )
         )
-      ),
-      stcn,
-      Msg
-    )
+      )
+    ),
+    
+    % Save the processed scrape results.
+    rdf_save2(F7, [format(turtle),graph(G)]),
+    debug(stcn_script, 'Done saving the scraped redactiebladen.', [])
   ),
   
-  %stcn_clean('STCN'),
+  % Picarta scraping 1: authors, printer-publishers, topics,
+  % translator-editors.
+  forall_thread(
+    (
+      member(C, ['Authors','PrintersPublishers','Topic','TranslatorEditor']),
+      format(atom(Msg), 'Scraping Picarta for ~w', [C])
+    ),
+    (
+      atomic_concat('Picarta', C, ToG),
+      stcn_scrape('PicartaPublications', C, ToG),
+      debug(stcn_script, 'Done scraping ~w from Picarta.', [C]),
+      absolute_file_name(data(ToG), F8, [access(write),file_type(turtle)]),
+      rdf_save2(F8, [format(turtle),graph(ToG)]),
+      debug(stcn_script, 'Done saving the scraped ~w from Picarta.', [C])
+    ),
+    stcn_script,
+    Msg
+  ),
 
   % End time.
   date_time(End),

@@ -19,7 +19,6 @@ and the STCN graph files are in =|/Data|=.
 :- use_module(kmc(kmc_1200)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_clean)).
 :- use_module(rdf(rdf_lit)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(xml(xml_namespace)).
@@ -30,12 +29,6 @@ and the STCN graph files are in =|/Data|=.
 
 
 stcn_clean(G):-
-  % Assert occurrences in literal enumerations as separate triples.
-  rdf_split_literal(_, stcnv:printer_publisher, G, '; '),
-  rdf_strip_literal([' '], _, stcnv:printer_publisher, G),
-  rdf_split_literal(_, stcnv:topical_keyword, G, '; '),
-  rdf_split_literal(_, stcnv:typographic_information, G, ' , '),
-  
   % KMC 1200
   forall(
     rdf_literal(PPN, picarta:typographic_information, Lit, G),
@@ -44,8 +37,5 @@ stcn_clean(G):-
       phrase(kmc_1200_picarta(G, PPN), Codes),
       rdf_retractall_literal(PPN, picarta:typographic_information, Lit, G)
     )
-  ),
-  
-  rdf_literal_to_uri(_PPN1, stcnv:author, stcn, G),
-  rdf_literal_to_uri(_PPN2, stcnv:printer_publisher, stcn, G),
-  rdf_literal_to_uri(_PPN3, stcnv:translator_editor, stcn, G).
+  ).
+

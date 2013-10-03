@@ -2,7 +2,7 @@
   stcn_scrape,
   [
     stcn_scrape/3 % +FromGraph:atom
-                  % +Category:oneof(['Author','Printer','Publication','Topic'])
+                  % +Category:oneof(['Author','PrinterPublisher','Publication','Topic','TranslatorEditor'])
                   % +ToGraph:atom
   ]
 ).
@@ -38,7 +38,7 @@ Fully automated scrape for the STCN.
 
 %! stcn_scrape(
 %!   +FromGraph:atom,
-%!   +Category:oneof([author,printer_publisher,'Publication','Topic',translator_editor]),
+%!   +RDFS_Class:oneof(['Author','PrinterPublisher','Publication','Topic','TranslatorEditor']),
 %!   +ToGraph:atom
 %! ) is det.
 % First we check whether the STCN content that we are after is already
@@ -46,32 +46,30 @@ Fully automated scrape for the STCN.
 % Otherwise, we start scraping.
 %
 % The following categories are used:
+%   * `Author`
+%   * `PrinterPublisher`
 %   * `Publication`
-%   * `author`
-%   * `printer_publisher`
-%   * `translator_editor`
+%   * `Topic`
+%   * `TranslatorEditor`
 
 % Scrape from remote Website (Picarta),
 % Without a prior TODO file.
-stcn_scrape(FromG, Category1, ToG):-
-  rdf_global_id(stcnv:Category1, Category2),
+stcn_scrape(FromG, C1, ToG):-
+  rdf_global_id(stcnv:C1, C2),
+  
   % We assume that the PPNs of the given category are currently loaded.
   setoff(
     PPN3,
     (
-      (
-        rdfs_individual(m(t,f,f), PPN1, Category2, FromG)
-      ;
-        rdf_literal(_, Category2, PPN1, FromG)
-      ),
+      rdfs_individual(m(t,f,f), PPN1, C2, FromG),
       rdf_global_id(stcn:PPN2, PPN1),
-      split_atom_exclusive('/', PPN2, [Category1,PPN3])
+      split_atom_exclusive('/', PPN2, [C1,PPN3])
     ),
     PPNs
   ),
 
   % Write the PPNs of the given category to a TODO file.
-  atomic_list_concat(['TODO',Category1], '_', TODO_FileName),
+  atomic_list_concat(['TODO',C1], '_', TODO_FileName),
   create_file(data('.'), TODO_FileName, text, TODO_File),
   setup_call_cleanup(
     open(TODO_File, write, Stream, []),
@@ -88,11 +86,11 @@ stcn_scrape(FromG, Category1, ToG):-
 
   % Start the actual scraping, using the TODO file.
   % DONE file.
-  atomic_list_concat(['DONE',Category1], '_', DONE_FileName),
+  atomic_list_concat(['DONE',C1], '_', DONE_FileName),
   create_file(data('.'), DONE_FileName, text, DONE_File),
 
   % Process the TODO file.
-  list_script(picarta_scrape(Category1, ToG), TODO_File, DONE_File).
+  list_script(picarta_scrape(C1, ToG), TODO_File, DONE_File).
 
 picarta_scrape(Category, G, PPN_Name):-
   picarta_query_ppn(PPN_Name, ScrapeSite, NVPairs),

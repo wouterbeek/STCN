@@ -27,18 +27,6 @@ load_stcn:-
     ensure_loaded(pgc(load))
   ),
   
-  % Debug server.
-  use_module(server(dev_server)),
-  use_module(server(web_console)),
-  start_dev_server(3333),
-  
-  % Load the STCN Web predicates.
-  use_module(stcn(stcn_web)),
-  
-  % RDF Web front-end.
-  use_module(rdf(rdf_web)),
-  register_module(rdf_web),
-  
   % Create the STCN SW dataset.
   use_module(stcn(stcn_script)),
   thread_create(stcn_script, _Id, []).
