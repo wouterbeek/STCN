@@ -30,6 +30,8 @@ These predicate should be converted to some other module or be removed.
 :- use_module(stcn(stcn_parse)).
 :- use_module(stcn(stcn_schema)).
 :- use_module(stcn(stcn_scrape)).
+:- use_module(stcn(stcn_void)).
+:- use_module(vocab(void_file)).
 
 :- debug(stcn_script).
 
@@ -101,13 +103,17 @@ stcn_script:-
       [access(read),file_type(turtle)]
     ),
     rdf_load2(F7, [format(turtle),graph('PicartaPublications')]),
-    debug(stcn_script, 'The Picarta scrape was loaded from file.', []),
-  %;
+    debug(stcn_script, 'The Picarta scrape was loaded from file.', [])
+  ;
     G = 'PicartaPublications',
     
-    %stcn_scrape('Redactiebladen', 'Publication', G),
-    %debug(stcn_script, 'Done scraping the redactiebladen.', []),
-    %absolute_file_name(data(G), F7, [access(write),file_type(turtle)]),
+    stcn_scrape('Redactiebladen', 'Publication', G),
+    debug(stcn_script, 'Done scraping the redactiebladen.', []),
+    
+    % Intermediate save.
+    absolute_file_name(data(interm), F70, [access(write),file_type(turtle)]),
+    rdf_save2(F70, [format(turtle),graph(G)]),
+    debug(stcn_script, 'Intermediate save of Picarta publications.', []),
     
     % Assert occurrences in literal enumerations as separate triples.
     rdf_split_literal([answer('A')], _, picarta:printer_publisher, G, '; '),
@@ -134,6 +140,7 @@ stcn_script:-
         forall(
           rdf_literal(PublicationPPN, P2, Lit, G),
           (
+            gtrace,
             ppn_resource(G, C1, Lit, PPN),
             rdf_assert(PublicationPPN, P2, PPN, G),
             rdf_retractall_literal(PublicationPPN, P2, Lit, G)
@@ -143,6 +150,7 @@ stcn_script:-
     ),
     
     % Save the processed scrape results.
+    absolute_file_name(data(G), F7, [access(write),file_type(turtle)]),
     rdf_save2(F7, [format(turtle),graph(G)]),
     debug(stcn_script, 'Done saving the scraped redactiebladen.', [])
   ),
