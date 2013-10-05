@@ -37,6 +37,8 @@ These predicate should be converted to some other module or be removed.
 
 
 script:-
+  set_prolog_stack(global, limit(2*10**9)),
+  set_prolog_stack(local, limit(2*10**9)),
   script_begin,
   stcn_schema,
   script_stage(0, redactiebladen_copy),
@@ -179,7 +181,7 @@ redactiebladen_parse(FromDir, ToDir):-
   parse_redactiebladen(FromFile, 'Redactiebladen'),
   debug(stcn_script, 'Done parsing the redactiebladen.', []),
   absolute_file_name(
-    redactiebladen,
+    'Redactiebladen',
     ToFile,
     [access(write),file_type(turtle),relative_to(ToDir)]
   ),
@@ -202,8 +204,9 @@ redactiebladen_prepare(FromDir, ToDir):-
     FromFile,
     [access(read),file_type(text),relative_to(FromDir)]
   ),
+debug(stcn_script, 'Begin collecting lines.', []),
   collect_lines(FromFile, F1),
-
+debug(stcn_script, 'End collecting lines.', []),
   % Perform some in-file replacements.
   trim_spaces(F1, F2),
   replace_in_file(F2, "Â°", "°", F3),

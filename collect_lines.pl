@@ -13,7 +13,7 @@ Some statements span multiple lines.
 We first want to create a text file with one line per statement.
 
 @author Wouter Beek
-@version 2013/09
+@version 2013/09-2013/10
 */
 
 :- use_module(dcg(dcg_ascii)).
@@ -42,13 +42,16 @@ collect_lines(F1, F2):-
 collect_lines(Out) -->
   end_of_line, !,
   collect_lines(Out).
-% Line 2.946.252 contains the erratic character sequence [239,187,191].
-% According to the Unicode standard these are the following characters:
-%   1. Latin Small Letter I With Diaeresis
-%   2. Right-Pointing Double Angle Quotation Mark
-%   3. Inverted Question Mark
+% Line 2.946.252 contains the erratic character sequences:
+%  * [239,187,191]
+%    ** =ï=, Latin Small Letter I With Diaeresis
+%    ** =»=, Right-Pointing Double Angle Quotation Mark
+%    ** =¿=, Inverted Question Mark
+%  * [65279]
+%    ** Zero Width No-Break Space
 collect_lines(Out) -->
-  "ï»¿", end_of_line, !,
+  ([239,187,191] ; [65279]),
+  end_of_line, !,
   collect_lines(Out).
 % A collected line.
 collect_lines(Out) -->
@@ -56,7 +59,7 @@ collect_lines(Out) -->
   {put_codes(Out, L), nl(Out), flush_output(Out)},
   collect_lines(Out).
 % Done!
-collect_lines(_Out) --> [].
+collect_lines(_Out, L, L).
 
 collect_line(L) -->
   collect_line(L, out).
