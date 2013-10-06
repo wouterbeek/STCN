@@ -75,7 +75,7 @@ stcn_void(G):-
     G
   ),
   
-  % Vacabulary namespaces.
+  % Vocabulary namespaces.
   rdf_current_namespace(stcn, STCN_NS),
   rdf_current_namespace(stcnv, STCNV_NS),
   rdf_assert(stcn:'STCN', void:vocabulary, STCN_NS, G),
@@ -282,4 +282,3 @@ stcn_void_topics(G):-
   rdf_assert(stcn:'STCN_Topics', void:class, stcnv:'Topic', G),
   % Datadump location.
   rdf_assert(stcn:'STCN_Topics', void:dataDump, 'STCN_Topics.ttl', G).
-

@@ -32,26 +32,51 @@ These predicate should be converted to some other module or be removed.
 
 :- debug(stcn_script).
 
-:- initialization(script).
+:- initialization(stcn_script).
 
 
 
-script:-
+stcn_script:-
   set_prolog_stack(global, limit(2*10**9)),
   set_prolog_stack(local, limit(2*10**9)),
-  script_begin,
   stcn_schema,
-  script_stage(0, redactiebladen_copy),
-  script_stage(1, redactiebladen_prepare),
-  script_stage(2, redactiebladen_parse),
-  script_stage(3, picarta_scrape1),
-  script_stage(4, picarta_scrape2),
-  stcn_void.
+  Process = 'STCN',
+  script(
+    [to_file('VoID.ttl')],
+    Process,
+    [
+      stage(
+        [from_file('redactiebladen.txt'),to_file('redactiebladen_3.txt')],
+        redactiebladen_copy
+      ),
+      stage(
+        [from_file('redactiebladen.txt'),to_file('redactiebladen_3.txt')],
+        redactiebladen_prepare
+      ),
+      stage(
+        [from_file('redactiebladen_3.txt'),to_file('redactiebladen.txt')],
+        redactiebladen_parse
+      ),
+      stage(
+        [from_file('redactiebladen.txt'),to_file('redactiebladen.ttl')],
+        picarta_scrape1
+      ),
+      stage([], picarta_scrape2),
+      stage([], assert_stcn_void)
+    ]
+  ).
 
-%! picarta_scrape(+FromDirectory:atom, +ToDirectory:atom) is det.
+assert_stcn_void(_PS, _FromDir, ToDir):-
+  absolute_file_name2(
+    'VoID',
+    ToFile,
+    [access(write),file_type(turtle),relative_to(ToDir)]
+  ),
+  stcn_void('VoID'),
+  void_save_library('VoID', ToFile).
+
 % Picarta scraping 1: publications.
-
-picarta_scrape1(_FromDir, ToDir):-
+picarta_scrape1(_PS, _FromDir, ToDir):-
   absolute_file_name2(
     'PicartaPublications',
     ToFile,
@@ -59,7 +84,7 @@ picarta_scrape1(_FromDir, ToDir):-
   ),
   rdf_load2(ToFile, [format(turtle),graph('PicartaPublications')]),
   debug(stcn_script, 'The Picarta scrape was loaded from file.', []), !.
-picarta_scrape1(FromDir, ToDir):-
+picarta_scrape1(_PS, FromDir, ToDir):-
   absolute_file_name(
     'Redactiebladen',
     FromFile,
@@ -118,11 +143,9 @@ picarta_scrape1(FromDir, ToDir):-
   rdf_save2(ToFile, [format(turtle),graph(G)]),
   debug(stcn_script, 'Done saving the scraped redactiebladen.', []).
 
-%! picarta_scrape2(+FromDirectory:atom, +ToDirectory:atom) is det.
-% Picarta scraping 1: authors, printer-publishers, topics,
+% Picarta scraping 2: authors, printer-publishers, topics,
 % translator-editors.
-
-picarta_scrape2(FromDir, ToDir):-
+picarta_scrape2(_PS, FromDir, ToDir):-
   absolute_file_name(
     'PicartaPublications',
     FromFile,
@@ -151,9 +174,7 @@ picarta_scrape2(FromDir, ToDir):-
     Msg
   ).
 
-%! redactiebladen_copy(+FromDirectory:atom, +ToDirectory:atom) is det.
-
-redactiebladen_copy(FromDir, ToDir):-
+redactiebladen_copy(_PS, FromDir, ToDir):-
   absolute_file_name(
     'redactiebladen.txt.tar.gz',
     FromFile,
@@ -161,10 +182,8 @@ redactiebladen_copy(FromDir, ToDir):-
   ),
   archive_extract(FromFile, ToDir, []).
 
-%! redactiebladen_parse(+FromDirectory:atom, +ToDirectory:atom) is det.
 % Parses the redactiebladen.
-
-redactiebladen_parse(_FromDir, ToDir):-
+redactiebladen_parse(_PS, _FromDir, ToDir):-
   absolute_file_name2(
     'Redactiebladen',
     ToFile,
@@ -172,7 +191,7 @@ redactiebladen_parse(_FromDir, ToDir):-
   ),
   rdf_load2(ToFile, [format(turtle),graph('Redactiebladen')]),
   debug(stcn_script, 'The redactiebladen parse were loaded from file.', []), !.
-redactiebladen_parse(FromDir, ToDir):-
+redactiebladen_parse(_PS, FromDir, ToDir):-
   absolute_file_name(
     redactiebladen,
     FromFile,
@@ -188,25 +207,21 @@ redactiebladen_parse(FromDir, ToDir):-
   rdf_save2(ToFile, [format(turtle),graph('Redactiebladen')]),
   debug(stcn_script, 'Done saving the parsed redactiebladen.', []).
 
-%! redactiebladen_prepare(+FromDirectory:atom, +ToDirectory:atom) is det.
 % Prepares the redactiebladen file.
-
-redactiebladen_prepare(_FromDir, ToDir):-
+redactiebladen_prepare(_PS, _FromDir, ToDir):-
   absolute_file_name2(
     redactiebladen,
     ToFile,
     [access(read),file_type(text),relative_to(ToDir)]
   ),
   access_file(ToFile, read), !.
-redactiebladen_prepare(FromDir, ToDir):-
+redactiebladen_prepare(_PS, FromDir, ToDir):-
   absolute_file_name2(
     redactiebladen,
     FromFile,
     [access(read),file_type(text),relative_to(FromDir)]
   ),
-debug(stcn_script, 'Begin collecting lines.', []),
   collect_lines(FromFile, F1),
-debug(stcn_script, 'End collecting lines.', []),
   % Perform some in-file replacements.
   trim_spaces(F1, F2),
   replace_in_file(F2, "Â°", "°", F3),
@@ -229,8 +244,3 @@ stcn_schema:-
   stcn_schema('STCNV'),
   absolute_file_name(output('STCNV'), F, [access(write),file_type(turtle)]),
   rdf_save2(F, [format(turtle),graph('STCNV')]).
-
-stcn_void:-
-  absolute_file_name(output('VoID'), File, [access(write),file_type(turtle)]),
-  stcn_void('VoID'),
-  void_save_library('VoID', File).
