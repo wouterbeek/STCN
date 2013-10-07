@@ -15,6 +15,7 @@ These predicate should be converted to some other module or be removed.
 :- use_module(generics(thread_ext)).
 :- use_module(library(archive)).
 :- use_module(library(debug)).
+:- use_module(library(filesex)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(os(datetime_ext)).
 :- use_module(os(file_ext)).
@@ -39,14 +40,17 @@ These predicate should be converted to some other module or be removed.
 stcn_script:-
   set_prolog_stack(global, limit(2*10**9)),
   set_prolog_stack(local, limit(2*10**9)),
-  stcn_schema,
   Process = 'STCN',
   script(
     [to_file('VoID.ttl')],
     Process,
     [
+      stage([to_file('STCNV.ttl'),to_output(true)], stcn_schema),
       stage(
-        [from_file('redactiebladen.txt'),to_file('redactiebladen_3.txt')],
+        [
+          from_file('redactiebladen.txt.tar.gz'),
+          to_file('redactiebladen.txt')
+        ],
         redactiebladen_copy
       ),
       stage(
@@ -61,8 +65,8 @@ stcn_script:-
         [from_file('redactiebladen.txt'),to_file('redactiebladen.ttl')],
         picarta_scrape1
       ),
-      stage([], picarta_scrape2),
-      stage([], assert_stcn_void)
+      stage([to_output(true)], picarta_scrape2),
+      stage([to_output(true)], assert_stcn_void)
     ]
   ).
 
@@ -91,16 +95,16 @@ picarta_scrape1(_PS, FromDir, ToDir):-
     [access(read),file_type(turtle),relative_to(FromDir)]
   ),
   rdf_load2(FromFile, [format(turtle),graph('Redactiebladen')]),
-  
+
   G = 'PicartaPublications',
   stcn_scrape('Redactiebladen', 'Publication', G),
   debug(stcn_script, 'Done scraping the redactiebladen.', []),
-  
+
   % Intermediate save.
   absolute_file_name(data(interm), F0, [access(write),file_type(turtle)]),
   rdf_save2(F0, [format(turtle),graph(G)]),
   debug(stcn_script, 'Intermediate save of Picarta publications.', []),
-  
+
   % Assert occurrences in literal enumerations as separate triples.
   rdf_split_literal([answer('A')], _, picarta:printer_publisher, G, '; '),
   debug(stcn_script, 'Printer-publishers were split.', []),
@@ -110,7 +114,7 @@ picarta_scrape1(_PS, FromDir, ToDir):-
   debug(stcn_script, 'Topics were split.', []),
   rdf_split_literal([answer('A')], _, picarta:typographic_information, G, ' , '),
   debug(stcn_script, 'Typographic information was split.', []),
-  
+
   % Turn PPN literals into IRIs.
   forall(
     member(
@@ -133,7 +137,7 @@ picarta_scrape1(_PS, FromDir, ToDir):-
       )
     )
   ),
-  
+
   % Save the processed scrape results.
   absolute_file_name(
     G,
@@ -152,7 +156,7 @@ picarta_scrape2(_PS, FromDir, ToDir):-
     [access(read),file_type(turtle),relative_to(FromDir)]
   ),
   rdf_load2(FromFile, [format(turtle),graph('PicartaPublications')]),
-  
+
   forall_thread(
     (
       member(C, ['Authors','PrintersPublishers','Topic','TranslatorEditor']),
@@ -174,12 +178,8 @@ picarta_scrape2(_PS, FromDir, ToDir):-
     Msg
   ).
 
-redactiebladen_copy(_PS, FromDir, ToDir):-
-  absolute_file_name(
-    'redactiebladen.txt.tar.gz',
-    FromFile,
-    [access(read),relative_to(FromDir)]
-  ),
+redactiebladen_copy(_PS, FromFile, ToFile):-
+  directory_file_path(ToDir, _, ToFile),
   archive_extract(FromFile, ToDir, []).
 
 % Parses the redactiebladen.
@@ -237,10 +237,8 @@ redactiebladen_prepare(_PS, FromDir, ToDir):-
     []
   ).
 
-%! stcn_schema is det.
 % Asserts the schema for STCN.
-
-stcn_schema:-
+stcn_schema(_PS, _FromDir, ToFile):-
   stcn_schema('STCNV'),
-  absolute_file_name(output('STCNV'), F, [access(write),file_type(turtle)]),
-  rdf_save2(F, [format(turtle),graph('STCNV')]).
+  rdf_save2(ToFile, [format(turtle),graph('STCNV')]).
+

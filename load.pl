@@ -28,6 +28,5 @@ load_stcn:-
   ),
   
   % Create the STCN SW dataset.
-  use_module(stcn(stcn_script)),
-  thread_create(stcn_script, _Id, []).
+  use_module(stcn(stcn_script)).
 
