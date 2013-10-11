@@ -234,13 +234,13 @@ city_printer('Zutphen', '075566729').
 city_printer('Zwammerdam', '172217148').
 city_printer('Zwolle', '075566737').
 
-kmc_4043(G, PPN) -->
+kmc_4043(_G, PPN) -->
   dcg_until([end_mode(exclusive)], exclamation_mark, _Codes),
   % PPN codes for printers can contain non-numbers (just like any other PPN).
-  ppn(G, 'Printer', PrinterPPN),
+  ppn('Printer', PrinterPPN),
   exclamation_mark,
   {
-    ppn_resource(G, printer_publisher, PrinterPPN, Printer),
+    ppn_resource(printer_publisher, PrinterPPN, Printer),
     rdf_assert(PPN, stcnv:printer, Printer, stcn)
   }.
 % E.g. PPN 317155091.
@@ -251,7 +251,7 @@ kmc_4043(G, PPN) -->
   word(PrinterName),
   {
     once(city_printer(PrinterName, PPN)),
-    ppn_resource(G, printer_publisher, PPN, Printer),
+    ppn_resource(printer_publisher, PPN, Printer),
     rdf_assert(PPN, stcnv:printer, Printer, G)
   }.
 

@@ -7,13 +7,13 @@
   ]
 ).
 
-/** <module> PICARTA_QUERY
+/** <module> Picarta query
 
 This module contains predicate for querying the Picarta online dataset
-via its URI-baset (RESTless) API.
+via its URI-baset/REST API.
 
 @author Wouter Beek
-@version 2013/01-2013/04, 2013/06, 2013/09
+@version 2013/01-2013/04, 2013/06, 2013/09-2013/10
 */
 
 :- use_module(dcg(dcg_generic)).
@@ -21,6 +21,7 @@ via its URI-baset (RESTless) API.
 :- use_module(html(html)).
 :- use_module(library(uri)).
 :- use_module(library(xpath)).
+:- use_module(stcn(stcn_generic)).
 
 :- debug(picarta_query).
 
@@ -117,14 +118,12 @@ picarta_query_ppn(PPN, _URI, []):-
 picarta_scheme(http).
 
 ppn_link(PPN) -->
-  {
-    (Separator = 'PPN=' ; Separator = 'TRM='),
-    atom_codes(Separator, Codes)
-  },
-  dcg_until(Codes, _),
-  [A,B,C, D,E,F, G,H,I],
-  {atom_codes(PPN, [A,B,C, D,E,F, G,H,I])},
-  string(_).
+  dcg_until([end_mode(inclusive)], ppn_link_prefix, _), !,
+  ppn(PPN),
+  dcg_all.
+
+ppn_link_prefix --> "PPN=".
+ppn_link_prefix --> "TRM=".
 
 %! strip_link(+Value, -Content) is det.
 % Strips links in the given value, extracting its contents.
@@ -137,12 +136,9 @@ ppn_link(PPN) -->
 strip_link(element(a, Attributes, _Content), PPN):-
   memberchk(href=URI1, Attributes),
   atom_codes(URI1, URI2),
-  phrase(ppn_link(PPN), URI2),
-  !.
-% If the link does not point to a PPN, then we take the full link
-% and the content.
-strip_link(element(a, _Attributes, [Content]), Content):-
-  !.
+  phrase(ppn_link(PPN), URI2), !.
+% If the link does not point to a PPN, then we take the content.
+strip_link(element(a, _Attributes, [Content]), Content):- !.
 % Non-link content is returned as-is.
 strip_link(Content, Content).
 
@@ -162,8 +158,7 @@ strip_value(UnstrippedValue, StrippedValue):-
 % as they are asserted in the Picarta SW dataset.
 
 translate_attribute(UntranslatedAttribute, TranslatedAttribute):-
-  picarta_attribute(UntranslatedAttribute, TranslatedAttribute),
-  !.
+  picarta_attribute(UntranslatedAttribute, TranslatedAttribute), !.
 translate_attribute(UntranslatedAttribute, UntranslatedAttribute):-
   debug(
     picarta,

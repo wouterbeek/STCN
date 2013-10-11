@@ -94,7 +94,8 @@ stcn_scrape(FromG, C1, ToG):-
 
 picarta_scrape(Category, G, PPN_Name):-
   picarta_query_ppn(PPN_Name, ScrapeSite, NVPairs),
-  ppn_resource(G, Category, PPN_Name, PPN),
+  ppn_resource(Category, PPN_Name, PPN),
+  rdf_assert_individual(PPN, Category, G),
   rdfs_assert_seeAlso(PPN, ScrapeSite, G),
   forall(
     member(N/V, NVPairs),

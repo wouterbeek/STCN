@@ -103,11 +103,10 @@ link_to_dbpedia_agents(G, Agents):-
 
 kmc_30xx(G, PPN, Pred) -->
   dcg_until([end_mode(exclusive)], exclamation_mark, _Codes),
-  ppn(G, 'Author', AuthorPPN),
+  ppn('Author', AuthorPPN),
   "!",
   {
     rdf_global_id(stcn:AuthorPPN, Author),
-    rdf_assert_individual(Author, stcnv:'Author', G),
     rdf_assert(PPN, Pred, Author, G)
   }.
 

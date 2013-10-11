@@ -33,7 +33,7 @@ These predicate should be converted to some other module or be removed.
 
 :- debug(stcn_script).
 
-:- initialization(stcn_script).
+:- initialization(thread_create(stcn_script, _, [])).
 
 
 
@@ -63,15 +63,23 @@ stcn_script:-
       ),
       stage(
         [from_file('Redactiebladen.ttl'),to_file('PicartaPublications.ttl')],
-        picarta_scrape1
+        picarta_scrape_publications
       ),
       stage(
         [
           from_file('PicartaPublications.ttl'),
           to_file('PicartaPublications.ttl')
         ],
-        picarta_scrape2
+        picarta_scrape_publications_split
       ),
+      stage(
+        [
+          from_file('PicartaPublications.ttl'),
+          to_file('PicartaPublications.ttl')
+        ],
+        picarta_scrape_publications_ppns
+      ),
+      stage([from_file('PicartaPublications.ttl')], picarta_scrape_others),
       stage([to_output(true)], assert_stcn_void)
     ]
   ).
@@ -86,47 +94,56 @@ assert_stcn_void(_PS, _FromDir, ToDir):-
   void_save_library('VoID', ToFile).
 
 % Picarta scraping 1: publications.
-picarta_scrape1(_PS, _FromFile, ToFile):-
-  access_file(ToFile, read),
+picarta_scrape_publications(_PS, _FromFile, ToFile):-
   rdf_load2(ToFile, [format(turtle)]),
   debug(stcn_script, 'The Picarta scrape was loaded from file ~w.', [ToFile]), !.
-picarta_scrape1(_PS, FromFile, ToFile):-
-  access_file(FromFile, read),
-  file_name_extension(FromG, _Ext1, FromFile),
+picarta_scrape_publications(_PS, FromFile, ToFile):-
+  file_to_graph_name(FromFile, FromG),
   rdf_load2(FromFile, [format(turtle),graph(FromG)]),
 
-  file_name_extension(ToG, _Ext2, ToFile),
+  file_to_graph_name(ToFile, ToG),
   stcn_scrape(FromG, 'Publication', ToG),
   debug(stcn_script, 'Done scraping the redactiebladen for publications.', []),
 
-  % Intermediate save.
-  absolute_file_name(data(interm), F0, [access(write),file_type(turtle)]),
-  rdf_save2(F0, [format(turtle),graph(ToG)]),
-  debug(stcn_script, 'Intermediate save of Picarta publications.', []),
+  rdf_save2(ToFile, [format(turtle),graph(ToG)]),
+  debug(stcn_script, 'Done scraping Picarta for publications.', []),
+  rdf_unload_graph(ToG).
 
+picarta_scrape_publications_split(_PS, _FromFile, ToFile):-
+  rdf_load2(ToFile, [format(turtle)]),
+  debug(stcn_script, 'The Picarta scrape with splits was loaded from file ~w.', [ToFile]), !.
+picarta_scrape_publications_split(_PS, FromFile, ToFile):-
+  file_to_graph_name(FromFile, G),
+  rdf_load2(FromFile, [format(turtle),graph(G)]),
+  
   % Assert occurrences in literal enumerations as separate triples.
-  rdf_split_literal([answer('A')], _, picarta:printer_publisher, ToG, '; '),
+  rdf_split_literal([answer('A')], _, picarta:printer_publisher, G, '; '),
   debug(stcn_script, 'Printer-publishers were split.', []),
 
-  rdf_strip_literal([answer('A')], [' '], _, picarta:printer_publisher, ToG),
+  rdf_strip_literal([answer('A')], [' '], _, picarta:printer_publisher, G),
   debug(stcn_script, 'Printer-publishers were stripped.', []),
 
-  rdf_split_literal([answer('A')], _, picarta:topical_keyword, ToG, '; '),
+  rdf_split_literal([answer('A')], _, picarta:topical_keyword, G, '; '),
   debug(stcn_script, 'Topics were split.', []),
 
-  rdf_split_literal(
-    [answer('A')],
-    _,
-    picarta:typographic_information,
-    ToG,
-    ' , '
-  ),
+  rdf_split_literal([answer('A')], _, picarta:typographic_information, G, ' , '),
   debug(stcn_script, 'Typographic information was split.', []),
+  
+  rdf_save2(ToFile, [format(turtle),graph(G)]),
+  debug(stcn_script, 'The Picarta scrape with splits were saved to file ~w.', [ToFile]),
+  rdf_unload_graph(G).
 
+picarta_scrape_publications_ppns(_PS, _FromFile, ToFile):-
+  rdf_load2(ToFile, [format(turtle)]),
+  debug(stcn_script, 'The Picarta scrape with PPNs was loaded from file ~w.', [ToFile]), !.
+picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
+  file_to_graph_name(FromFile, G),
+  rdf_load2(FromFile, [format(turtle),graph(G)]),
+  
   % Turn PPN literals into IRIs.
   forall(
     member(
-      P1-C1,
+      P1-Category,
       [
         author-'Author',
         printer_publisher-'PrinterPublisher',
@@ -138,7 +155,7 @@ picarta_scrape1(_PS, FromFile, ToFile):-
       forall(
         rdf_literal(PublicationPPN, P2, Lit, G),
         (
-          ppn_resource(G, C1, Lit, PPN),
+          ppn_resource(Category, Lit, PPN),
           rdf_assert(PublicationPPN, P2, PPN, G),
           rdf_retractall_literal(PublicationPPN, P2, Lit, G)
         )
@@ -147,29 +164,36 @@ picarta_scrape1(_PS, FromFile, ToFile):-
   ),
 
   % Save the processed scrape results.
-  rdf_save2(ToFile, [format(turtle),graph(ToG)]),
-  debug(stcn_script, 'Done saving the scraped redactiebladen.', []).
+  rdf_save2(ToFile, [format(turtle),graph(G)]),
+  debug(stcn_script, 'Done saving the scraped redactiebladen to file ~w.', [ToFile]),
+  rdf_unload_graph(G).
 
 % Picarta scraping 2: authors, printer-publishers, topics,
 % translator-editors.
-picarta_scrape2(_PS, _FromFile, ToFile):-
-  access_file(ToFile, read),
-  file_name_extension(ToG, _Ext, ToFile),
-  rdf_load2(ToFile, [format(turtle),graph(ToG)]), !.
-picarta_scrape2(_PS, FromFile, ToFile):-
-  access_file(FromFile, read),
-  file_name_extension(FromG, _Ext, FromFile),
+picarta_scrape_others(_PS, _FromFile, ToDir):-
+  absolute_file_name(
+    'PicartaAuthors',
+    _ToFile,
+    [access(read),file_type(turtle),relative_to(ToDir)]
+  ), !.
+picarta_scrape_others(_PS, FromFile, ToDir):-
+  file_to_graph_name(FromFile, FromG),
   rdf_load2(FromFile, [format(turtle),graph(FromG)]),
-
+  
   forall_thread(
     (
       member(C, ['Author','PrinterPublisher','Topic','TranslatorEditor']),
       format(atom(Msg), 'Scraping Picarta for class ~w', [C])
     ),
     (
-      atomic_concat('Picarta', C, ToG),
+      atomic_list_concat(['Picarta',C,'s'], ToG),
       stcn_scrape(FromG, C, ToG),
       debug(stcn_script, 'Done scraping class ~w from Picarta.', [C]),
+      absolute_file_name(
+        ToG,
+        ToFile,
+        [access(write),file_type(turtle),relative_to(ToDir)]
+      ),
       rdf_save2(ToFile, [format(turtle),graph(ToG)]),
       debug(stcn_script, 'Done saving the scraped class ~w from Picarta.', [C])
     ),
