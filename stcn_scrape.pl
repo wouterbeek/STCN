@@ -109,10 +109,11 @@ stcn_scrape_ppns(G, C, PPNs):-
     PPNs
   ).
 
-picarta_scrape(Category, G, PPN_Name):-
+picarta_scrape(Category1, G, PPN_Name):-
   picarta_query_ppn(PPN_Name, ScrapeSite, NVPairs),
-  ppn_resource(Category, PPN_Name, PPN),
-  rdf_assert_individual(PPN, Category, G),
+  ppn_resource(Category1, PPN_Name, PPN),
+  rdf_global_id(stcnv:Category1, Category2),
+  rdf_assert_individual(PPN, Category2, G),
   rdfs_assert_seeAlso(PPN, ScrapeSite, G),
   forall(
     member(N/V, NVPairs),

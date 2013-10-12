@@ -81,18 +81,14 @@ stcn_script:-
         picarta_scrape_publications_topics
       ),
       stage([from(_,'PicartaPublications',turtle)], picarta_scrape_others),
-      stage([to(output,_,_)], assert_stcn_void)
+      stage([to(output,'VoID',turtle)], assert_stcn_void)
     ]
   ).
 
-assert_stcn_void(_PS, _FromDir, ToDir):-
-  absolute_file_name2(
-    'VoID',
-    ToFile,
-    [access(write),file_type(turtle),relative_to(ToDir)]
-  ),
-  stcn_void('VoID'),
-  void_save_library('VoID', ToFile).
+assert_stcn_void(_PS, _FromDir, ToFile):-
+  G = 'VoID',
+  stcn_void(G),
+  void_save_library(G, ToFile).
 
 % Picarta scraping for publications.
 picarta_scrape_publications(_PS, FromFile, ToFile):-
