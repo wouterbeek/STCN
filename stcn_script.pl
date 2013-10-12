@@ -10,6 +10,7 @@ These predicate should be converted to some other module or be removed.
 @version 2013/09-2013/10
 */
 
+:- use_module(dcg(dcg_generic)).
 :- use_module(generics(replace_in_file)).
 :- use_module(generics(script_ext)).
 :- use_module(generics(thread_ext)).
@@ -17,6 +18,7 @@ These predicate should be converted to some other module or be removed.
 :- use_module(library(debug)).
 :- use_module(library(filesex)).
 :- use_module(library(semweb/rdf_db)).
+:- use_module(library(semweb/rdfs)).
 :- use_module(os(datetime_ext)).
 :- use_module(os(file_ext)).
 :- use_module(rdf(rdf_build)).
@@ -42,45 +44,44 @@ stcn_script:-
   set_prolog_stack(local, limit(2*10**9)),
   Process = 'STCN',
   script(
-    [to_file('VoID.ttl')],
+    [to(output,'VoID',turtle)],
     Process,
     [
-      stage([to_file('STCNV.ttl'),to_output(true)], stcn_schema),
+      stage([to(output,'STCNV',turtle)], stcn_schema),
       stage(
-        [
-          from_file('redactiebladen.txt.tar.gz'),
-          to_file('redactiebladen.txt')
-        ],
-        redactiebladen_copy
+        [from(input,'redactiebladen.txt',archive),to(_,redactiebladen,text)],
+        script_extract_archive
       ),
       stage(
-        [from_file('redactiebladen.txt'),to_file('redactiebladen.txt')],
+        [from(input,'PicartaTopics',turtle),to(output,'PicartaTopics',turtle)],
+        script_copy_file
+      ),
+      stage(
+        [from(_,redactiebladen,text),to(_,redactiebladen,text)],
         redactiebladen_prepare
       ),
       stage(
-        [from_file('redactiebladen.txt'),to_file('Redactiebladen.ttl')],
+        [from(_,redactiebladen,text),to(_,'Redactiebladen',turtle)],
         redactiebladen_parse
       ),
       stage(
-        [from_file('Redactiebladen.ttl'),to_file('PicartaPublications.ttl')],
+        [from(_,'Redactiebladen',turtle),to(_,'PicartaPublications',turtle)],
         picarta_scrape_publications
       ),
       stage(
-        [
-          from_file('PicartaPublications.ttl'),
-          to_file('PicartaPublications.ttl')
-        ],
+        [from(_,'PicartaPublications',turtle),to(_,'PicartaPublications',turtle)],
         picarta_scrape_publications_split
       ),
       stage(
-        [
-          from_file('PicartaPublications.ttl'),
-          to_file('PicartaPublications.ttl')
-        ],
+        [from(_,'PicartaPublications',turtle),to(_,'PicartaPublications',turtle)],
         picarta_scrape_publications_ppns
       ),
-      stage([from_file('PicartaPublications.ttl')], picarta_scrape_others),
-      stage([to_output(true)], assert_stcn_void)
+      stage(
+        [from(_,'PicartaPublications',turtle),to(_,'PicartaPublications',turtle)],
+        picarta_scrape_publications_topics
+      ),
+      stage([from(_,'PicartaPublications',turtle)], picarta_scrape_others),
+      stage([to(output,_,_)], assert_stcn_void)
     ]
   ).
 
@@ -93,10 +94,7 @@ assert_stcn_void(_PS, _FromDir, ToDir):-
   stcn_void('VoID'),
   void_save_library('VoID', ToFile).
 
-% Picarta scraping 1: publications.
-picarta_scrape_publications(_PS, _FromFile, ToFile):-
-  rdf_load2(ToFile, [format(turtle)]),
-  debug(stcn_script, 'The Picarta scrape was loaded from file ~w.', [ToFile]), !.
+% Picarta scraping for publications.
 picarta_scrape_publications(_PS, FromFile, ToFile):-
   file_to_graph_name(FromFile, FromG),
   rdf_load2(FromFile, [format(turtle),graph(FromG)]),
@@ -109,13 +107,10 @@ picarta_scrape_publications(_PS, FromFile, ToFile):-
   debug(stcn_script, 'Done scraping Picarta for publications.', []),
   rdf_unload_graph(ToG).
 
-picarta_scrape_publications_split(_PS, _FromFile, ToFile):-
-  rdf_load2(ToFile, [format(turtle)]),
-  debug(stcn_script, 'The Picarta scrape with splits was loaded from file ~w.', [ToFile]), !.
 picarta_scrape_publications_split(_PS, FromFile, ToFile):-
   file_to_graph_name(FromFile, G),
   rdf_load2(FromFile, [format(turtle),graph(G)]),
-  
+
   % Assert occurrences in literal enumerations as separate triples.
   rdf_split_literal([answer('A')], _, picarta:printer_publisher, G, '; '),
   debug(stcn_script, 'Printer-publishers were split.', []),
@@ -128,18 +123,15 @@ picarta_scrape_publications_split(_PS, FromFile, ToFile):-
 
   rdf_split_literal([answer('A')], _, picarta:typographic_information, G, ' , '),
   debug(stcn_script, 'Typographic information was split.', []),
-  
+
   rdf_save2(ToFile, [format(turtle),graph(G)]),
   debug(stcn_script, 'The Picarta scrape with splits were saved to file ~w.', [ToFile]),
   rdf_unload_graph(G).
 
-picarta_scrape_publications_ppns(_PS, _FromFile, ToFile):-
-  rdf_load2(ToFile, [format(turtle)]),
-  debug(stcn_script, 'The Picarta scrape with PPNs was loaded from file ~w.', [ToFile]), !.
 picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
   file_to_graph_name(FromFile, G),
   rdf_load2(FromFile, [format(turtle),graph(G)]),
-  
+
   % Turn PPN literals into IRIs.
   forall(
     member(
@@ -153,7 +145,12 @@ picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
     (
       rdf_global_id(picarta:P1, P2),
       forall(
-        rdf_literal(PublicationPPN, P2, Lit, G),
+        (
+          rdf_literal(PublicationPPN, P2, Lit, G),
+          % There are both PPN literals and full name literals.
+          % Only the former can be turned into URIs.
+          dcg_phrase(ppn, Lit)
+        ),
         (
           ppn_resource(Category, Lit, PPN),
           rdf_assert(PublicationPPN, P2, PPN, G),
@@ -168,21 +165,48 @@ picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
   debug(stcn_script, 'Done saving the scraped redactiebladen to file ~w.', [ToFile]),
   rdf_unload_graph(G).
 
-% Picarta scraping 2: authors, printer-publishers, topics,
+picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
+  % Load the Picarta publications.
+  file_to_graph_name(FromFile, G),
+  rdf_load2(FromFile, [format(turtle),graph(G)]),
+
+  % Load the Picarta topics.
+  absolute_file_name(
+    input('PicartaTopics'),
+    TopicFile,
+    [access(read),file_type(turtle)]
+  ),
+  rdf_load2(TopicFile, [format(turtle),graph('PicartaTopics')]),
+
+  forall(
+    rdf_literal(PPN, picarta:topical_keyword, TopicLit, G),
+    (
+      once(rdf_literal(TopicPPN, _, TopicLit, G)),
+      rdf_assert(PPN, picarta:topical_keyword, TopicPPN, G),
+      rdf_retractall(PPN, picarta:topical_keyword, TopicLit, G)
+    )
+  ),
+
+  % Save the processed scrape results.
+  rdf_save2(ToFile, [format(turtle),graph(G)]),
+  debug(stcn_script, 'Done saving the scraped redactiebladen to file ~w.', [ToFile]),
+  rdf_unload_graph(G).
+
+% Picarta scraping for authors, printer-publishers, topics, and
 % translator-editors.
 picarta_scrape_others(_PS, _FromFile, ToDir):-
-  absolute_file_name(
+  absolute_file_name2(
     'PicartaAuthors',
     _ToFile,
     [access(read),file_type(turtle),relative_to(ToDir)]
   ), !.
 picarta_scrape_others(_PS, FromFile, ToDir):-
+  % Load the Picarta publications.
   file_to_graph_name(FromFile, FromG),
   rdf_load2(FromFile, [format(turtle),graph(FromG)]),
-  
   forall_thread(
     (
-      member(C, ['Author','PrinterPublisher','Topic','TranslatorEditor']),
+      member(C, ['Author','PrinterPublisher','TranslatorEditor']),
       format(atom(Msg), 'Scraping Picarta for class ~w', [C])
     ),
     (
@@ -201,32 +225,11 @@ picarta_scrape_others(_PS, FromFile, ToDir):-
     Msg
   ).
 
-redactiebladen_copy(_PS, FromFile, ToFile):-
-  directory_file_path(ToDir, _, ToFile),
-  archive_extract(FromFile, ToDir, []).
-
 % Parses the redactiebladen.
-redactiebladen_parse(_PS, _FromDir, ToDir):-
-  absolute_file_name2(
-    'Redactiebladen',
-    ToFile,
-    [access(read),file_type(turtle),relative_to(ToDir)]
-  ),
-  rdf_load2(ToFile, [format(turtle),graph('Redactiebladen')]),
-  debug(stcn_script, 'The redactiebladen parse were loaded from file.', []), !.
-redactiebladen_parse(_PS, FromDir, ToDir):-
-  absolute_file_name(
-    redactiebladen,
-    FromFile,
-    [access(read),file_type(text),relative_to(FromDir)]
-  ),
+redactiebladen_parse(_PS, FromFile, ToFile):-
   parse_redactiebladen(FromFile, 'Redactiebladen'),
   debug(stcn_script, 'Done parsing the redactiebladen.', []),
-  absolute_file_name(
-    'Redactiebladen',
-    ToFile,
-    [access(write),file_type(turtle),relative_to(ToDir)]
-  ),
+
   rdf_save2(ToFile, [format(turtle),graph('Redactiebladen')]),
   debug(stcn_script, 'Done saving the parsed redactiebladen.', []).
 

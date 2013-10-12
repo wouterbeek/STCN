@@ -1,6 +1,7 @@
 :- module(
   stcn_generic,
   [
+    ppn//0,
     ppn//1, % -PPN:atom
     ppn//2, % +Category:atom
             % -PPN:atom
@@ -22,8 +23,6 @@ but are not generic enough to be in PGC.
 :- use_module(dcg(dcg_ascii)).
 :- use_module(dcg(dcg_multi)).
 :- use_module(library(semweb/rdf_db)).
-:- use_module(rdf(rdf_build)).
-:- use_module(rdfs(rdfs_read)).
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(foaf,  'http://xmlns.com/foaf/0.1/').
@@ -33,6 +32,9 @@ but are not generic enough to be in PGC.
 :- rdf_meta(category_class(?,r)).
 
 
+
+ppn -->
+  ppn(_PPN).
 
 %! ppn(-PPN:atom)//
 

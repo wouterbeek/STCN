@@ -21,18 +21,19 @@ Fully automated scrape for the STCN.
 :- use_module(generics(meta_ext)).
 :- use_module(generics(list_script)).
 :- use_module(library(semweb/rdf_db)).
+:- use_module(library(semweb/rdfs)).
 :- use_module(os(file_ext)).
 :- use_module(picarta(picarta_query)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_lit)).
 :- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_read)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(picarta, 'http://picarta.pica.nl/').
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
+
+:- rdf_meta(stcn_scrape_category_relation(r,r)).
 
 
 
@@ -54,22 +55,11 @@ Fully automated scrape for the STCN.
 
 % Scrape from remote Website (Picarta),
 % Without a prior TODO file.
-stcn_scrape(FromG, C1, ToG):-
-  rdf_global_id(stcnv:C1, C2),
-  
-  % We assume that the PPNs of the given category are currently loaded.
-  setoff(
-    PPN3,
-    (
-      rdfs_individual(m(t,f,f), PPN1, C2, FromG),
-      rdf_global_id(stcn:PPN2, PPN1),
-      split_atom_exclusive('/', PPN2, [C1,PPN3])
-    ),
-    PPNs
-  ),
+stcn_scrape(FromG, C, ToG):-
+  stcn_scrape_ppns(FromG, C, PPNs),
 
   % Write the PPNs of the given category to a TODO file.
-  atomic_list_concat(['TODO',C1], '_', TODO_FileName),
+  atomic_list_concat(['TODO',C], '_', TODO_FileName),
   create_file(data('.'), TODO_FileName, text, TODO_File),
   setup_call_cleanup(
     open(TODO_File, write, Stream, []),
@@ -86,11 +76,38 @@ stcn_scrape(FromG, C1, ToG):-
 
   % Start the actual scraping, using the TODO file.
   % DONE file.
-  atomic_list_concat(['DONE',C1], '_', DONE_FileName),
+  atomic_list_concat(['DONE',C], '_', DONE_FileName),
   create_file(data('.'), DONE_FileName, text, DONE_File),
 
   % Process the TODO file.
-  list_script(picarta_scrape(C1, ToG), TODO_File, DONE_File).
+  list_script(picarta_scrape(C, ToG), TODO_File, DONE_File).
+
+stcn_scrape_category_relation('Author', picarta:author).
+stcn_scrape_category_relation('PrinterPublisher', picarta:printer_publisher).
+stcn_scrape_category_relation('TranslatorEditor', picarta:translator_editor).
+
+stcn_scrape_ppns(_G, 'Publication', PPNs):- !,
+  setoff(
+    PPN3,
+    (
+      % @tbd Restrict this to triples in graph `G`.
+      rdfs_individual_of(PPN1, stcnv:'Publication'),
+      rdf_global_id(stcn:PPN2, PPN1),
+      split_atom_exclusive('/', PPN2, ['Publication',PPN3])
+    ),
+    PPNs
+  ).
+stcn_scrape_ppns(G, C, PPNs):-
+  once(stcn_scrape_category_relation(C, P)),
+  setoff(
+    PPN3,
+    (
+      rdf(_, P, PPN1, G),
+      rdf_global_id(stcn:PPN2, PPN1),
+      split_atom_exclusive('/', PPN2, [C,PPN3])
+    ),
+    PPNs
+  ).
 
 picarta_scrape(Category, G, PPN_Name):-
   picarta_query_ppn(PPN_Name, ScrapeSite, NVPairs),
