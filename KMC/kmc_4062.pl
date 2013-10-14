@@ -104,8 +104,10 @@ Extra space at beginning.
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_statistics)).
+:- use_module(rdf(rdf_lit_build)).
+:- use_module(rdf(rdf_stat)).
 :- use_module(rdfs(rdfs_build)).
+:- use_module(rdfs(rdfs_label_build)).
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').

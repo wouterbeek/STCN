@@ -97,7 +97,7 @@ New parse results are coming soon!
 @version 2013/01-2013/03, 2013/06
 */
 
-:- use_module(rdf(rdf_statistics)).
+:- use_module(rdf(rdf_stat)).
 :- use_module(kmc(kmc_0500)).
 :- use_module(kmc(kmc_1100)).
 :- use_module(kmc(kmc_1200)).

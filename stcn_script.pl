@@ -23,7 +23,8 @@ These predicate should be converted to some other module or be removed.
 :- use_module(os(file_ext)).
 :- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_clean)).
-:- use_module(rdf(rdf_lit)).
+:- use_module(rdf(rdf_lit_build)).
+:- use_module(rdf(rdf_lit_read)).
 :- use_module(rdf(rdf_serial)).
 :- use_module(stcn(collect_lines)).
 :- use_module(stcn(stcn_generic)).
@@ -53,8 +54,8 @@ stcn_script:-
         script_extract_archive
       ),
       stage(
-        [from(input,'PicartaTopics',turtle),to(output,'PicartaTopics',turtle)],
-        script_copy_file
+        [from(input,'PicartaTopics.ttl',archive),to(output,'PicartaTopics',turtle)],
+        script_extract_archive
       ),
       stage(
         [from(_,redactiebladen,text),to(_,redactiebladen,text)],

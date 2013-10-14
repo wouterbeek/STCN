@@ -25,6 +25,7 @@ Fully automated scrape for the STCN.
 :- use_module(os(file_ext)).
 :- use_module(picarta(picarta_query)).
 :- use_module(rdf(rdf_build)).
+:- use_module(rdf(rdf_lit_build)).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(xml(xml_namespace)).

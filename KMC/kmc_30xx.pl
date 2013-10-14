@@ -37,11 +37,14 @@ These are considered to be the same. Mapped to upper case X using option
 :- use_module(owl(owl_build)).
 :- use_module(owl(owl_read)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_lit)).
+:- use_module(rdf(rdf_datatype)).
+:- use_module(rdf(rdf_lit_build)).
+:- use_module(rdf(rdf_lit_read)).
 :- use_module(rdf(rdf_read)).
-:- use_module(rdf(rdf_statistics)).
+:- use_module(rdf(rdf_stat)).
 :- use_module(rdf(rdf_term)).
 :- use_module(rdfs(rdfs_build)).
+:- use_module(rdfs(rdfs_label_build)).
 :- use_module(rdfs(rdfs_read)).
 :- use_module(sparql(sparql_ext)).
 :- use_module(stcn(stcn_generic)).

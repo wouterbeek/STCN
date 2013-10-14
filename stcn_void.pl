@@ -16,10 +16,13 @@ Generates the VoID description of the STCN dataset.
 :- use_module(library(semweb/rdf_db)).
 :- use_module(os(datetime_ext)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_lit)).
+:- use_module(rdf(rdf_datatype)).
+:- use_module(rdf(rdf_lit_build)).
+:- use_module(rdf(rdf_lit_read)).
 :- use_module(rdf(rdf_namespace)).
 :- use_module(rdf(rdf_read)).
 :- use_module(rdfs(rdfs_build)).
+:- use_module(rdfs(rdfs_label_build)).
 :- use_module(rdfs(rdfs_read)).
 :- use_module(xml(xml_namespace)).
 

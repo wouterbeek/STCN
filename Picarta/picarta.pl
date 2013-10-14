@@ -46,7 +46,7 @@ We make a distinction between three portions of code in this module:
 :- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_namespace)).
 :- use_module(rdf(rdf_read)).
-:- use_module(rdf(rdf_statistics)).
+:- use_module(rdf(rdf_stat)).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_read)).
 :- use_module(skos(skos_build)).

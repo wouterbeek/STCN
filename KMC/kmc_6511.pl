@@ -45,7 +45,9 @@ PPN 324985231 has no exclamation mark after the topic PPN in KMC 6512.
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
 :- use_module(rdf(rdf_build)).
+:- use_module(rdf(rdf_lit_build)).
 :- use_module(rdfs(rdfs_build)).
+:- use_module(rdfs(rdfs_label_build)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(xml(xml_namespace)).
 

@@ -96,7 +96,8 @@ are not included in a 4-2-2-1 search. [?]
 :- use_module(dcg(dcg_content)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_statistics)).
+:- use_module(rdf(rdf_datatype)).
+:- use_module(rdf(rdf_stat)).
 :- use_module(standards(lexvo)).
 :- use_module(xml(xml_namespace)).
 
