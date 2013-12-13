@@ -26,8 +26,6 @@ Encodes the 'status' of a work.
 @version 2013/01-2013/04, 2013/06, 2013/09
 */
 
-:- use_module(dcg(dcg_content)).
-:- use_module(dcg(dcg_generic)).
 :- use_module(html(html_table)).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).

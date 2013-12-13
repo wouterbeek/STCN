@@ -7,12 +7,13 @@ These predicate should be converted to some other module or be removed.
 
 @author Wouter Beek
 @see http://www.kb.nl/kbhtml/stcnhandleiding/frames.html
-@version 2013/09-2013/10
+@version 2013/09-2013/10, 2013/12
 */
 
+:- use_module(ap(ap)).
 :- use_module(dcg(dcg_generic)).
+:- use_module(generics(archive_ext)).
 :- use_module(generics(replace_in_file)).
-:- use_module(generics(script_ext)).
 :- use_module(generics(thread_ext)).
 :- use_module(library(archive)).
 :- use_module(library(debug)).
@@ -23,6 +24,7 @@ These predicate should be converted to some other module or be removed.
 :- use_module(os(file_ext)).
 :- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_clean)).
+:- use_module(rdf(rdf_graph_name)).
 :- use_module(rdf(rdf_lit_build)).
 :- use_module(rdf(rdf_lit_read)).
 :- use_module(rdf(rdf_serial)).
@@ -32,7 +34,7 @@ These predicate should be converted to some other module or be removed.
 :- use_module(stcn(stcn_schema)).
 :- use_module(stcn(stcn_scrape)).
 :- use_module(stcn(stcn_void)).
-:- use_module(vocab(void_file)).
+:- use_module(void(void_file)).
 
 :- debug(stcn_script).
 
@@ -41,48 +43,56 @@ These predicate should be converted to some other module or be removed.
 
 
 stcn_script:-
-  set_prolog_stack(global, limit(2*10**9)),
-  set_prolog_stack(local, limit(2*10**9)),
-  Process = 'STCN',
-  script(
-    [to(output,'VoID',turtle)],
-    Process,
+  ap(
+    [process(db_create),project(stcn),to('VoID',turtle)],
     [
-      stage([to(output,'STCNV',turtle)], stcn_schema),
-      stage(
+      ap_stage([to(output,'STCNV',turtle)], stcn_schema),
+      ap_stage(
         [from(input,'redactiebladen.txt',archive),to(_,redactiebladen,text)],
-        script_extract_archive
+        archive_extract
       ),
-      stage(
-        [from(input,'PicartaTopics.ttl',archive),to(output,'PicartaTopics',turtle)],
-        script_extract_archive
+      ap_stage(
+        [
+          from(input,'PicartaTopics.ttl',archive),
+          to(output,'PicartaTopics',turtle)
+        ],
+        archive_extract
       ),
-      stage(
+      ap_stage(
         [from(_,redactiebladen,text),to(_,redactiebladen,text)],
         redactiebladen_prepare
       ),
-      stage(
+      ap_stage(
         [from(_,redactiebladen,text),to(_,'Redactiebladen',turtle)],
         redactiebladen_parse
       ),
-      stage(
+      ap_stage(
         [from(_,'Redactiebladen',turtle),to(_,'PicartaPublications',turtle)],
         picarta_scrape_publications
       ),
-      stage(
-        [from(_,'PicartaPublications',turtle),to(_,'PicartaPublications',turtle)],
+      ap_stage(
+        [
+          from(_,'PicartaPublications',turtle),
+          to(_,'PicartaPublications',turtle)
+        ],
         picarta_scrape_publications_split
       ),
-      stage(
-        [from(_,'PicartaPublications',turtle),to(_,'PicartaPublications',turtle)],
+      ap_stage(
+        [
+          from(_,'PicartaPublications',turtle),
+          to(_,'PicartaPublications',turtle)
+        ],
         picarta_scrape_publications_ppns
       ),
-      stage(
-        [from(_,'PicartaPublications',turtle),to(_,'PicartaPublications',turtle)],
+      ap_stage(
+        [
+          from(_,'PicartaPublications',turtle),
+          to(_,'PicartaPublications',turtle)
+        ],
         picarta_scrape_publications_topics
       ),
-      stage([from(_,'PicartaPublications',turtle)], picarta_scrape_others),
-      stage([to(output,'VoID',turtle)], assert_stcn_void)
+      ap_stage([from(_,'PicartaPublications',turtle)], picarta_scrape_others),
+      ap_stage([to(output,'VoID',turtle)], assert_stcn_void)
     ]
   ).
 
@@ -98,7 +108,11 @@ picarta_scrape_publications(_PS, FromFile, ToFile):-
 
   file_to_graph_name(ToFile, ToG),
   stcn_scrape(FromG, 'Publication', ToG),
-  debug(stcn_script, 'Done scraping the redactiebladen for publications.', []),
+  debug(
+    stcn_script,
+    'Done scraping the redactiebladen for publications.',
+    []
+  ),
 
   rdf_save2(ToFile, [format(turtle),graph(ToG)]),
   debug(stcn_script, 'Done scraping Picarta for publications.', []),
@@ -118,11 +132,21 @@ picarta_scrape_publications_split(_PS, FromFile, ToFile):-
   rdf_split_literal([answer('A')], _, picarta:topical_keyword, G, '; '),
   debug(stcn_script, 'Topics were split.', []),
 
-  rdf_split_literal([answer('A')], _, picarta:typographic_information, G, ' , '),
+  rdf_split_literal(
+    [answer('A')],
+    _,
+    picarta:typographic_information,
+    G,
+    ' , '
+  ),
   debug(stcn_script, 'Typographic information was split.', []),
 
   rdf_save2(ToFile, [format(turtle),graph(G)]),
-  debug(stcn_script, 'The Picarta scrape with splits were saved to file ~w.', [ToFile]),
+  debug(
+    stcn_script,
+    'The Picarta scrape with splits was saved to file ~w.',
+    [ToFile]
+  ),
   rdf_unload_graph(G).
 
 picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
@@ -159,7 +183,11 @@ picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
 
   % Save the processed scrape results.
   rdf_save2(ToFile, [format(turtle),graph(G)]),
-  debug(stcn_script, 'Done saving the scraped redactiebladen to file ~w.', [ToFile]),
+  debug(
+    stcn_script,
+    'Done saving the scraped redactiebladen to file ~w.',
+    [ToFile]
+  ),
   rdf_unload_graph(G).
 
 picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
@@ -186,16 +214,20 @@ picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
 
   % Save the processed scrape results.
   rdf_save2(ToFile, [format(turtle),graph(G)]),
-  debug(stcn_script, 'Done saving the scraped redactiebladen to file ~w.', [ToFile]),
+  debug(
+    stcn_script,
+    'Done saving the scraped redactiebladen to file ~w.',
+    [ToFile]
+  ),
   rdf_unload_graph(G).
 
 % Picarta scraping for authors, printer-publishers, topics, and
 % translator-editors.
 picarta_scrape_others(_PS, _FromFile, ToDir):-
-  absolute_file_name2(
+  absolute_file_name(
     'PicartaAuthors',
     _ToFile,
-    [access(read),file_type(turtle),relative_to(ToDir)]
+    [access(read),file_errors(fail),file_type(turtle),relative_to(ToDir)]
   ), !.
 picarta_scrape_others(_PS, FromFile, ToDir):-
   % Load the Picarta publications.
@@ -216,7 +248,11 @@ picarta_scrape_others(_PS, FromFile, ToDir):-
         [access(write),file_type(turtle),relative_to(ToDir)]
       ),
       rdf_save2(ToFile, [format(turtle),graph(ToG)]),
-      debug(stcn_script, 'Done saving the scraped class ~w from Picarta.', [C])
+      debug(
+        stcn_script,
+        'Done saving the scraped class ~w from Picarta.',
+        [C]
+      )
     ),
     stcn_script,
     Msg

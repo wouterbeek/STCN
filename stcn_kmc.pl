@@ -34,9 +34,6 @@ Support for STCN KMCs.
 :- use_module(kmc(kmc_4043)). % Meta-calls.
 :- use_module(kmc(kmc_4062)). % Meta-calls.
 :- use_module(kmc(kmc_6511)). % Meta-calls.
-:- use_module(server(web_console)).
-
-:- register_module(kmc_0500).
 
 :- discontiguous(kmc_code/2).
 :- discontiguous(kmc_code/3).

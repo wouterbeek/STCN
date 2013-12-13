@@ -13,7 +13,7 @@
 Web front-end for STCN methods.
 
 @author Wouter Beek
-@version 2012/12-2013/01, 2013/03, 2013/05-2013/06, 2013/09-2013/10
+@version 2012/12-2013/01, 2013/03, 2013/05-2013/06, 2013/09-2013/10, 2013/12
 */
 
 :- use_module(generics(atom_ext)).
@@ -26,21 +26,21 @@ Web front-end for STCN methods.
 :- use_module(library(http/http_server_files)).
 :- use_module(library(http/html_write)).
 :- use_module(library(lists)).
-:- use_module(server(error_web)).
-:- use_module(server(web_console)).
-:- use_module(stat(humR)).
+:- use_module(server(app_ui)).
+:- use_module(server(web_error)).
+:- use_module(server(web_modules)).
 :- use_module(stcn(stcn_statistics)).
 
-:- register_module(stcn_web).
-
 :- http_handler(root(stcn), stcn, [prefix,priority(10)]).
+:- web_module_add('STCN', stcn_web, stcn).
 
-% Fixate the location of the HTML pages.
+% /html
 :- db_add_novel(http:location(html, root(html), [])).
 :- db_add_novel(user:file_search_path(stcn_html, stcn('HTML'))).
-:- http_handler(html(.), serve_files_in_directory(stcn_html), [prefix, priority(10)]).
-
+:- http_handler(html(.), serve_files_in_directory(stcn_html), [prefix]).
 :- html_resource(css('wallace.css'), []).
+
+:- debug(stcn_web).
 
 
 
@@ -60,7 +60,7 @@ stcn(Request):-
   (
     (PPN == '' ; PPN == 'stcn')
   ->
-    reply_html_file(stcn, stcn)
+    reply_html_file(app_style, stcn)
   ;
     catch_web(
       vertex_web(stcn, PPN),
