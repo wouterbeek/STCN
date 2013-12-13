@@ -118,5 +118,5 @@ collect_line(L, in) -->
   {append(H2, T, L)}.
 
 peek_kmc_start -->
-  dcg_peek_length(5, Cs),
+  dcg_peek(5, Cs),
   {phrase(kmc_start(_KMC), Cs)}.

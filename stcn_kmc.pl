@@ -22,6 +22,7 @@ Support for STCN KMCs.
 
 :- use_module(dcg(dcg_ascii)).
 :- use_module(dcg(dcg_generic)).
+:- use_module(dcg(dcg_meta)).
 :- use_module(dcg(dcg_multi)).
 :- use_module(kmc(kmc_0500)). % Meta-calls.
 :- use_module(kmc(kmc_1100)). % Meta-calls.
