@@ -82,7 +82,7 @@ link_to_dbpedia_agent(G, Agent):-
   rdf_datatype(Agent, stcnv:death, gYear, Death, G),
   rdfs_assert_label(stcnv:death, nl, sterftejaar, G),
   
-  find_dbpedia_agent(Name, Birth, Death, DBpediaAgent),
+  dbpedia_find_agent(Name, Birth, Death, DBpediaAgent),
   owl_assert_resource_identity(Agent, DBpediaAgent, G),
   debug(
     dbpedia,
