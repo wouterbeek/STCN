@@ -320,10 +320,7 @@ kmc_3210(G, PPN) -->
   space,
   language(G, PPN).
 kmc_3210(_G, PPN) -->
-  {
-    gtrace, %DEB
-    debug(kmc_3210, 'Cannot parse title for publication ~w.', [PPN])
-  }.
+  {debug(kmc_3210, 'Cannot parse title for publication ~w.', [PPN])}.
 
 language(G, PPN) -->
   word(Word),
