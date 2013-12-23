@@ -23,7 +23,7 @@ These are considered to be the same. Mapped to upper case X using option
 =|case(upper)|=.
 
 @author Wouter Beek
-@version 2013/01-2013/03, 2013/05-2013/06, 2013/09
+@version 2013/01-2013/03, 2013/05-2013/06, 2013/09, 2013/12
 */
 
 :- use_module(datasets(dbpedia)).
@@ -46,7 +46,6 @@ These are considered to be the same. Mapped to upper case X using option
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_label_build)).
 :- use_module(rdfs(rdfs_read)).
-:- use_module(sparql(sparql_ext)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(xml(xml_namespace)).
 
@@ -113,8 +112,6 @@ kmc_30xx(G, PPN, Pred) -->
     rdf_assert(PPN, Pred, Author, G)
   }.
 
-% @tbd Use threading via run_on_sublists/2.
-
 populate_dbpedia(DBpediaG):-
   forall(
     (
@@ -123,15 +120,15 @@ populate_dbpedia(DBpediaG):-
       rdf_global_id(dbpedia:_, DBpedia_Agent)
     ),
     (
-      describe_resource(dbpedia, DBpedia_Agent, Rows),
+      dbpedia_describe([], DBpedia_Agent, PO_Pairs),
       forall(
-        member(row(Predicate, Object), Rows),
+        member([P,O], PO_Pairs),
         (
-          rdf_assert(DBpedia_Agent, Predicate, Object, DBpediaG),
-          flag(populate_dbpedia_triples, ID1, ID1 + 1)
+          rdf_assert(DBpedia_Agent, P, O, DBpediaG),
+          flag(populate_dbpedia_triples, Id1, Id1 + 1)
         )
       ),
-      flag(populate_dbpedia_agents, ID2, ID2 + 1)
+      flag(populate_dbpedia_agents, Id2, Id2 + 1)
     )
   ).
 
