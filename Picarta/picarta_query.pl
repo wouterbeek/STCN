@@ -148,7 +148,8 @@ strip_link(Content, Content).
 
 strip_value(UnstrippedValue, StrippedValue):-
   strip_link(UnstrippedValue, X),
-  strip_atom([' '], X, StrippedValue).
+  % Strip all leading and training white space.
+  normalize_space(atom(StrippedValue), X).
 
 %! translate_attribute(
 %!   +UntranslatedAttribute:atom,

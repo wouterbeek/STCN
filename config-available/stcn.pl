@@ -21,7 +21,7 @@ The STCN SW package.
 :- assert(user:file_search_path(standards,    stcn('Standards'))).
 :- assert(user:file_search_path(vocabularies, stcn('Vocabularies'))).
 
-:- use_module(generic(file_ext)).
+:- use_module(generics(file_ext)).
 :- use_module(standards(html)).
 
 :-

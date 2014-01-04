@@ -94,7 +94,7 @@ stcn_scrape_ppns(_G, 'Publication', PPNs):- !,
       % @tbd Restrict this to triples in graph `G`.
       rdfs_individual_of(PPN1, stcnv:'Publication'),
       rdf_global_id(stcn:PPN2, PPN1),
-      split_atom_exclusive('/', PPN2, ['Publication',PPN3])
+      atomic_list_concat(['Publication',PPN3], '/', PPN2) % split
     ),
     PPNs
   ).
@@ -105,7 +105,7 @@ stcn_scrape_ppns(G, C, PPNs):-
     (
       rdf(_, P, PPN1, G),
       rdf_global_id(stcn:PPN2, PPN1),
-      split_atom_exclusive('/', PPN2, [C,PPN3])
+      atomic_list_concat([C,PPN3], '/', PPN2) % split
     ),
     PPNs
   ).

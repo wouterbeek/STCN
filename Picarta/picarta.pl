@@ -34,11 +34,11 @@ We make a distinction between three portions of code in this module:
 @version 
 */
 
-:- use_module(generic(atom_ext)).
-:- use_module(generic(list_ext)).
-:- use_module(generic(meta_ext)).
-:- use_module(generic(parse_ext)).
-:- use_module(generic(thread_ext)).
+:- use_module(generics(atom_ext)).
+:- use_module(generics(list_ext)).
+:- use_module(generics(meta_ext)).
+:- use_module(generics(parse_ext)).
+:- use_module(generics(thread_ext)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
 :- use_module(library(xpath)).
@@ -167,7 +167,7 @@ process_professions(G, Pairs):-
   maplist(process_profession(G), Pairs).
 
 process_profession(G, Agent/Literal):-
-  split_atom_exclusive(Literal, ', ', [ProfessionName|YearNames]),
+  atomic_list_concar([ProfessionName|YearNames], ', ', Literal), % split
   translate_profession(ProfessionName, Profession),
   process_profession(Agent, Profession, YearNames, G).
 
@@ -271,7 +271,7 @@ process_topics_hierarchy(G):-
       rdf_datatype(Topic, stcn:synonym, string, TopicCode1, G),
       atom_codes(TopicCode1, TopicCode2),
       contains([], [decimal_digit], TopicCode2-[]),
-      split_atom_exclusive(TopicCode1, ['.', ' '], List)
+      atom_splits(['.',' '], TopicCode1, List)
     ),
     Pairs
   ),

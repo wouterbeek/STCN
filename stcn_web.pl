@@ -55,7 +55,7 @@ ppn_web(PPN, Markup):-
 
 stcn(Request):-
   memberchk(path(Path), Request),
-  split_atom_exclusive(['/'], Path, Terms),
+  atomic_list_concat(Terms, '/', Path), % split
   last(Terms, PPN),
   (
     (PPN == '' ; PPN == 'stcn')
