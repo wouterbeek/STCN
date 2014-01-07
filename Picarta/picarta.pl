@@ -261,7 +261,7 @@ export_topics_hierarchy:-
 % This method uses a copied version of trees:all_subpaths_to_tree/2,
 % adapted to work with pairs.
 %
-% @param G The atomic name of the graph containing the topic resources.
+% @arg G The atomic name of the graph containing the topic resources.
 
 process_topics_hierarchy(G):-
   setoff(
@@ -315,8 +315,8 @@ topic_size(Topic, Size):-
 %
 % This predicate uses multi-threading to perform its task.
 %
-% @param G The atomic name of the Picarta graph.
-% @param Class
+% @arg G The atomic name of the Picarta graph.
+% @arg Class
 
 scrape_picarta(G, Class):-
   setoff(
@@ -335,8 +335,8 @@ scrape_picarta(G, Class):-
 %! scrape_picarta_progress(+PicartaGraph:atom, +STCN_Graph:atom) is det.
 % Sends scraping statistics to the debug console.
 %
-% @param PicartaGraph The atomic name of the Picarta graph.
-% @param STCN_Graph The atomic name of the STCN graph.
+% @arg PicartaGraph The atomic name of the Picarta graph.
+% @arg STCN_Graph The atomic name of the STCN graph.
 
 scrape_picarta_progress(PicartaGraph, STCN_Graph):-
   count_individuals(stcnv:'Author', PicartaGraph, X1),
