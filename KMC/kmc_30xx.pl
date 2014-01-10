@@ -55,8 +55,6 @@ These are considered to be the same. Mapped to upper case X using option
 
 :- rdf_meta(link_to_dbpedia_agent(+,r)).
 
-:- debug(kmc_30xx).
-
 
 
 assert_schema_kmc_30xx(G):-

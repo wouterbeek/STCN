@@ -30,8 +30,6 @@ This parses 139.817 PPN entries in the redactiebladen file.
 
 :- assert(user:prolog_file_type(txt, text)).
 
-:- debug(stcn_parse).
-
 
 
 parse_redactiebladen(F, G):-

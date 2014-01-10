@@ -106,9 +106,9 @@ New parse results are coming soon!
 :- use_module(kmc(kmc_3000)).
 :- use_module(kmc(kmc_3011)).
 :- use_module(kmc(kmc_4062)).
+:- use_module(library(debug)).
+:- use_module(library(lists)).
 :- use_module(xml(xml_namespace)).
-
-:- debug(stcn_statistics).
 
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 

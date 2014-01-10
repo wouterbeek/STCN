@@ -26,8 +26,6 @@ We first want to create a text file with one line per statement.
 :- use_module(os(file_ext)).
 :- use_module(stcn(stcn_kmc)).
 
-:- debug(collect_lines).
-
 
 
 collect_lines(F1, F2):-

@@ -31,7 +31,6 @@ E.g. PPN 234597046.
 :- use_module(dcg(dcg_ascii)).
 :- use_module(dcg(dcg_content)).
 :- use_module(dcg(dcg_generic)).
-:- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_lit_build)).
@@ -42,8 +41,6 @@ E.g. PPN 234597046.
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
-
-:- debug(kmc_4043).
 
 
 

@@ -80,8 +80,6 @@ Also see kmc_4040.pl for dating.
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
-:- debug(kmc_1100).
-
 
 
 assert_schema_kmc_1100(G):-

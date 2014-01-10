@@ -79,8 +79,6 @@ TODO: See whether languages can be related to their language families.
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
-:- debug(kmc_1500).
-
 
 
 % SCHEMA

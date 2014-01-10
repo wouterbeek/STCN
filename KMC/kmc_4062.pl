@@ -121,8 +121,6 @@ Extra space at beginning.
 :- db_add_novel(user:file_search_path(images, project('Images'))).
 :- db_add_novel(user:prolog_file_type(png, png)).
 
-:- debug(kmc_4062).
-
 
 
 assert_schema_kmc_4062(G):-

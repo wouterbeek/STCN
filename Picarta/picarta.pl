@@ -39,6 +39,7 @@ We make a distinction between three portions of code in this module:
 :- use_module(generics(meta_ext)).
 :- use_module(generics(parse_ext)).
 :- use_module(generics(thread_ext)).
+:- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
 :- use_module(library(xpath)).
@@ -62,8 +63,6 @@ We make a distinction between three portions of code in this module:
 :- rdf_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- rdf_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 :- rdf_register_namespace(xsd).
-
-:- debug(picarta).
 
 
 

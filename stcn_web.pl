@@ -40,8 +40,6 @@ Web front-end for STCN methods.
 :- http_handler(html(.), serve_files_in_directory(stcn_html), [prefix]).
 :- html_resource(css('wallace.css'), []).
 
-:- debug(stcn_web).
-
 
 
 user:body(stcn, Body) -->

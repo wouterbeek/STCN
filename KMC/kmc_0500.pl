@@ -43,8 +43,6 @@ Encodes the 'status' of a work.
 :- meta_predicate(kmc_0500_status_value(3,+,-,-)).
 :- meta_predicate(kmc_0500_web(3,+,-)).
 
-:- debug(kmc_0500).
-
 
 
 % SCHEMA ASSERTION %

@@ -19,11 +19,10 @@ via its URI-baset/REST API.
 :- use_module(dcg(dcg_generic)).
 :- use_module(generics(atom_ext)).
 :- use_module(html(html)).
+:- use_module(library(debug)).
 :- use_module(library(uri)).
 :- use_module(library(xpath)).
 :- use_module(stcn(stcn_generic)).
-
-:- debug(picarta_query).
 
 
 

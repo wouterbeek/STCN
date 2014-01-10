@@ -63,8 +63,6 @@ country options).
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
-:- debug(kmc_1700).
-
 
 
 assert_schema_kmc_1700(G):-

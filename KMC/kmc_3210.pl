@@ -94,6 +94,7 @@ are not included in a 4-2-2-1 search. [?]
 
 :- use_module(dcg(dcg_ascii)).
 :- use_module(dcg(dcg_content)).
+:- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_datatype)).
@@ -103,8 +104,6 @@ are not included in a 4-2-2-1 search. [?]
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
-
-:- debug(kmc_3210).
 
 
 
