@@ -110,16 +110,16 @@ kmc_1100(G, PPN) -->
   year_interval(_Lang, Y1-Y2), !,
   {
     integer_to_gYear_dateTime(Y1, DT1),
-    rdf_assert_datatype(PPN, stcnv:earliest_publication_year, gYear, DT1, G),
+    rdf_assert_datatype(PPN, stcnv:earliest_publication_year, xsd:gYear, DT1, G),
     integer_to_gYear_dateTime(Y2, DT2),
-    rdf_assert_datatype(PPN, stcnv:latest_publication_year, gYear, DT2, G)
+    rdf_assert_datatype(PPN, stcnv:latest_publication_year, xsd:gYear, DT2, G)
   }.
 % Year point.
 kmc_1100(G, PPN) -->
   year_point(_Lang, Y), !,
   {
     integer_to_gYear_dateTime(Y, DT),
-    rdf_assert_datatype(PPN, stcnv:exact_publication_year, gYear, DT, G)
+    rdf_assert_datatype(PPN, stcnv:exact_publication_year, xsd:gYear, DT, G)
   }.
 % Cannot parse.
 kmc_1100(_G, PPN) -->
@@ -141,7 +141,7 @@ statistics_kmc_1100(G, [[A1,V1],[A2,V2],[A3,V3]|T]):-
 
   setoff(
     Year,
-    rdf_datatype(_PPN, stcnv:exact_publication_year, gYear, Year, G),
+    rdf_datatype(_PPN, stcnv:exact_publication_year, xsd:gYear, Year, G),
     Years
   ),
   (

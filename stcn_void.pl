@@ -58,7 +58,7 @@ stcn_void(G):-
   % Creation time.
   get_time(POSIX_TS),
   posix_timestamp_to_xsd_dateTime(POSIX_TS, XSD_DT),
-  rdf_assert_datatype(stcn:'STCN', dcterms:created, dateTime, XSD_DT, G),
+  rdf_assert_datatype(stcn:'STCN', dcterms:created, xsd:dateTime, XSD_DT, G),
   
   % Title
   rdf_assert_literal(

@@ -71,12 +71,12 @@ assert_schema_kmc_30xx(G):-
   rdfs_assert_label(stcnv:author_name, nl, 'heeft auteursnaam', G).
 
 link_to_dbpedia_agent(G, Agent):-
-  rdf_datatype(Agent, foaf:name, string, Name, G),
+  rdf_datatype(Agent, foaf:name, xsd:string, Name, G),
   
-  rdf_datatype(Agent, stcnv:birth, gYear, Birth, G),
+  rdf_datatype(Agent, stcnv:birth, xsd:gYear, Birth, G),
   rdfs_assert_label(stcnv:birth, nl, geboortejaar, G),
   
-  rdf_datatype(Agent, stcnv:death, gYear, Death, G),
+  rdf_datatype(Agent, stcnv:death, xsd:gYear, Death, G),
   rdfs_assert_label(stcnv:death, nl, sterftejaar, G),
   
   dbpedia_find_agent(Name, Birth, Death, DBpediaAgent),

@@ -39,6 +39,7 @@ We make a distinction between three portions of code in this module:
 :- use_module(generics(meta_ext)).
 :- use_module(generics(parse_ext)).
 :- use_module(generics(thread_ext)).
+:- use_module(library(apply)).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
@@ -75,7 +76,7 @@ We make a distinction between three portions of code in this module:
 process_life_years(G):-
   setoff(
     Agent/LifeYears,
-    rdf_datatype(Agent, stcn:life_years, string, LifeYears, G),
+    rdf_literal(Agent, stcn:life_years, LifeYears, G),
     Pairs
   ),
   run_on_sublists(Pairs, process_life_years(G)).
@@ -86,9 +87,9 @@ process_life_years(G, Pairs):-
 process_lifeyears1(G, Agent/LifeYears):-
   atom_codes(LifeYears, LifeYearsCodes),
   parse_date(Birth/Death, LifeYearsCodes-[]),
-  rdf_assert_datatype(Agent, stcnv:birth, gYear, Birth, G),
-  rdf_assert_datatype(Agent, stcnv:death, gYear, Death, G),
-  rdf_retractall_datatype(Agent, stcn:life_years, string, G).
+  rdf_assert_datatype(Agent, stcnv:birth, xsd:gYear, Birth, G),
+  rdf_assert_datatype(Agent, stcnv:death, xsd:gYear, Death, G),
+  rdf_retractall_literal(Agent, stcn:life_years, G).
 
 
 
@@ -97,7 +98,7 @@ process_lifeyears1(G, Agent/LifeYears):-
 process_name_normals(G):-
   setoff(
     Agent/UnparsedName,
-    rdf_datatype(Agent, stcn:name_normal, string, UnparsedName, G),
+    rdf_assert_literal(Agent, stcn:name_normal, UnparsedName, G),
     Pairs
   ),
   run_on_sublists(Pairs, process_name_normals(G)).
@@ -107,8 +108,8 @@ process_name_normals(G, Pairs):-
 
 process_name_normal(G, Agent/UnparsedName):-
   parse_name_normal(UnparsedName, ParsedName),
-  rdf_assert_datatype(Agent, foaf:name, string, ParsedName, G),
-  rdf_retractall_datatype(Agent, stcn:name_normal, string, G).
+  rdf_assert_literal(Agent, foaf:name, ParsedName, G),
+  rdf_retractall_literal(Agent, stcn:name_normal, G).
 
 parse_name_normal(UnparsedName, ParsedName):-
   sub_atom(
@@ -157,7 +158,7 @@ process_professions(G):-
   assert_schema_profession(G),
   setoff(
     Agent/Profession,
-    rdf_datatype(Agent, stcn:profession, string, Profession, G),
+    rdf_literal(Agent, stcn:profession, Profession, G),
     Pairs
   ),
   run_on_sublists(Pairs, process_professions(G)).
@@ -172,7 +173,7 @@ process_profession(G, Agent/Literal):-
 
 process_profession(Agent, Profession, ['-'], G):- !,
   rdf_assert(Agent, stcn:profession, Profession, G),
-  rdf_retractall_datatype(Agent, stcn:profession, string, G).
+  rdf_retractall_literal(Agent, stcn:profession, G).
 process_profession(Agent, Profession, YearNames, G):- !,
   rdf_bnode(HasProfession),
   rdf_assert(Agent, stcn:has_profession, HasProfession, G),
@@ -185,12 +186,12 @@ process_profession(Agent, Profession, YearNames, G):- !,
       (
         parse_date(Point, C1-[])
       ->
-        rdf_assert_datatype(Agent, stcn:active, gYear, Point, G)
+        rdf_assert_datatype(Agent, stcn:active, xsd:gYear, Point, G)
       ;
         parse_date(Begin, End, C1-[])
       ->
-        rdf_assert_datatype(Agent, stcn:active_start, gYear, Begin, G),
-        rdf_assert_datatype(Agent, stcn:active_end, gYear, End, G)
+        rdf_assert_datatype(Agent, stcn:active_start, xsd:gYear, Begin, G),
+        rdf_assert_datatype(Agent, stcn:active_end, xsd:gYear, End, G)
       )
     ),
     _YearNames1
@@ -202,7 +203,7 @@ process_profession(Agent, Profession, YearNames, G):- !,
     length(YearNames, Length),
     length(YearNames1, Length)
   ->
-    rdf_retractall_datatype(Agent, stcn:profession, string, G)
+    rdf_retractall_literal(Agent, stcn:profession, G)
   ;
     true
   ).
@@ -225,8 +226,8 @@ translate_profession(printer, URI):-
 process_pseudonyms(G):-
   forall(
     (
-      rdf_datatype(Agent1, stcnv:pseudonym, string, Pseudonym, G),
-      rdf_datatype(Agent2, stcn:author_name, string, Pseudonym, G)
+      rdf_assert_literal(Agent1, stcnv:pseudonym, Pseudonym, G),
+      rdf_assert_literal(Agent2, stcn:author_name, Pseudonym, G)
     ),
     (
       owl_assert_resource_identity(Agent1, Agent2, G),
@@ -267,7 +268,7 @@ process_topics_hierarchy(G):-
     List/Topic,
     (
       rdfs_individual_of(Topic, stcnv:'Topic'),
-      rdf_datatype(Topic, stcn:synonym, string, TopicCode1, G),
+      rdf_literal(Topic, stcn:synonym, TopicCode1, G),
       atom_codes(TopicCode1, TopicCode2),
       contains([], [decimal_digit], TopicCode2-[]),
       atom_splits(['.',' '], TopicCode1, List)
@@ -291,7 +292,7 @@ subtopics(AllPairs, List/Topic, Topic-Trees):-
   ).
 
 topic_label(Topic, Label):-
-  once(rdf_datatype(Vertex, stcn:synonym, string, Label, _Graph1)).
+  once(rdf_literal(Vertex, stcn:synonym, Label, _Graph1)).
 
 topic_size(Topic, Size):-
   beam([], Topic, [Predicate], SubTopics, _SubEdges),

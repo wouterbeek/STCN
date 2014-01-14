@@ -306,7 +306,7 @@ kmc_3210(G, PPN) -->
   {anonymous_popular(Title)},
   atom(Title),
   {
-    rdf_assert_datatype(PPN, stcnv:title, string, Title, G),
+    rdf_assert_literal(PPN, stcnv:title, Title, G),
     debug(
       kmc_3210,
       'Recognized title \'~w\' for publication ~w.',
