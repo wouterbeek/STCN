@@ -32,7 +32,7 @@ Web front-end for STCN methods.
 :- use_module(stcn(stcn_statistics)).
 
 :- http_handler(root(stcn), stcn, [prefix,priority(10)]).
-:- web_module_add('STCN', stcn_web, stcn).
+:- initialization(web_module_add('STCN', stcn_web)).
 
 % /html
 :- db_add_novel(http:location(html, root(html), [])).
