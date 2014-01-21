@@ -47,14 +47,14 @@ stcn_script:-
       ap_stage([to(output,'STCNV',turtle)], stcn_schema),
       ap_stage(
         [from(input,'redactiebladen.txt',archive),to(_,redactiebladen,text)],
-        archive_extract
+        extract_archive
       ),
       ap_stage(
         [
           from(input,'PicartaTopics.ttl',archive),
           to(output,'PicartaTopics',turtle)
         ],
-        archive_extract
+        extract_archive
       ),
       ap_stage(
         [from(_,redactiebladen,text),to(_,redactiebladen,text)],
