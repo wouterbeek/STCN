@@ -23,10 +23,9 @@ These are considered to be the same. Mapped to upper case X using option
 =|case(upper)|=.
 
 @author Wouter Beek
-@version 2013/01-2013/03, 2013/05-2013/06, 2013/09, 2013/12
+@version 2013/01-2013/03, 2013/05-2013/06, 2013/09, 2013/12-2014/01
 */
 
-:- use_module(datasets(dbpedia)).
 :- use_module(dcg(dcg_ascii)).
 :- use_module(dcg(dcg_generic)).
 :- use_module(generics(meta_ext)).
@@ -34,6 +33,7 @@ These are considered to be the same. Mapped to upper case X using option
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
+:- use_module('LOD'(dbpedia)).
 :- use_module(owl(owl_build)).
 :- use_module(owl(owl_read)).
 :- use_module(rdf(rdf_build)).
@@ -47,6 +47,7 @@ These are considered to be the same. Mapped to upper case X using option
 :- use_module(rdfs(rdfs_label_build)).
 :- use_module(rdfs(rdfs_read)).
 :- use_module(stcn(stcn_generic)).
+:- use_module('SPARQL'('SPARQL_cache')).
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(foaf, 'http://xmlns.com/foaf/0.1/').
@@ -118,11 +119,11 @@ populate_dbpedia(DBpediaG):-
       rdf_global_id(dbpedia:_, DBpedia_Agent)
     ),
     (
-      dbpedia_describe([], DBpedia_Agent, PO_Pairs),
+      'SPARQL_cache'(DBpedia_Agent, _, Propositions),
       forall(
-        member([P,O], PO_Pairs),
+        member([S,P,O], Propositions),
         (
-          rdf_assert(DBpedia_Agent, P, O, DBpediaG),
+          rdf_assert(S, P, O, DBpediaG),
           flag(populate_dbpedia_triples, Id1, Id1 + 1)
         )
       ),
