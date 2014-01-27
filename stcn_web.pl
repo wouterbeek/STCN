@@ -1,19 +1,12 @@
-:- module(
-  stcn_web,
-  [
-    ppn_web/2, % +PPN:atom
-               % -Markup:dom
-    stcn_statistics_web/1, % -Markup:dom
-    stcn_web/1 % -Markup:dom
-  ]
-).
+:- module(stcn_web, []).
 
 /** <module> STCN Web
 
-Web front-end for STCN methods.
+Web front-end for the STCN.
 
 @author Wouter Beek
-@version 2012/12-2013/01, 2013/03, 2013/05-2013/06, 2013/09-2013/10, 2013/12
+@version 2012/12-2013/01, 2013/03, 2013/05-2013/06, 2013/09-2013/10,
+         2013/12-2014/01
 */
 
 :- use_module(generics(atom_ext)).
@@ -31,7 +24,7 @@ Web front-end for STCN methods.
 :- use_module(server(web_modules)).
 :- use_module(stcn(stcn_statistics)).
 
-:- http_handler(root(stcn), stcn, [prefix,priority(10)]).
+:- http_handler(root(stcn), stcn_web, [prefix,priority(10)]).
 :- initialization(web_module_add('STCN', stcn_web)).
 
 % /html
@@ -42,37 +35,29 @@ Web front-end for STCN methods.
 
 
 
-user:body(stcn, Body) -->
-  html(body(Body)).
-
-user:head(stcn, Head) -->
-  html(head([\html_requires(css('wallace.css'))|Head])).
-
-ppn_web(PPN, Markup):-
-  catch_web(vertex_web(stcn, PPN), Markup).
-
-stcn(Request):-
+stcn_web(Request):-
   memberchk(path(Path), Request),
   atomic_list_concat(Terms, '/', Path), % split
   last(Terms, PPN),
+  stcn(Request, PPN).
   (
     (PPN == '' ; PPN == 'stcn')
   ->
     reply_html_file(app_style, stcn)
   ;
-    catch_web(
-      vertex_web(stcn, PPN),
-      Markup
-    ),
-    reply_html_page(stcn, [], Markup)
+    reply_html_page(
+      app_style,
+      title('STCN'),
+      [\vertex_web(stcn, PPN),\stcn_statistics_web]
+    )
   ).
 
-stcn_statistics_web([HTML_Table]):-
-  stcn_statistics(Rows),
-  html_table([header(false)], Rows, HTML_Table).
-
-stcn_web(Body):-
-  absolute_file_name(html(stcn), File, [access(read),file_type(html)]),
-  file_to_html(File, DOM),
-  contains_term(element(body, _, Body), DOM).
-
+stcn_statistics_web -->
+  {stcn_statistics(Rows)},
+  html(
+    \html_table(
+      [header(false)],
+      `Overview of STCN statistics.`,
+      Rows
+    )
+  ).

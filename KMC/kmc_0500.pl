@@ -26,7 +26,6 @@ Encodes the 'status' of a work.
 @version 2013/01-2013/04, 2013/06, 2013/09
 */
 
-:- use_module(html(html_table)).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
@@ -41,7 +40,6 @@ Encodes the 'status' of a work.
 
 :- meta_predicate(kmc_0500_oclc(+,+,+,3)).
 :- meta_predicate(kmc_0500_status_value(3,+,-,-)).
-:- meta_predicate(kmc_0500_web(3,+,-)).
 
 
 
@@ -305,18 +303,3 @@ par_103(y, 'bibliografisch onvolledig', 'Bibliografisch onvolledig.').
 
 statistics_kmc_0500(G, [['Status (KMC 0500)','Occurrences']|L]):-
   rdf_property_table(stcnv:status, G, L).
-
-
-
-% WEB INTERFACE %
-
-'kmc_0500-1_web'(DOM):-
-  kmc_0500_web('kmc_0500-1', first, DOM).
-
-'kmc_0500-2_web'(DOM):-
-  kmc_0500_web('kmc_0500-2', second, DOM).
-
-kmc_0500_web(Pred, N, DOM):-
-  findall([Char,Comment], call(Pred, Char, _Label, Comment), L),
-  format(atom(Caption), 'Legal values for KMC 0500\'s ~w character.', [N]),
-  html_table([caption(Caption),header(true),indexed(true)], L, DOM).
