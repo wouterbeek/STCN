@@ -46,24 +46,22 @@ We make a distinction between three portions of code in this module:
 :- use_module(library(xpath)).
 :- use_module(owl(owl_build)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_namespace)).
 :- use_module(rdf(rdf_read)).
 :- use_module(rdf(rdf_stat)).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_read)).
 :- use_module(skos(skos_build)).
 :- use_module(standards(html)).
+:- use_module(xml(xml_namespace)).
 
 :- rdf_meta(assert_schema_picarta(+,r)).
 :- rdf_meta(scrape_picarta(+,r)).
 :- rdf_meta(translate_profession(+,r)).
 
-:- rdf_register_namespace(foaf).
-:- rdf_register_namespace(rdf).
-:- rdf_register_namespace(rdfs).
-:- rdf_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
-:- rdf_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
-:- rdf_register_namespace(xsd).
+:- xml_register_namespace(foaf, 'http://xmlns.com/foaf/0.1/').
+:- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
+:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
+:- xml_register_namespace(xsd, 'http://www.w3.org/2001/XMLSchema#').
 
 
 
