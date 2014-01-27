@@ -54,8 +54,6 @@ PPN 324985231 has no exclamation mark after the topic PPN in KMC 6512.
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
-:- nodebug(kmc_6511).
-
 
 
 assert_schema_kmc_6511(G):-

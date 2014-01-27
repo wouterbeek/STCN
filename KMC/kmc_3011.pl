@@ -28,8 +28,6 @@
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
-:- nodebug(kmc_3011).
-
 
 
 assert_schema_kmc_3011(G):-
