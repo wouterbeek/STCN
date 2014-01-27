@@ -52,8 +52,6 @@ http://picarta.pica.nl/DB=3.11/SET=1/TTL=1/CMD?
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
-:- nodebug(kmc_3000).
-
 
 
 assert_schema_kmc_3000(G):-
