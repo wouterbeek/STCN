@@ -86,7 +86,7 @@ stcn_void(G):-
   rdf_assert(stcn:'STCN', void:vocabulary, STCNV_NS, G),
   
   % VoID Feature: RDF serialization format.
-  % @tbd Automate this based on rdf_save2/2.
+  % @tbd Automate this based on rdf_save/3.
   rdf_assert(stcn:'STCN', void:feature, format:'Turtle', G),
   
   % SPARQL endpoint.

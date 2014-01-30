@@ -102,7 +102,7 @@ assert_stcn_void(_PS, _FromDir, ToFile):-
 % Picarta scraping for publications.
 picarta_scrape_publications(_PS, FromFile, ToFile):-
   file_to_graph_name(FromFile, FromG),
-  rdf_load2(FromFile, [format(turtle),graph(FromG)]),
+  rdf_load([format(turtle)], FromG, FromFile),
 
   file_to_graph_name(ToFile, ToG),
   stcn_scrape(FromG, 'Publication', ToG),
@@ -112,13 +112,13 @@ picarta_scrape_publications(_PS, FromFile, ToFile):-
     []
   ),
 
-  rdf_save2(ToFile, [format(turtle),graph(ToG)]),
+  rdf_save([format(turtle)], ToG, ToFile),
   debug(stcn_script, 'Done scraping Picarta for publications.', []),
   rdf_unload_graph(ToG).
 
-picarta_scrape_publications_split(_PS, FromFile, ToFile):-
-  file_to_graph_name(FromFile, G),
-  rdf_load2(FromFile, [format(turtle),graph(G)]),
+picarta_scrape_publications_split(_, FromFile, ToFile):-
+  file_to_graph_name(FromFile, Graph),
+  rdf_load([format(turtle)], Graph, FromFile),
 
   % Assert occurrences in literal enumerations as separate triples.
   rdf_split_literal([answer('A')], _, picarta:printer_publisher, G, '; '),
@@ -139,7 +139,7 @@ picarta_scrape_publications_split(_PS, FromFile, ToFile):-
   ),
   debug(stcn_script, 'Typographic information was split.', []),
 
-  rdf_save2(ToFile, [format(turtle),graph(G)]),
+  rdf_save([format(turtle)], G, ToFile),
   debug(
     stcn_script,
     'The Picarta scrape with splits was saved to file ~w.',
@@ -149,7 +149,7 @@ picarta_scrape_publications_split(_PS, FromFile, ToFile):-
 
 picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
   file_to_graph_name(FromFile, G),
-  rdf_load2(FromFile, [format(turtle),graph(G)]),
+  rdf_load([format(turtle)], Graph, FromFile),
 
   % Turn PPN literals into IRIs.
   forall(
@@ -180,7 +180,7 @@ picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
   ),
 
   % Save the processed scrape results.
-  rdf_save2(ToFile, [format(turtle),graph(G)]),
+  rdf_save([format(turtle)], G, ToFile),
   debug(
     stcn_script,
     'Done saving the scraped redactiebladen to file ~w.',
@@ -191,7 +191,7 @@ picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
 picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
   % Load the Picarta publications.
   file_to_graph_name(FromFile, G),
-  rdf_load2(FromFile, [format(turtle),graph(G)]),
+  rdf_load([format(turtle)], Graph, FromFile),
 
   % Load the Picarta topics.
   absolute_file_name(
@@ -199,7 +199,7 @@ picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
     TopicFile,
     [access(read),file_type(turtle)]
   ),
-  rdf_load2(TopicFile, [format(turtle),graph('PicartaTopics')]),
+  rdf_load([format(turtle)], 'PicartaTopics', TopicFile),
 
   forall(
     rdf_literal(PPN, picarta:topical_keyword, TopicLit, G),
@@ -211,7 +211,7 @@ picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
   ),
 
   % Save the processed scrape results.
-  rdf_save2(ToFile, [format(turtle),graph(G)]),
+  rdf_save([format(turtle)], G, ToFile),
   debug(
     stcn_script,
     'Done saving the scraped redactiebladen to file ~w.',
@@ -230,7 +230,7 @@ picarta_scrape_others(_PS, _FromFile, ToDir):-
 picarta_scrape_others(_PS, FromFile, ToDir):-
   % Load the Picarta publications.
   file_to_graph_name(FromFile, FromG),
-  rdf_load2(FromFile, [format(turtle),graph(FromG)]),
+  rdf_load([format(turtle)], FromG, FromFile),
   forall_thread(
     (
       member(C, ['Author','PrinterPublisher','TranslatorEditor']),
@@ -245,7 +245,7 @@ picarta_scrape_others(_PS, FromFile, ToDir):-
         ToFile,
         [access(write),file_type(turtle),relative_to(ToDir)]
       ),
-      rdf_save2(ToFile, [format(turtle),graph(ToG)]),
+      rdf_save([format(turtle)], ToG, ToFile),
       debug(
         stcn_script,
         'Done saving the scraped class ~w from Picarta.',
@@ -261,7 +261,7 @@ redactiebladen_parse(_PS, FromFile, ToFile):-
   parse_redactiebladen(FromFile, 'Redactiebladen'),
   debug(stcn_script, 'Done parsing the redactiebladen.', []),
 
-  rdf_save2(ToFile, [format(turtle),graph('Redactiebladen')]),
+  rdf_save([format(turtle)], 'Redactiebladen', ToFile),
   debug(stcn_script, 'Done saving the parsed redactiebladen.', []).
 
 % Prepares the redactiebladen file.
@@ -280,4 +280,4 @@ redactiebladen_prepare(_PS, FromFile, ToFile):-
 % Asserts the schema for STCN.
 stcn_schema(_PS, _FromDir, ToFile):-
   stcn_schema('STCNV'),
-  rdf_save2(ToFile, [format(turtle),graph('STCNV')]).
+  rdf_save([format(turtle)], 'STCNV', ToFile).
