@@ -56,7 +56,7 @@ stcn_statistics_web -->
   {stcn_statistics(Rows)},
   html(
     \html_table(
-      [header(false)],
+      [header_row(false)],
       `Overview of STCN statistics.`,
       Rows
     )
