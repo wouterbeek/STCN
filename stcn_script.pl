@@ -12,7 +12,6 @@ These predicate should be converted to some other module or be removed.
 
 :- use_module(ap(ap)).
 :- use_module(dcg(dcg_generic)).
-:- use_module(generics(archive_ext)).
 :- use_module(generics(replace_in_file)).
 :- use_module(generics(thread_ext)).
 :- use_module(library(archive)).
@@ -20,6 +19,7 @@ These predicate should be converted to some other module or be removed.
 :- use_module(library(filesex)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
+:- use_module(os(archive_ext)).
 :- use_module(os(datetime_ext)).
 :- use_module(os(file_ext)).
 :- use_module(rdf(rdf_build)).
