@@ -57,7 +57,7 @@ stcn_statistics_web -->
   html(
     \html_table(
       [header_row(false)],
-      atom('Overview of STCN statistics.'),
+      html('Overview of STCN statistics.'),
       Rows
     )
   ).
