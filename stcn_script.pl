@@ -97,7 +97,7 @@ stcn_script:-
 assert_stcn_void(_PS, _FromDir, ToFile):-
   G = 'VoID',
   stcn_void(G),
-  void_save_library(G, ToFile).
+  void_save(G, ToFile).
 
 % Picarta scraping for publications.
 picarta_scrape_publications(_PS, FromFile, ToFile):-
