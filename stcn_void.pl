@@ -26,7 +26,7 @@ Generates the VoID description of the STCN dataset.
 :- use_module(rdfs(rdfs_read)).
 :- use_module(void(void_db)). % XML namespace.
 :- use_module(xml(xml_namespace)).
-:- use_module(xsd(xsd_dateTime)).
+:- use_module(xsd(xsd_dateTime_ext)).
 
 :- xml_register_namespace(dcterms, 'http://purl.org/dc/terms/'    ).
 :- xml_register_namespace(foaf,    'http://xmlns.com/foaf/0.1/'   ).
