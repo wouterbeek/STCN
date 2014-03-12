@@ -85,7 +85,7 @@ picarta_query_ppn(PPN, URI, Pairs):-
     URI,
     uri_components(Scheme, Authority, Path, Search, Fragment)
   ),
-  download_html(URI, HTML),
+  download_html([html_dialect(html4)], URI, HTML),
   findall(
     TranslatedAttribute/ProcessedValue,
     (
