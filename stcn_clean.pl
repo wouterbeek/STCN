@@ -19,7 +19,7 @@ and the STCN graph files are in =|/Data|=.
 :- use_module(kmc(kmc_1200)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_lit)).
+:- use_module(rdf(rdf_literal)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(xml(xml_namespace)).
 

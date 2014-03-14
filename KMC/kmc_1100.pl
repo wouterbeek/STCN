@@ -57,7 +57,7 @@ Also see kmc_4040.pl for dating.
 
 @author Wouter Beek
 @tbd Add R output: year by number of publications.
-@version 2013/01-2013/04, 2013/06, 2013/09
+@version 2013/01-2013/04, 2013/06, 2013/09, 2014/03
 */
 
 :- use_module(dcg(dcg_content)).
@@ -75,6 +75,7 @@ Also see kmc_4040.pl for dating.
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_label_build)).
 :- use_module(xml(xml_namespace)).
+:- use_module(xsd(xsd_dateTime_support)).
 :- use_module(xsd(xsd_gYear)).
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
@@ -109,16 +110,16 @@ assert_schema_kmc_1100(G):-
 kmc_1100(G, PPN) -->
   year_interval(_Lang, Y1-Y2), !,
   {
-    integer_to_gYear_dateTime(Y1, DT1),
+    newDateTime(Y1, _, _, _, _, _, _, DT1),
     rdf_assert_datatype(PPN, stcnv:earliest_publication_year, xsd:gYear, DT1, G),
-    integer_to_gYear_dateTime(Y2, DT2),
+    newDateTime(Y2, _, _, _, _, _, _, DT2),
     rdf_assert_datatype(PPN, stcnv:latest_publication_year, xsd:gYear, DT2, G)
   }.
 % Year point.
 kmc_1100(G, PPN) -->
   year_point(_Lang, Y), !,
   {
-    integer_to_gYear_dateTime(Y, DT),
+    newDateTime(Y, _, _, _, _, _, _, DT),
     rdf_assert_datatype(PPN, stcnv:exact_publication_year, xsd:gYear, DT, G)
   }.
 % Cannot parse.
