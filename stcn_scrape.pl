@@ -14,7 +14,7 @@ Fully automated scrape for the STCN.
 @author Wouter Beek
 @tbd Automate the generation of the list of initial publication PPNs
      based on the redactiebladen (using module STCN_PARSE).
-@version 2013/06, 2013/09-2013/10
+@version 2013/06, 2013/09-2013/10, 2014/03
 */
 
 :- use_module(generics(atom_ext)).
@@ -25,7 +25,8 @@ Fully automated scrape for the STCN.
 :- use_module(os(file_ext)).
 :- use_module(picarta(picarta_query)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_lit_build)).
+:- use_module(rdf_term(rdf_literal)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(xml(xml_namespace)).
@@ -120,6 +121,7 @@ picarta_scrape(Category1, G, PPN_Name):-
     member(N/V, NVPairs),
     (
       rdf_global_id(picarta:N, Pred),
-      rdf_assert_literal(PPN, Pred, V, G)
+      rdf_assert_string(PPN, Pred, V, G)
     )
   ).
+

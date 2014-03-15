@@ -93,7 +93,7 @@ Extra space at beginning.
 # Duodecimolong or Duodecimocommon
 
 @author Wouter Beek
-@version 2013/01-2013/03, 2013/06, 2013/09
+@version 2013/01-2013/03, 2013/06, 2013/09, 2014/03
 */
 
 :- use_module(dcg(dcg_ascii)).
@@ -104,10 +104,12 @@ Extra space at beginning.
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_lit_build)).
 :- use_module(rdf(rdf_stat)).
+:- use_module(rdf_term(rdf_language_tagged_string)).
+:- use_module(rdf_term(rdf_literal)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_build)).
+:- use_module(rdfs(rdfs_label_ext)).
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
@@ -125,32 +127,33 @@ Extra space at beginning.
 
 assert_schema_kmc_4062(G):-
   rdfs_assert_class(stcnv:'FormatValue', G),
-  rdfs_assert_label(stcnv:'FormatValue', nl, 'formaat waarde', G),
+  rdfs_assert_label(stcnv:'FormatValue', 'formaat waarde', nl, G),
   
   rdfs_assert_subclass(stcnv:'PrimaryFormatValue', stcnv:'FormatValue', G),
-  rdfs_assert_label(stcnv:'PrimaryFormatValue', nl, 'eerste formaat waarde',
+  rdfs_assert_label(stcnv:'PrimaryFormatValue', 'eerste formaat waarde', nl,
     G),
   
   rdfs_assert_subclass(stcnv:'SecondaryFormatValue', stcnv:'FormatValue', G),
-  rdfs_assert_label(stcnv:'SecondaryFormatValue', nl,
-    'tweede formaat waarde', G),
+  rdfs_assert_label(stcnv:'SecondaryFormatValue',
+    'tweede formaat waarde', nl, G),
   
   rdf_assert_property(stcnv:image, G),
-  rdfs_assert_label(stcnv:image, nl, 'heeft afbeelding', G),
+  rdfs_assert_label(stcnv:image, 'heeft afbeelding', nl, G),
   
   rdf_assert_property(stcnv:format, G),
-  rdfs_assert_label(stcnv:format, nl, 'heeft formaat', G),
-  rdf_assert_literal(stcnv:format, stcnv:kb_name, 'KMC 4062', G),
+  rdfs_assert_label(stcnv:format, 'heeft formaat', nl, G),
+  rdf_assert_string(stcnv:format, stcnv:kb_name, 'KMC 4062', G),
   rdf_assert(stcnv:format, stcnv:documentatie,
-    'http://www.kb.nl/kbhtml/stcnhandleiding/4062.html', G),
-  rdf_assert_literal(stcnv:format, stcnv:picarta_name, nl, 'formaat', G),
+      'http://www.kb.nl/kbhtml/stcnhandleiding/4062.html', G),
+  rdf_assert_language_tagged_string(stcnv:format, stcnv:picarta_name,
+      'formaat', nl, G),
   
   forall(
     format(FormatID, _Symbol, _NumberOfLeaflets, _Kettinglijnen, _, _),
     (
       rdf_global_id(stcn:FormatID, Format),
       rdf_assert_individual(Format, stcnv:'PrimaryFormatValue',  G),
-      rdfs_assert_label(Format, nl, FormatID, G),
+      rdfs_assert_label(Format, FormatID, nl, G),
       (
         once(has_image(FormatID, ImageID))
       ->
@@ -159,7 +162,7 @@ assert_schema_kmc_4062(G):-
           Image,
           [access(read),file_type(png)]
         ),
-        rdf_assert_literal(Format, stcnv:image, Image, G)
+        rdf_assert_string(Format, stcnv:image, Image, G)
       ;
         % Not every format has an image.
         true
@@ -167,19 +170,19 @@ assert_schema_kmc_4062(G):-
     )
   ),
   rdf_assert_individual(stcnv:agenda, stcnv:'SecondaryFormatValue', G),
-  rdfs_assert_label(stcnv:agenda, nl, agenda, G),
+  rdfs_assert_label(stcnv:agenda, agenda, nl, G),
   
   rdf_assert_individual(stcnv:broadsheet, stcnv:'SecondaryFormatValue', G),
-  rdfs_assert_label(stcnv:broadsheet, nl, broadsheet, G),
+  rdfs_assert_label(stcnv:broadsheet, broadsheet, nl, G),
   
   rdf_assert_individual(stcnv:oblong, stcnv:'SecondaryFormatValue', G),
-  rdfs_assert_label(stcnv:oblong, nl, oblong, G),
+  rdfs_assert_label(stcnv:oblong, oblong, nl, G),
   
   rdf_assert_individual(stcnv:other_format, stcnv:'FormatValue', G),
-  rdfs_assert_label(stcnv:other_format, nl, 'ander formaat', G),
+  rdfs_assert_label(stcnv:other_format, 'ander formaat', nl, G),
   
   rdf_assert_individual(stcnv:unknown_format, stcnv:'FormatValue', G),
-  rdfs_assert_label(stcnv:unknown_format, nl, 'onbekend formaat', G).
+  rdfs_assert_label(stcnv:unknown_format, 'onbekend formaat', nl, G).
 
 %! format(
 %!   ?Name:atom,
@@ -251,11 +254,11 @@ kmc_4062_extra(_G, _PPN) --> [].
 kmc_4062_main(G, PPN) -->
   integer(_First),
   blanks,
-  "x",
+  `x`,
   blanks,
   integer(_Second),
   blanks,
-  "mm",
+  `mm`,
   {rdf_assert(PPN, stcnv:format, stcnv:unknown_format, G)}.
 kmc_4062_main(G, PPN) -->
   blanks,

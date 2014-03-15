@@ -37,7 +37,7 @@ exclamation mark.
 PPN 324985231 has no exclamation mark after the topic PPN in KMC 6512.
 
 @author Wouter Beek
-@version 2013/03, 2013/06, 2013/09
+@version 2013/03, 2013/06, 2013/09, 2014/03
 */
 
 :- use_module(dcg(dcg_ascii)).
@@ -45,9 +45,10 @@ PPN 324985231 has no exclamation mark after the topic PPN in KMC 6512.
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_lit_build)).
+:- use_module(rdf_term(rdf_literal)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_build)).
+:- use_module(rdfs(rdfs_label_ext)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(xml(xml_namespace)).
 
@@ -59,12 +60,12 @@ PPN 324985231 has no exclamation mark after the topic PPN in KMC 6512.
 assert_schema_kmc_6511(G):-
   rdfs_assert_class(stcnv:'Topic', G),
   rdf_assert_property(stcnv:topic, G),
-  rdfs_assert_label(stcnv:topic, nl, onderwerp, G),
-  rdf_assert_literal(stcnv:topic, stcnv:kb_name, 'KMC 6511', G),
+  rdfs_assert_label(stcnv:topic, onderwerp, nl, G),
+  rdf_assert_string(stcnv:topic, stcnv:kb_name, 'KMC 6511', G),
   rdfs_assert_seeAlso(stcnv:topic,
-    'http://www.kb.nl/kbhtml/stcnhandleiding/6511.html', G),
-  rdf_assert_literal(stcnv:topic, stcnv:picarta_name, nl,
-    'Onderwerpstrefwoord', G).
+      'http://www.kb.nl/kbhtml/stcnhandleiding/6511.html', G),
+  rdf_assert_language_tagged_string(stcnv:topic, stcnv:picarta_name,
+      'Onderwerpstrefwoord', nl, G).
 
 kmc_6511(G, PPN) -->
   exclamation_mark,

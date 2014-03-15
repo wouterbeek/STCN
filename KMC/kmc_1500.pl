@@ -59,7 +59,7 @@ TODO: See whether languages can be related to their language families.
 @author Wouter Beek
 @tbd http://www.kb.nl/kbhtml/stcnhandleiding/1500.html
 @tbd http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1500
-@version 2013/01-2013/04, 2013/06, 2013/09
+@version 2013/01-2013/04, 2013/06, 2013/09, 2014/03
 */
 
 :- use_module(dcg(dcg_content)).
@@ -68,11 +68,12 @@ TODO: See whether languages can be related to their language families.
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_datatype)).
-:- use_module(rdf(rdf_lit_build)).
+:- use_module(rdf_term(rdf_datatype)).
 :- use_module(rdf(rdf_stat)).
+:- use_module(rdf_term(rdf_literal)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_build)).
+:- use_module(rdfs(rdfs_label_ext)).
 :- use_module(rdfs(rdfs_read)).
 :- use_module(xml(xml_namespace)).
 
@@ -85,26 +86,26 @@ TODO: See whether languages can be related to their language families.
 
 assert_schema_kmc_1500(G):-
   rdf_assert_property(stcnv:language, G),
-  rdfs_assert_label(stcnv:language, en, language, G),
-  rdfs_assert_label(stcnv:language, nl, taal, G),
-  rdf_assert_literal(stcnv:language, stcnv:kb_name, 'KMC 1500', G),
+  rdfs_assert_label(stcnv:language, language, en, G),
+  rdfs_assert_label(stcnv:language, taal, nl, G),
+  rdf_assert_string(stcnv:language, stcnv:kb_name, 'KMC 1500', G),
   rdfs_assert_seeAlso(stcnv:language,
-    'http://www.kb.nl/kbhtml/stcnhandleiding/1500.html', G),
+      'http://www.kb.nl/kbhtml/stcnhandleiding/1500.html', G),
   rdfs_assert_seeAlso(stcnv:language,
-    'http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1500', G),
+      'http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1500', G),
 
   rdf_assert_individual(stcnv:actual_language, stcnv:'LanguageProperty', G),
-  rdfs_assert_label(stcnv:actual_language, en, 'actual language', G),
-  rdfs_assert_label(stcnv:actual_language, nl, 'daadwerkelijke taal', G),
+  rdfs_assert_label(stcnv:actual_language, 'actual language', en, G),
+  rdfs_assert_label(stcnv:actual_language, 'daadwerkelijke taal', nl, G),
   rdfs_assert_subproperty(stcnv:actual_language, stcnv:language, G),
 
   rdfs_assert_subproperty(stcnv:translated_via, stcnv:language, G),
-  rdfs_assert_label(stcnv:actual_language, en, 'translated via', G),
-  rdfs_assert_label(stcnv:translated_via, nl, 'vertaald via', G),
+  rdfs_assert_label(stcnv:actual_language, 'translated via', en, G),
+  rdfs_assert_label(stcnv:translated_via, 'vertaald via', nl, G),
 
   rdfs_assert_subproperty(stcnv:translated_from, stcnv:language, G),
-  rdfs_assert_label(stcnv:actual_language, en, 'translated from', G),
-  rdfs_assert_label(stcnv:translated_from, nl, 'vertaald uit', G),
+  rdfs_assert_label(stcnv:actual_language, 'translated from', en, G),
+  rdfs_assert_label(stcnv:translated_from, 'vertaald uit', nl, G),
 
   'assert_iso639-3_schema'(G),
   % Use OCLC information to add Dutch labels to ISO 639-3 language codes.
@@ -116,7 +117,7 @@ assert_schema_kmc_1500(G):-
     (
       recognized_language(Lang2, Name)
     ->
-      rdfs_assert_label(Lang1, nl, Name, G)
+      rdfs_assert_label(Lang1, Name, nl, G)
     ;
       true
     )
@@ -124,7 +125,8 @@ assert_schema_kmc_1500(G):-
   'assert_iso639-5_schema'(G).
 
 kmc_1500(G, PPN) -->
-  "/", language_property(Pred),
+  `/`,
+  language_property(Pred),
   language(PPN, Lang),
   {rdf_assert(PPN, Pred, Lang, G)}, !,
   kmc_1500(G, PPN).
@@ -790,3 +792,4 @@ unrecognized_language(ypk, 'Yupik').
 unrecognized_language(znd, 'Zande').
 unrecognized_language(zig, 'Zigeunertalen').
 unrecognized_language(zxx, 'Geen taalkundige inhoud').
+

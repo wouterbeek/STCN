@@ -25,8 +25,8 @@ These predicate should be converted to some other module or be removed.
 :- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_clean)).
 :- use_module(rdf(rdf_graph_name)).
-:- use_module(rdf(rdf_lit_build)).
-:- use_module(rdf(rdf_lit_read)).
+:- use_module(rdf_term(rdf_literal)).
+:- use_module(rdf_term(rdf_literal)).
 :- use_module(rdf(rdf_serial)).
 :- use_module(stcn(collect_lines)).
 :- use_module(stcn(stcn_generic)).
@@ -165,15 +165,15 @@ picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
       rdf_global_id(picarta:P1, P2),
       forall(
         (
-          rdf_literal(PublicationPPN, P2, Lit, G),
+          rdf_string(PublicationPPN, P2, LexicalForm, G),
           % There are both PPN literals and full name literals.
           % Only the former can be turned into URIs.
-          dcg_phrase(ppn, Lit)
+          dcg_phrase(ppn, LexicalForm)
         ),
         (
-          ppn_resource(Category, Lit, PPN),
+          ppn_resource(Category, LexicalForm, PPN),
           rdf_assert(PublicationPPN, P2, PPN, G),
-          rdf_retractall_literal(PublicationPPN, P2, Lit, G)
+          rdf_retractall_string(PublicationPPN, P2, LexicalForm, G)
         )
       )
     )
@@ -202,11 +202,11 @@ picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
   rdf_load([format(turtle)], 'PicartaTopics', TopicFile),
 
   forall(
-    rdf_literal(PPN, picarta:topical_keyword, TopicLit, G),
+    rdf_string(PPN, picarta:topical_keyword, TopicLit, G),
     (
-      once(rdf_literal(TopicPPN, _, TopicLit, G)),
+      once(rdf_string(TopicPPN, _, TopicLit, G)),
       rdf_assert(PPN, picarta:topical_keyword, TopicPPN, G),
-      rdf_retractall(PPN, picarta:topical_keyword, TopicLit, G)
+      rdf_retractall_string(PPN, picarta:topical_keyword, TopicLit, G)
     )
   ),
 

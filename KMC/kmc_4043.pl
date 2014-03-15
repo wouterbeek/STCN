@@ -25,7 +25,7 @@ E.g. PPN 234597046.
 ## PPN 173117708
 
 @author Wouter Beek
-@version 2013/03, 2013/06, 2013/09
+@version 2013/03, 2013/06, 2013/09, 2014/03
 */
 
 :- use_module(dcg(dcg_ascii)).
@@ -33,9 +33,11 @@ E.g. PPN 234597046.
 :- use_module(dcg(dcg_generic)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_lit_build)).
+:- use_module(rdf_term(rdf_language_tagged_string)).
+:- use_module(rdf_term(rdf_literal)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_build)).
+:- use_module(rdfs(rdfs_label_ext)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(xml(xml_namespace)).
 
@@ -46,17 +48,17 @@ E.g. PPN 234597046.
 
 assert_schema_kmc_4043(G):-
   rdfs_assert_class(stcnv:'Printer', G),
-  rdfs_assert_label(stcnv:'Printer', nl, drukker, G),
+  rdfs_assert_label(stcnv:'Printer', drukker, nl, G),
   
   rdf_assert_property(stcnv:printer, G),
-  rdfs_assert_label(stcnv:printer, nl, 'heeft drukker', G),
-  rdf_assert_literal(stcnv:printer, stcnv:kb_name, 'KMC 4043', G),
+  rdfs_assert_label(stcnv:printer, 'heeft drukker', nl, G),
+  rdf_assert_string(stcnv:printer, stcnv:kb_name, 'KMC 4043', G),
   rdfs_assert_seeAlso(stcnv:printer,
-    'http://www.kb.nl/kbhtml/stcnhandleiding/4043.html', G),
-  rdf_assert_literal(stcnv:printer, stcnv:picarta_name, nl,
-    'Drukker / Uitgever', G),
+      'http://www.kb.nl/kbhtml/stcnhandleiding/4043.html', G),
+  rdf_assert_language_tagged_string(stcnv:printer, stcnv:picarta_name,
+      'Drukker / Uitgever', nl, G),
   
-  rdfs_assert_label(stcnv:'City', nl, stad, G),
+  rdfs_assert_label(stcnv:'City', stad, nl, G),
   % Assert the cities that act as printers/publishers.
   forall(
     city_printer(CityName, PPN),
