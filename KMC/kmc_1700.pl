@@ -41,7 +41,7 @@ country options).
      ISO 3166-3, i.e. the list of codes for past countries.
 @see http://www.kb.nl/kbhtml/stcnhandleiding/1700.html
 @see http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1700
-@version 2013/01-2013/06, 2013/09
+@version 2013/01-2013/06, 2013/09, 2014/03
 */
 
 :- use_module(dcg(dcg_content)).
@@ -49,10 +49,12 @@ country options).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_lit_build)).
 :- use_module(rdf(rdf_stat)).
+:- use_module(rdf_term(rdf_language_tagged_string)).
+:- use_module(rdf_term(rdf_literal)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_build)).
+:- use_module(rdfs(rdfs_label_ext)).
 :- use_module(xml(xml_namespace)).
 
 :- discontiguous(recognized_country/2).
@@ -68,28 +70,29 @@ country options).
 assert_schema_kmc_1700(G):-
   rdf_assert_property(stcnv:landcode, G),
   rdfs_assert_label(stcnv:landcode, nl, 'land van uitgave', G),
-  rdf_assert_literal(stcnv:landcode, stcnv:kb_name, 'KMC 1700', G),
+  rdf_assert_string(stcnv:landcode, stcnv:kb_name, 'KMC 1700', G),
   rdfs_assert_seeAlso(stcnv:landcode,
-    'http://www.kb.nl/kbhtml/stcnhandleiding/1700.html', G),
+      'http://www.kb.nl/kbhtml/stcnhandleiding/1700.html', G),
   rdfs_assert_seeAlso(stcnv:landcode,
-    'http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1700', G),
+      'http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1700', G),
   rdfs_assert_domain(stcnv:landcode, stcnv:'Publication', G),
   rdfs_assert_range(stcnv:landcode, 'iso3166-1':'Country', G),
 
   rdfs_assert_subproperty(stcnv:displayed_country, stcnv:landcode, G),
-  rdfs_assert_label(stcnv:displayed_country, nl,
-    'weergegeven land van uitgave', G),
-  rdfs_assert_comment(stcnv:displayed_country, nl,
-    'In geval van een gefingeerd of onjuist impressum wordt in /2 de\c
-     landcode opgenomen die hoort bij het juiste impressum zoals dat in\c
-     een annotatie is verantwoord.', G),
+  rdfs_assert_language_tagged_string(stcnv:displayed_country,
+      'weergegeven land van uitgave', nl, G),
+  rdfs_assert_comment(stcnv:displayed_country,
+      'In geval van een gefingeerd of onjuist impressum wordt in /2 de\c
+       landcode opgenomen die hoort bij het juiste impressum zoals dat in\c
+       een annotatie is verantwoord.', nl, G),
 
   rdfs_assert_subproperty(stcnv:actual_country, stcnv:landcode, G),
-  rdfs_assert_label(stcnv:actual_country, nl,
-    'daadwerkelijk land van uitgave', G),
+  rdfs_assert_language_tagged_string(stcnv:actual_country, 
+    'daadwerkelijk land van uitgave', ml, G),
 
   rdfs_assert_class(stcnv:'Country', G),
-  rdfs_assert_label(stcnv:'Country', en, 'OCLC country code not supported by ISO', G),
+  rdfs_assert_label(stcnv:'Country', 'OCLC country code not supported by ISO',
+      en, G),
   
   forall(
      unrecognized_country(Abbr1, Name),
@@ -97,7 +100,7 @@ assert_schema_kmc_1700(G):-
         atomic_list_concat(['Country',Abbr1], '/', Abbr2),
         rdf_global_id(stcnv:Abbr2, Abbr3),
         rdf_assert_individual(Abbr3, stcnv:'Country', G),
-        rdfs_assert_label(Abbr3, en, Name, G)
+        rdfs_assert_label(Abbr3, Name, en, G)
      )
   ),
 

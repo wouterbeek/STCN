@@ -23,7 +23,7 @@ These are considered to be the same. Mapped to upper case X using option
 =|case(upper)|=.
 
 @author Wouter Beek
-@version 2013/01-2013/03, 2013/05-2013/06, 2013/09, 2013/12-2014/01
+@version 2013/01-2013/03, 2013/05-2013/06, 2013/09, 2013/12-2014/01, 2014/03
 */
 
 :- use_module(dcg(dcg_ascii)).
@@ -37,14 +37,14 @@ These are considered to be the same. Mapped to upper case X using option
 :- use_module(owl(owl_build)).
 :- use_module(owl(owl_read)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_datatype)).
-:- use_module(rdf(rdf_lit_build)).
-:- use_module(rdf(rdf_lit_read)).
+:- use_module(rdf_term(rdf_datatype)).
+:- use_module(rdf_term(rdf_literal)).
+:- use_module(rdf_term(rdf_literal)).
 :- use_module(rdf(rdf_read)).
 :- use_module(rdf(rdf_stat)).
-:- use_module(rdf(rdf_term)).
+:- use_module(rdf_term(rdf_term)).
 :- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_build)).
+:- use_module(rdfs(rdfs_label_ext)).
 :- use_module(rdfs(rdfs_read)).
 :- use_module(stcn(stcn_generic)).
 :- use_module('SPARQL'('SPARQL_cache')).
@@ -59,26 +59,29 @@ These are considered to be the same. Mapped to upper case X using option
 
 
 assert_schema_kmc_30xx(G):-
+  % Author.
   rdfs_assert_subclass(stcnv:'Author', foaf:'Agent', G),
-  rdfs_assert_label(stcnv:'Author', en, author, G),
-  rdfs_assert_label(stcnv:'Author', nl, auteur, G),
+  rdfs_assert_label(stcnv:'Author', author, en, G),
+  rdfs_assert_label(stcnv:'Author', auteur, nl, G),
   
+  % Has author.
   rdf_assert_property(stcnv:author, G),
-  rdfs_assert_label(stcnv:author, en, 'has author', G),
-  rdfs_assert_label(stcnv:author, nl, 'heeft auteur', G),
+  rdfs_assert_label(stcnv:author, 'has author', en, G),
+  rdfs_assert_label(stcnv:author, 'heeft auteur', nl, G),
   
+  % Author name.
   rdf_assert_property(stcn:author_name, G),
-  rdfs_assert_label(stcnv:author_name, en, 'has author name', G),
-  rdfs_assert_label(stcnv:author_name, nl, 'heeft auteursnaam', G).
+  rdfs_assert_label(stcnv:author_name, 'has author name', en, G),
+  rdfs_assert_label(stcnv:author_name, 'heeft auteursnaam', nl, G).
 
 link_to_dbpedia_agent(G, Agent):-
-  rdf_datatype(Agent, foaf:name, xsd:string, Name, G),
+  rdf_string(Agent, foaf:name, Name, G),
   
   rdf_datatype(Agent, stcnv:birth, xsd:gYear, Birth, G),
-  rdfs_assert_label(stcnv:birth, nl, geboortejaar, G),
+  rdfs_assert_label(stcnv:birth, geboortejaar, nl, G),
   
   rdf_datatype(Agent, stcnv:death, xsd:gYear, Death, G),
-  rdfs_assert_label(stcnv:death, nl, sterftejaar, G),
+  rdfs_assert_label(stcnv:death, sterftejaar, nl, G),
   
   dbpedia_find_agent(Name, Birth, Death, DBpediaAgent),
   owl_assert_resource_identity(Agent, DBpediaAgent, G),
@@ -171,7 +174,7 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
     PPN_Pseudonym,
     (
       rdfs(PPN_Pseudonym, stcnv:author, Author, G),
-      rdf_literal(Author, stcnv:pseudonym, Pseudonym, G)
+      rdf_string(Author, stcnv:pseudonym, Pseudonym, G)
     ),
     PPN_Pseudonyms
   ),
@@ -181,7 +184,7 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   A6 = 'Number of pseudonyms',
   setoff(
     Pseudonym,
-    rdf_literal(_Author, stcnv:pseudonym, Pseudonym, G),
+    rdf_string(_, stcnv:pseudonym, Pseudonym, G),
     NumberOfPseudonyms
   ),
   length(NumberOfPseudonyms, V6),

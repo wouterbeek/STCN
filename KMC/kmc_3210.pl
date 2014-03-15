@@ -89,7 +89,7 @@ Note that additions such as =profeet=, for instance in case of prophet David,
 are not included in a 4-2-2-1 search. [?]
 
 @author Wouter Beek
-@version 2013/01-2013/03, 2013/06, 2013/09
+@version 2013/01-2013/03, 2013/06, 2013/09, 2014/03
 */
 
 :- use_module(dcg(dcg_ascii)).
@@ -97,8 +97,9 @@ are not included in a 4-2-2-1 search. [?]
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_datatype)).
+:- use_module(rdf_term(rdf_datatype)).
 :- use_module(rdf(rdf_stat)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(standards(lexvo)).
 :- use_module(xml(xml_namespace)).
 
@@ -306,7 +307,7 @@ kmc_3210(G, PPN) -->
   {anonymous_popular(Title)},
   atom(Title),
   {
-    rdf_assert_literal(PPN, stcnv:title, Title, G),
+    rdf_assert_string(PPN, stcnv:title, Title, G),
     debug(
       kmc_3210,
       'Recognized title \'~w\' for publication ~w.',

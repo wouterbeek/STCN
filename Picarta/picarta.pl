@@ -13,7 +13,7 @@
     scrape_picarta/2, % +PicartaGraph:atom
                       % +Class:oneof([stcnv:'Author',stcnv:'Printer',stcnv:'Publication',stcnv:'Topic'])
     scrape_picarta_progress/2 % +PicartaGraph:atom
-                              % +STCN_Graph:atom
+                              % +StcnGraph:atom
   ]
 ).
 
@@ -31,7 +31,7 @@ We make a distinction between three portions of code in this module:
     * KMC 1700, country of publication.
 
 @author Wouter Beek
-@version 
+@version 2013/01-2013/04, 2013/06, 2013/09-2013/10, 2014/03
 */
 
 :- use_module(generics(atom_ext)).
@@ -48,6 +48,7 @@ We make a distinction between three portions of code in this module:
 :- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_read)).
 :- use_module(rdf(rdf_stat)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_read)).
 :- use_module(skos(skos_build)).
@@ -74,7 +75,7 @@ We make a distinction between three portions of code in this module:
 process_life_years(G):-
   setoff(
     Agent/LifeYears,
-    rdf_literal(Agent, stcn:life_years, LifeYears, G),
+    rdf_string(Agent, stcn:life_years, LifeYears, G),
     Pairs
   ),
   run_on_sublists(Pairs, process_life_years(G)).
@@ -85,9 +86,9 @@ process_life_years(G, Pairs):-
 process_lifeyears1(G, Agent/LifeYears):-
   atom_codes(LifeYears, LifeYearsCodes),
   parse_date(Birth/Death, LifeYearsCodes-[]),
-  rdf_assert_datatype(Agent, stcnv:birth, xsd:gYear, Birth, G),
-  rdf_assert_datatype(Agent, stcnv:death, xsd:gYear, Death, G),
-  rdf_retractall_literal(Agent, stcn:life_years, G).
+  rdf_assert_datatype(Agent, stcnv:birth, Birth, xsd:gYear, G),
+  rdf_assert_datatype(Agent, stcnv:death, Death, xsd:gYear, G),
+  rdf_retractall_string(Agent, stcn:life_years, G).
 
 
 
@@ -96,7 +97,7 @@ process_lifeyears1(G, Agent/LifeYears):-
 process_name_normals(G):-
   setoff(
     Agent/UnparsedName,
-    rdf_assert_literal(Agent, stcn:name_normal, UnparsedName, G),
+    rdf_assert_string(Agent, stcn:name_normal, UnparsedName, G),
     Pairs
   ),
   run_on_sublists(Pairs, process_name_normals(G)).
@@ -106,8 +107,8 @@ process_name_normals(G, Pairs):-
 
 process_name_normal(G, Agent/UnparsedName):-
   parse_name_normal(UnparsedName, ParsedName),
-  rdf_assert_literal(Agent, foaf:name, ParsedName, G),
-  rdf_retractall_literal(Agent, stcn:name_normal, G).
+  rdf_assert_string(Agent, foaf:name, ParsedName, G),
+  rdf_retractall_string(Agent, stcn:name_normal, G).
 
 parse_name_normal(UnparsedName, ParsedName):-
   sub_atom(
@@ -116,8 +117,7 @@ parse_name_normal(UnparsedName, ParsedName):-
     LengthOfSeparator,
     LengthOfFirstNames,
     ', '
-  ),
-  !,
+  ), !,
   BeginOfFirstNames is EndOfLastNames + LengthOfSeparator,
   sub_atom(
     UnparsedName,
@@ -156,7 +156,7 @@ process_professions(G):-
   assert_schema_profession(G),
   setoff(
     Agent/Profession,
-    rdf_literal(Agent, stcn:profession, Profession, G),
+    rdf_string(Agent, stcn:profession, Profession, G),
     Pairs
   ),
   run_on_sublists(Pairs, process_professions(G)).
@@ -171,44 +171,30 @@ process_profession(G, Agent/Literal):-
 
 process_profession(Agent, Profession, ['-'], G):- !,
   rdf_assert(Agent, stcn:profession, Profession, G),
-  rdf_retractall_literal(Agent, stcn:profession, G).
+  rdf_retractall_string(Agent, stcn:profession, G).
 process_profession(Agent, Profession, YearNames, G):- !,
   rdf_bnode(HasProfession),
   rdf_assert(Agent, stcn:has_profession, HasProfession, G),
   rdf_assert(HasProfession, stcn:profession, Profession, G),
-  findall(
-    YearName,
+  forall(
+    member(YearName, YearNames),
     (
-      member(YearName, YearNames),
       atom_codes(YearName, C1),
       (
         parse_date(Point, C1-[])
       ->
-        rdf_assert_datatype(Agent, stcn:active, xsd:gYear, Point, G)
+        rdf_assert_datatype(Agent, stcn:active, Point, xsd:gYear, G)
       ;
         parse_date(Begin, End, C1-[])
       ->
-        rdf_assert_datatype(Agent, stcn:active_start, xsd:gYear, Begin, G),
-        rdf_assert_datatype(Agent, stcn:active_end, xsd:gYear, End, G)
+        rdf_assert_datatype(Agent, stcn:active_start, Begin, xsd:gYear, G),
+        rdf_assert_datatype(Agent, stcn:active_end, End, xsd:gYear, G)
       )
-    ),
-    _YearNames1
+    )
   ).
-/*
-  % When all life_years are explicitly asserted, the implicit literal can be
-  % removed from the graph.
-  (
-    length(YearNames, Length),
-    length(YearNames1, Length)
-  ->
-    rdf_retractall_literal(Agent, stcn:profession, G)
-  ;
-    true
-  ).
-*/
 
 profession(URI):-
-  translate_profession(_Name, URI).
+  translate_profession(_, URI).
 
 translate_profession(bookseller, URI):-
   rdf_global_id(stcn:bookseller, URI).
@@ -224,8 +210,8 @@ translate_profession(printer, URI):-
 process_pseudonyms(G):-
   forall(
     (
-      rdf_assert_literal(Agent1, stcnv:pseudonym, Pseudonym, G),
-      rdf_assert_literal(Agent2, stcn:author_name, Pseudonym, G)
+      rdf_assert_string(Agent1, stcnv:pseudonym, Pseudonym, G),
+      rdf_assert_string(Agent2, stcn:author_name, Pseudonym, G)
     ),
     (
       owl_assert_resource_identity(Agent1, Agent2, G),
@@ -266,7 +252,7 @@ process_topics_hierarchy(G):-
     List/Topic,
     (
       rdfs_individual_of(Topic, stcnv:'Topic'),
-      rdf_literal(Topic, stcn:synonym, TopicCode1, G),
+      rdf_string(Topic, stcn:synonym, TopicCode1, G),
       atom_codes(TopicCode1, TopicCode2),
       contains([], [decimal_digit], TopicCode2-[]),
       atom_splits(['.',' '], TopicCode1, List)
@@ -290,10 +276,10 @@ subtopics(AllPairs, List/Topic, Topic-Trees):-
   ).
 
 topic_label(Topic, Label):-
-  once(rdf_literal(Vertex, stcn:synonym, Label, _Graph1)).
+  once(rdf_string(Vertex, stcn:synonym, Label, _)).
 
 topic_size(Topic, Size):-
-  beam([], Topic, [Predicate], SubTopics, _SubEdges),
+  beam([], Topic, [Predicate], SubTopics, _),
   setoff(
     Publication,
     (
@@ -326,27 +312,34 @@ scrape_picarta(G, Class):-
   debug(
     picarta,
     'About to scrape ~w individuals of type ~w.\n',
-    [Length, Class]
+    [Length,Class]
   ),
   run_on_sublists(Individuals, scrape_picarta1(G, Class)).
 
-%! scrape_picarta_progress(+PicartaGraph:atom, +STCN_Graph:atom) is det.
+%! scrape_picarta_progress(+PicartaGraph:atom, +StcnGraph:atom) is det.
 % Sends scraping statistics to the debug console.
 %
 % @arg PicartaGraph The atomic name of the Picarta graph.
-% @arg STCN_Graph The atomic name of the STCN graph.
+% @arg StcnGraph The atomic name of the STCN graph.
 
-scrape_picarta_progress(PicartaGraph, STCN_Graph):-
+scrape_picarta_progress(PicartaGraph, StcnGraph):-
+  % Author.
   count_individuals(stcnv:'Author', PicartaGraph, X1),
-  count_individuals(stcnv:'Author', STCN_Graph, Y1),
+  count_individuals(stcnv:'Author', StcnGraph, Y1),
   debug(picarta, 'Authors: ~w of ~w.\n', [X1, Y1]),
+  
+  % Printer.
   count_individuals(stcnv:'Printer', PicartaGraph, X2),
-  count_individuals(stcnv:'Printer', STCN_Graph, Y2),
+  count_individuals(stcnv:'Printer', StcnGraph, Y2),
   debug(picarta, 'Printers: ~w of ~w.\n', [X2, Y2]),
+  
+  % Publications.
   count_individuals(stcnv:'Publication', PicartaGraph, X3),
-  count_individuals(stcnv:'Publication', STCN_Graph, Y3),
+  count_individuals(stcnv:'Publication', StcnGraph, Y3),
   debug(picarta, 'Publications: ~w of ~w.\n', [X3, Y3]),
+  
+  % Topics.
   count_individuals(stcnv:'Topic', PicartaGraph, X4),
-  count_individuals(stcnv:'Topic', STCN_Graph, Y4),
+  count_individuals(stcnv:'Topic', StcnGraph, Y4),
   debug(picarta, 'Topics: ~w of ~w.\n', [X4, Y4]).
 

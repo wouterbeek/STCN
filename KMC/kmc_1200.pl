@@ -197,10 +197,10 @@ kopie van de tp. (zie ook kmc 7134)
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_lit_build)).
+:- use_module(rdf_term(rdf_literal)).
 :- use_module(rdf(rdf_stat)).
 :- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_build)).
+:- use_module(rdfs(rdfs_label_ext)).
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(picarta, 'http://picarta.pica.nl/').
@@ -243,40 +243,47 @@ assert_schema_kmc_1200(G):-
 
   % Typographic value relation.
   rdf_assert_property(stcnv:typographic_property, G),
-  rdfs_assert_label(stcnv:typographic_property, en, 'typographic property', G),
-  rdfs_assert_label(stcnv:typographic_property, nl, 'typografische eigenschap', G),
-  rdf_assert_literal(stcnv:typographic_property, stcnv:kb_name, 'KMC 1200', G),
+  rdfs_assert_label(stcnv:typographic_property, 'typographic property', en,
+      G),
+  rdfs_assert_label(stcnv:typographic_property, 'typografische eigenschap',
+      nl, G),
+  rdf_assert_string(stcnv:typographic_property, stcnv:kb_name, 'KMC 1200', G),
   rdfs_assert_seeAlso(stcnv:typographic_property,
     'http://www.kb.nl/kbhtml/stcnhandleiding/1200.html', G),
-  rdf_assert_literal(stcnv:typographic_property, stcnv:picarta_name, nl,
-    'Typografische informatie', G),
+  rdf_assert_language_tagged_string(stcnv:typographic_property,
+      stcnv:picarta_name, 'Typografische informatie', nl, G),
   rdfs_assert_domain(stcnv:typographic_property, stcnv:'Publication', G),
-  rdfs_assert_range(stcnv:typographic_property, stcnv:'TypografischKenmerk', G),
+  rdfs_assert_range(stcnv:typographic_property, stcnv:'TypografischKenmerk',
+      G),
 
   rdfs_assert_subproperty(stcnv:boekenlijst, stcnv:typographic_property, G),
-  rdfs_assert_label(stcnv:boekenlijst, en, 'list of books', G),
-  rdfs_assert_label(stcnv:boekenlijst, nl, boekenlijst, G),
-  rdfs_assert_range(stcnv:boekenlijst, stcn:'TypografischKenmerk/Boekenlijsten', G),
+  rdfs_assert_label(stcnv:boekenlijst, 'list of books', en, G),
+  rdfs_assert_label(stcnv:boekenlijst, boekenlijst, nl, G),
+  rdfs_assert_range(stcnv:boekenlijst,
+      stcn:'TypografischKenmerk/Boekenlijsten', G),
 
   rdfs_assert_subproperty(stcnv:lettertype, stcnv:typographic_property, G),
-  rdfs_assert_label(stcnv:lettertype, en, 'font type', G),
-  rdfs_assert_label(stcnv:lettertype, nl, lettertype, G),
-  rdfs_assert_range(stcnv:lettertype, stcnv:'TypografischKenmerk/Lettertype', G),
+  rdfs_assert_label(stcnv:lettertype, 'font type', en, G),
+  rdfs_assert_label(stcnv:lettertype, lettertype, nl, G),
+  rdfs_assert_range(stcnv:lettertype, stcnv:'TypografischKenmerk/Lettertype',
+      G),
 
   rdfs_assert_subproperty(stcnv:illustraties, stcnv:typographic_property, G),
-  rdfs_assert_label(stcnv:illustraties, en, illustrations, G),
-  rdfs_assert_label(stcnv:illustraties, nl, illustraties, G),
-  rdfs_assert_range(stcnv:illustraties, stcnv:'TypografischKenmerk/Illustraties', G),
+  rdfs_assert_label(stcnv:illustraties, illustrations, en, G),
+  rdfs_assert_label(stcnv:illustraties, illustraties, nl, G),
+  rdfs_assert_range(stcnv:illustraties,
+      stcnv:'TypografischKenmerk/Illustraties', G),
 
   rdfs_assert_subproperty(stcnv:diversen, stcnv:typographic_property, G),
-  rdfs_assert_label(stcnv:diversen, en, miscellaneous, G),
-  rdfs_assert_label(stcnv:diversen, nl, diversen, G),
+  rdfs_assert_label(stcnv:diversen, miscellaneous, en, G),
+  rdfs_assert_label(stcnv:diversen, diversen, nl, G),
   rdfs_assert_range(stcnv:diversen, stcnv:'TypografischKenmerk/Diversen', G),
 
   rdfs_assert_subproperty(stcnv:titelpagina, stcnv:typographic_property, G),
-  rdfs_assert_label(stcnv:titelpagina, en, titlepage, G),
-  rdfs_assert_label(stcnv:titelpagina, nl, titelpagina, G),
-  rdfs_assert_range(stcnv:titelpagina, stcnv:'TypografischKenmerk/Titelpagina', G).
+  rdfs_assert_label(stcnv:titelpagina, titlepage, en, G),
+  rdfs_assert_label(stcnv:titelpagina, titelpagina, nl, G),
+  rdfs_assert_range(stcnv:titelpagina,
+      stcnv:'TypografischKenmerk/Titelpagina', G).
 
 
 
@@ -467,9 +474,9 @@ kmc_1200_translate('Y', y).
 kmc_1200_picarta(G, PPN) -->
   [Code],
   {code_type(Code, alnum)},
-  " (",
+  ` (`,
   dcg_until([end_mode(inclusive),output_format(atom)], closing_bracket, _),
-  ")",
+  `)`,
   {
     char_code(Char1, Code),
     kmc_1200_table(Category, Char1, _Label, _Comment1),
@@ -488,3 +495,4 @@ kmc_1200_picarta(_G, PPN) -->
 
 statistics_kmc_1200(G, [['Typografosch kenmerk (KMC 1200)','Occurrences']|L]):-
   rdf_property_table(stcnv:typographic_property, G, L).
+

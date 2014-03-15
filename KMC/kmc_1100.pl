@@ -68,12 +68,12 @@ Also see kmc_4040.pl for dating.
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_datatype)).
-:- use_module(rdf(rdf_lit_build)).
+:- use_module(rdf_term(rdf_datatype)).
+:- use_module(rdf_term(rdf_literal)).
 :- use_module(rdf(rdf_read)). % Meta-call.
 :- use_module(rdf(rdf_stat)).
 :- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_build)).
+:- use_module(rdfs(rdfs_label_ext)).
 :- use_module(xml(xml_namespace)).
 :- use_module(xsd(xsd_dateTime_support)).
 :- use_module(xsd(xsd_gYear)).
@@ -85,42 +85,52 @@ Also see kmc_4040.pl for dating.
 
 assert_schema_kmc_1100(G):-
   rdf_assert_property(stcnv:publication_year, G),
-  rdfs_assert_label(stcnv:publication_year, en, 'publication year', G),
-  rdfs_assert_label(stcnv:publication_year, nl, publicatiejaar, G),
+  rdfs_assert_label(stcnv:publication_year, 'publication year', en, G),
+  rdfs_assert_label(stcnv:publication_year, publicatiejaar, nl, G),
   rdfs_assert_domain(stcnv:publication_year, stcnv:'Publication', G),
   rdfs_assert_range(stcnv:publication_year, xsd:gYear, G),
-  rdf_assert_literal(stcnv:publication_year, stcnv:kb_name, 'KMC 1100', G),
+  rdf_assert_string(stcnv:publication_year, stcnv:kb_name, 'KMC 1100', G),
   rdfs_assert_seeAlso(stcnv:publication_year,
-    'http://www.kb.nl/kbhtml/stcnhandleiding/1100.html', G),
-  rdf_assert_literal(stcnv:publication_year, stcnv:picarta_name, nl, 'Jaar', G),
+      'http://www.kb.nl/kbhtml/stcnhandleiding/1100.html', G),
+  rdf_assert_language_tagged_string(stcnv:publication_year,
+      stcnv:picarta_name, 'Jaar', nl, G),
 
-  rdfs_assert_subproperty(stcnv:exact_publication_year, stcnv:publication_year, G),
-  rdfs_assert_label(stcnv:exact_publication_year, en, 'exact publication year', G),
-  rdfs_assert_label(stcnv:exact_publication_year, nl, 'exact publicatiejaar', G),
+  rdfs_assert_subproperty(stcnv:exact_publication_year,
+      stcnv:publication_year, G),
+  rdfs_assert_label(stcnv:exact_publication_year, 'exact publication year',
+      en, G),
+  rdfs_assert_label(stcnv:exact_publication_year, 'exact publicatiejaar', nl,
+      G),
 
   rdfs_assert_subproperty(stcnv:earliest_publication_year, stcnv:publication_year, G),
-  rdfs_assert_label(stcnv:earliest_publication_year, en, 'earliest publication year', G),
-  rdfs_assert_label(stcnv:earliest_publication_year, nl, 'vroegste publicatiejaar', G),
+  rdfs_assert_label(stcnv:earliest_publication_year,
+      'earliest publication year', en, G),
+  rdfs_assert_label(stcnv:earliest_publication_year,
+      'vroegste publicatiejaar', nl, G),
 
-  rdfs_assert_subproperty(stcnv:latest_publication_year, stcnv:publication_year, G),
-  rdfs_assert_label(stcnv:latest_publication_year, en, 'latest publicationyear', G),
-  rdfs_assert_label(stcnv:latest_publication_year, nl, 'laatste publicatiejaar', G).
+  rdfs_assert_subproperty(stcnv:latest_publication_year,
+      stcnv:publication_year, G),
+  rdfs_assert_label(stcnv:latest_publication_year, 'latest publicationyear',
+      en, G),
+  rdfs_assert_label(stcnv:latest_publication_year, 'laatste publicatiejaar',
+      nl, G).
 
 % Year interval.
 kmc_1100(G, PPN) -->
-  year_interval(_Lang, Y1-Y2), !,
+  year_interval(_, Y1-Y2), !,
   {
     newDateTime(Y1, _, _, _, _, _, _, DT1),
-    rdf_assert_datatype(PPN, stcnv:earliest_publication_year, xsd:gYear, DT1, G),
+    rdf_assert_datatype(PPN, stcnv:earliest_publication_year, DT1, xsd:gYear,
+        G),
     newDateTime(Y2, _, _, _, _, _, _, DT2),
-    rdf_assert_datatype(PPN, stcnv:latest_publication_year, xsd:gYear, DT2, G)
+    rdf_assert_datatype(PPN, stcnv:latest_publication_year, DT2, xsd:gYear, G)
   }.
 % Year point.
 kmc_1100(G, PPN) -->
-  year_point(_Lang, Y), !,
+  year_point(_, Y), !,
   {
     newDateTime(Y, _, _, _, _, _, _, DT),
-    rdf_assert_datatype(PPN, stcnv:exact_publication_year, xsd:gYear, DT, G)
+    rdf_assert_datatype(PPN, stcnv:exact_publication_year, DT, xsd:gYear, G)
   }.
 % Cannot parse.
 kmc_1100(_G, PPN) -->
@@ -142,7 +152,7 @@ statistics_kmc_1100(G, [[A1,V1],[A2,V2],[A3,V3]|T]):-
 
   setoff(
     Year,
-    rdf_datatype(_PPN, stcnv:exact_publication_year, xsd:gYear, Year, G),
+    rdf_datatype(_, stcnv:exact_publication_year, Year, xsd:gYear, G),
     Years
   ),
   (
@@ -158,3 +168,4 @@ statistics_kmc_1100(G, [[A1,V1],[A2,V2],[A3,V3]|T]):-
     debug(stcn_statistics, '-- ~w: ~w.', [A4,V4]),
     T = [[A4,V4]]
   ).
+

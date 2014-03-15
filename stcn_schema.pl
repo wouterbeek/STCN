@@ -18,7 +18,7 @@ Schema for the STCN database.
 :- use_module(picarta(picarta_query)). % Make private call.
 :- use_module(rdf(rdf_build)).
 :- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_build)).
+:- use_module(rdfs(rdfs_label_ext)).
 :- use_module(stcn(stcn_kmc)).
 :- use_module(xml(xml_namespace)).
 :- use_module(xsd(xsd_rdf)).
