@@ -23,7 +23,6 @@ These predicate should be converted to some other module or be removed.
 :- use_module(os(datetime_ext)).
 :- use_module(os(file_ext)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_clean)).
 :- use_module(rdf(rdf_graph_name)).
 :- use_module(rdf_term(rdf_literal)).
 :- use_module(rdf_term(rdf_literal)).

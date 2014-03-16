@@ -77,10 +77,10 @@ assert_schema_kmc_30xx(G):-
 link_to_dbpedia_agent(G, Agent):-
   rdf_string(Agent, foaf:name, Name, G),
   
-  rdf_datatype(Agent, stcnv:birth, xsd:gYear, Birth, G),
+  rdf_datatype(Agent, stcnv:birth, Birth, xsd:gYear, G),
   rdfs_assert_label(stcnv:birth, geboortejaar, nl, G),
   
-  rdf_datatype(Agent, stcnv:death, xsd:gYear, Death, G),
+  rdf_datatype(Agent, stcnv:death, Death, xsd:gYear, G),
   rdfs_assert_label(stcnv:death, sterftejaar, nl, G),
   
   dbpedia_find_agent(Name, Birth, Death, DBpediaAgent),
