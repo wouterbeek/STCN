@@ -96,7 +96,7 @@ link_to_dbpedia_agents(G):-
     Agent,
     (
       rdfs_individual_of(Agent, foaf:'Agent'),
-      rdf_subject(G, Agent)
+      rdf_subject(Agent, G)
     ),
     Agents
   ),
