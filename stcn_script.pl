@@ -121,22 +121,23 @@ picarta_scrape_publications_split(_, FromFile, ToFile):-
   rdf_load([format(turtle)], Graph, FromFile),
 
   % Assert occurrences in literal enumerations as separate triples.
-  rdf_split_literal([answer('A')], _, picarta:printer_publisher, G, '; '),
-  debug(stcn_script, 'Printer-publishers were split.', []),
-
-  rdf_strip_literal([answer('A')], [' '], _, picarta:printer_publisher, G),
-  debug(stcn_script, 'Printer-publishers were stripped.', []),
-
-  rdf_split_literal([answer('A')], _, picarta:topical_keyword, G, '; '),
-  debug(stcn_script, 'Topics were split.', []),
-
-  rdf_split_literal(
-    [answer('A')],
-    _,
-    picarta:typographic_information,
-    G,
-    ' , '
+  rdf_update_literal(_, picarta:printer_publisher, _, _, _, Graph,
+      split_lexical_form('; ')
   ),
+  debug(stcn_script, 'Printer-publishers were split.', []),
+  
+  rdf_update_literal(_, picarta:printer_publisher, _, _, _, Graph,
+      lexical_form(strip_atom([' ']))
+  ),
+  debug(stcn_script, 'Printer-publishers were stripped.', []),
+  
+  rdf_update_literal(_, picarta:topical_keyword, _, _, _, Graph,
+      split_lexical_form('; ')
+  ),
+  debug(stcn_script, 'Topics were split.', []),
+  
+  rdf_update_literal(_, picarta:typographic_information, _, _, _, Graph,
+      split_lexical_form(' , ')),
   debug(stcn_script, 'Typographic information was split.', []),
 
   rdf_save([format(turtle)], G, ToFile),
