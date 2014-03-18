@@ -25,7 +25,8 @@ Web front-end for the STCN.
 :- use_module(stcn(stcn_statistics)).
 
 :- http_handler(root(stcn), stcn_web, [prefix,priority(10)]).
-:- initialization(web_module_add('STCN', stcn_web)).
+
+:- web_module_add('STCN', stcn_web).
 
 % /html
 :- db_add_novel(http:location(html, root(html), [])).
@@ -33,23 +34,21 @@ Web front-end for the STCN.
 :- http_handler(html(.), serve_files_in_directory(stcn_html), [prefix]).
 :- html_resource(css('wallace.css'), []).
 
+:- rdf_meta(stcn_web(+,r)).
 
 
-stcn_web(Request):-
-  memberchk(path(Path), Request),
-  atomic_list_concat(Terms, '/', Path), % split
-  last(Terms, PPN),
-  stcn(Request, PPN).
-  (
-    (PPN == '' ; PPN == 'stcn')
-  ->
-    reply_html_file(app_style, stcn)
-  ;
-    reply_html_page(
-      app_style,
-      title('STCN'),
-      [\vertex_web(stcn, PPN),\stcn_statistics_web]
-    )
+
+stcn_web(_Request):-
+  reply_html_file(app_style, stcn).
+
+stcn_web(_Request, PPN):-
+  reply_html_page(
+    app_style,
+    title('STCN'),
+    html([
+      \vertex_web(PPN),
+      \stcn_statistics_web
+    ])
   ).
 
 stcn_statistics_web -->
@@ -61,3 +60,4 @@ stcn_statistics_web -->
       Rows
     )
   ).
+

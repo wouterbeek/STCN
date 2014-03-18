@@ -26,28 +26,26 @@ These are considered to be the same. Mapped to upper case X using option
 @version 2013/01-2013/03, 2013/05-2013/06, 2013/09, 2013/12-2014/01, 2014/03
 */
 
-:- use_module(dcg(dcg_ascii)).
+:- use_module(dbpedia(dbpedia_agent)).
+:- use_module(dcg(dcg_ascii)). % Meta-DCG.
 :- use_module(dcg(dcg_generic)).
 :- use_module(generics(meta_ext)).
 :- use_module(generics(thread_ext)).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
-:- use_module('LOD'(dbpedia)).
 :- use_module(owl(owl_build)).
 :- use_module(owl(owl_read)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf_term(rdf_datatype)).
-:- use_module(rdf_term(rdf_literal)).
-:- use_module(rdf_term(rdf_literal)).
-:- use_module(rdf(rdf_read)).
 :- use_module(rdf(rdf_stat)).
+:- use_module(rdf_term(rdf_datatype)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(rdf_term(rdf_term)).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_label_ext)).
 :- use_module(rdfs(rdfs_read)).
 :- use_module(stcn(stcn_generic)).
-:- use_module('SPARQL'('SPARQL_cache')).
+:- use_module(sparql(sparql_cache)).
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(foaf, 'http://xmlns.com/foaf/0.1/').
@@ -63,12 +61,12 @@ assert_schema_kmc_30xx(G):-
   rdfs_assert_subclass(stcnv:'Author', foaf:'Agent', G),
   rdfs_assert_label(stcnv:'Author', author, en, G),
   rdfs_assert_label(stcnv:'Author', auteur, nl, G),
-  
+
   % Has author.
   rdf_assert_property(stcnv:author, G),
   rdfs_assert_label(stcnv:author, 'has author', en, G),
   rdfs_assert_label(stcnv:author, 'heeft auteur', nl, G),
-  
+
   % Author name.
   rdf_assert_property(stcn:author_name, G),
   rdfs_assert_label(stcnv:author_name, 'has author name', en, G),
@@ -76,13 +74,13 @@ assert_schema_kmc_30xx(G):-
 
 link_to_dbpedia_agent(G, Agent):-
   rdf_string(Agent, foaf:name, Name, G),
-  
+
   rdf_datatype(Agent, stcnv:birth, Birth, xsd:gYear, G),
   rdfs_assert_label(stcnv:birth, geboortejaar, nl, G),
-  
+
   rdf_datatype(Agent, stcnv:death, Death, xsd:gYear, G),
   rdfs_assert_label(stcnv:death, sterftejaar, nl, G),
-  
+
   dbpedia_find_agent(Name, Birth, Death, DBpediaAgent),
   owl_assert_resource_identity(Agent, DBpediaAgent, G),
   debug(
@@ -122,7 +120,7 @@ populate_dbpedia(DBpediaG):-
       rdf_global_id(dbpedia:_, DBpedia_Agent)
     ),
     (
-      'SPARQL_cache'(DBpedia_Agent, _, Propositions),
+      sparql_cache(DBpedia_Agent, _, Propositions),
       forall(
         member([S,P,O], Propositions),
         (

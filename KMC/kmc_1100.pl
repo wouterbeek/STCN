@@ -60,23 +60,22 @@ Also see kmc_4040.pl for dating.
 @version 2013/01-2013/04, 2013/06, 2013/09, 2014/03
 */
 
-:- use_module(dcg(dcg_content)).
+:- use_module(dcg(dcg_content)). % Meta-DCG.
 :- use_module(dcg(dcg_generic)).
-:- use_module(dcg(dcg_year)).
 :- use_module(generics(list_ext)).
 :- use_module(generics(meta_ext)).
 :- use_module(library(debug)).
-:- use_module(library(semweb/rdf_db)).
+:- use_module(nlp(dcg_year)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf_term(rdf_datatype)).
-:- use_module(rdf_term(rdf_literal)).
 :- use_module(rdf(rdf_read)). % Meta-call.
 :- use_module(rdf(rdf_stat)).
+:- use_module(rdf_term(rdf_datatype)).
+:- use_module(rdf_term(rdf_language_tagged_string)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_label_ext)).
 :- use_module(xml(xml_namespace)).
 :- use_module(xsd(xsd_dateTime_support)).
-:- use_module(xsd(xsd_gYear)).
 
 :- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
 :- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').

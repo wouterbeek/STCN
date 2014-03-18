@@ -16,11 +16,9 @@
 */
 
 :- use_module(kmc(kmc_30xx)).
-:- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
-:- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_stat)).
-:- use_module(rdf_term(rdf_literal)).
+:- use_module(rdf_term(rdf_language_tagged_string)).
 :- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_label_ext)).
@@ -33,7 +31,7 @@
 
 assert_schema_kmc_3011(G):-
   assert_schema_kmc_30xx(G),
-  
+
   rdfs_assert_subproperty(stcnv:secondary_author, stcnv:author, G),
   rdfs_assert_label(stcnv:secondary_author, 'secundairy author', en, G),
   rdfs_assert_label(stcnv:secondary_author, 'secundaire auteur', nl, G),

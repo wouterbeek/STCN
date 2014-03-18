@@ -40,12 +40,10 @@ http://picarta.pica.nl/DB=3.11/SET=1/TTL=1/CMD?
 */
 
 :- use_module(kmc(kmc_30xx)).
-:- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
-:- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_stat)).
 :- use_module(rdf_term(rdf_language_tagged_string)).
-:- use_module(rdf_term(rdf_literal)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_label_ext)).
 :- use_module(xml(xml_namespace)).

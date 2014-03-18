@@ -35,8 +35,6 @@ These predicate should be converted to some other module or be removed.
 :- use_module(stcn(stcn_void)).
 :- use_module(void(void_file)).
 
-:- initialization(thread_create(stcn_script, _, [])).
-
 
 
 stcn_script:-

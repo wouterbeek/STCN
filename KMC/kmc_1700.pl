@@ -44,14 +44,13 @@ country options).
 @version 2013/01-2013/06, 2013/09, 2014/03
 */
 
+:- use_module(dcg(dcg_ascii)).
 :- use_module(dcg(dcg_content)).
 :- use_module(geo('iso3166-1')).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
 :- use_module(rdf(rdf_stat)).
-:- use_module(rdf_term(rdf_language_tagged_string)).
-:- use_module(rdf_term(rdf_literal)).
 :- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_label_ext)).
@@ -79,21 +78,20 @@ assert_schema_kmc_1700(G):-
   rdfs_assert_range(stcnv:landcode, 'iso3166-1':'Country', G),
 
   rdfs_assert_subproperty(stcnv:displayed_country, stcnv:landcode, G),
-  rdfs_assert_language_tagged_string(stcnv:displayed_country,
-      'weergegeven land van uitgave', nl, G),
+  rdfs_assert_label(stcnv:displayed_country, 'weergegeven land van uitgave', nl, G),
   rdfs_assert_comment(stcnv:displayed_country,
       'In geval van een gefingeerd of onjuist impressum wordt in /2 de\c
        landcode opgenomen die hoort bij het juiste impressum zoals dat in\c
        een annotatie is verantwoord.', nl, G),
 
   rdfs_assert_subproperty(stcnv:actual_country, stcnv:landcode, G),
-  rdfs_assert_language_tagged_string(stcnv:actual_country, 
-    'daadwerkelijk land van uitgave', ml, G),
+  rdfs_assert_label(stcnv:actual_country, 'daadwerkelijk land van uitgave',
+      nl, G),
 
   rdfs_assert_class(stcnv:'Country', G),
   rdfs_assert_label(stcnv:'Country', 'OCLC country code not supported by ISO',
       en, G),
-  
+
   forall(
      unrecognized_country(Abbr1, Name),
      (

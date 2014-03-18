@@ -7,11 +7,8 @@
     kmc_0500//2, % +Graph:atom
                  % +PPN:uri
 % STATISTICS
-    statistics_kmc_0500/2, % +Graph:atom
-                           % -Rows:list(list)
-% WEB INTERFACE
-    'kmc_0500-1_web'/1, % -DOM:list
-    'kmc_0500-2_web'/1 % -DOM:list
+    statistics_kmc_0500/2 % +Graph:atom
+                          % -Rows:list(list)
   ]
 ).
 
@@ -29,8 +26,8 @@ Encodes the 'status' of a work.
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(rdf(rdf_build)).
-:- use_module(rdf_term(rdf_literal)).
 :- use_module(rdf(rdf_stat)).
+:- use_module(rdf_term(rdf_string)).
 :- use_module(rdfs(rdfs_build)).
 :- use_module(rdfs(rdfs_label_ext)).
 :- use_module(xml(xml_namespace)).
