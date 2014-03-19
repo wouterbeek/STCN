@@ -30,11 +30,6 @@ The STCN SW package.
   create_directory(DebugDirectory),
   assert(user:file_search_path(debug, stcn('Debug'))),
   
-  % Data files directory.
-  absolute_file_name(stcn('RDF-store'), DataDirectory),
-  create_directory(DataDirectory),
-  assert(user:file_search_path(data, stcn('RDF-store'))),
-
   % Standards-supporting data files.
   absolute_file_name(data('Standards'), StandardsDirectory),
   create_directory(StandardsDirectory),
