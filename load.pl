@@ -14,5 +14,7 @@ load_stcn:-
   assert(user:file_search_path(stcn,    ThisDir        )),
   assert(user:file_search_path(kmc,     stcn('KMC'    ))),
   assert(user:file_search_path(picarta, stcn('Picarta'))),
+  assert(user:file_search_path(wnt,     stcn('WNT'    ))),
+  
   use_module(stcn(stcn_web)).
 
