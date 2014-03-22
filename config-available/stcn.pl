@@ -8,6 +8,9 @@ The STCN SW package.
 @version 2013/04
 */
 
+:- use_module(html(html)).
+:- use_module(os(file_ext)).
+
 :- assert(user:file_search_path(kmc,          stcn('KMC'     ))).
 :- assert(user:file_search_path(datasets,     stcn('Datasets'))).
 :- assert(user:file_search_path(generic,      stcn('Generics'))).
@@ -20,9 +23,6 @@ The STCN SW package.
 :-   assert(user:file_search_path(sparql,       generic(sparql        ))).
 :- assert(user:file_search_path(standards,    stcn('Standards'   ))).
 :- assert(user:file_search_path(vocabularies, stcn('Vocabularies'))).
-
-:- use_module(generics(file_ext)).
-:- use_module(standards(html)).
 
 :-
   % Data files directory.
