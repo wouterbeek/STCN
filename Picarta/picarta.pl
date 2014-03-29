@@ -36,9 +36,9 @@ We make a distinction between three portions of code in this module:
 
 :- use_module(generics(atom_ext)).
 :- use_module(generics(list_ext)).
-:- use_module(generics(meta_ext)).
 :- use_module(generics(parse_ext)).
 :- use_module(generics(thread_ext)).
+:- use_module(library(aggregate)).
 :- use_module(library(apply)).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
@@ -73,8 +73,8 @@ We make a distinction between three portions of code in this module:
 % literal to a more explicit assertion.
 
 process_life_years(G):-
-  setoff(
-    Agent/LifeYears,
+  aggregate_all(
+    set(Agent/LifeYears),
     rdf_string(Agent, stcn:life_years, LifeYears, G),
     Pairs
   ),
@@ -95,8 +95,8 @@ process_lifeyears1(G, Agent/LifeYears):-
 % PROCESSING: NAME NORMAL %
 
 process_name_normals(G):-
-  setoff(
-    Agent/UnparsedName,
+  aggregate_all(
+    set(Agent/UnparsedName),
     rdf_assert_string(Agent, stcn:name_normal, UnparsedName, G),
     Pairs
   ),
@@ -154,8 +154,8 @@ assert_schema_profession(G):-
 
 process_professions(G):-
   assert_schema_profession(G),
-  setoff(
-    Agent/Profession,
+  aggregate_all(
+    set(Agent/Profession),
     rdf_string(Agent, stcn:profession, Profession, G),
     Pairs
   ),
@@ -248,8 +248,8 @@ export_topics_hierarchy:-
 % @arg G The atomic name of the graph containing the topic resources.
 
 process_topics_hierarchy(G):-
-  setoff(
-    List/Topic,
+  aggregate_all(
+    set(List/Topic),
     (
       rdfs_individual_of(Topic, stcnv:'Topic'),
       rdf_string(Topic, stcn:synonym, TopicCode1, G),
@@ -265,8 +265,8 @@ process_topics_hierarchy(G):-
   skos_assert_hierarchy(Tree, stcn:'TopicScheme', G).
 
 subtopics(AllPairs, List/Topic, Topic-Trees):-
-  setoff(
-    Tree,
+  aggregate_all(
+    set(Tree),
     (
       member(LongerList/SubTopic, AllPairs),
       append(List, [_], LongerList),
@@ -280,8 +280,8 @@ topic_label(Topic, Label):-
 
 topic_size(Topic, Size):-
   beam([], Topic, [Predicate], SubTopics, _),
-  setoff(
-    Publication,
+  aggregate_all(
+    set(Publication),
     (
       member(SubVertex, SubVertices),
       rdf(Publication, stcnv:topic, SubVertex)
@@ -303,8 +303,8 @@ topic_size(Topic, Size):-
 % @arg Class
 
 scrape_picarta(G, Class):-
-  setoff(
-    Individual,
+  aggregate_all(
+    set(Individual),
     rdfs_individual_of(Individual, Class),
     Individuals
   ),

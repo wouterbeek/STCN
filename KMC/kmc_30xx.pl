@@ -29,8 +29,8 @@ These are considered to be the same. Mapped to upper case X using option
 :- use_module(dbpedia(dbpedia_agent)).
 :- use_module(dcg(dcg_ascii)). % Meta-DCG.
 :- use_module(dcg(dcg_generic)).
-:- use_module(generics(meta_ext)).
 :- use_module(generics(thread_ext)).
+:- use_module(library(aggregate)).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
@@ -90,8 +90,8 @@ link_to_dbpedia_agent(G, Agent):-
   ).
 
 link_to_dbpedia_agents(G):-
-  setoff(
-    Agent,
+  aggregate_all(
+    set(Agent),
     (
       rdfs_individual_of(Agent, foaf:'Agent'),
       rdf_subject(Agent, G)
@@ -138,8 +138,8 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   debug(stcn_statistics, '~w: ~w', [A1,V1]),
 
   A2 = 'Publications with at least one DBpedia author',
-  setoff(
-    DBpediaAuthorPPN,
+  aggregate_all(
+    set(DBpediaAuthorPPN),
     (
       rdfs(DBpediaAuthorPPN, stcnv:author, AuthorPPN, G),
       owl_resource_identity(AuthorPPN, _DBpediaAuthor),
@@ -155,8 +155,8 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   debug(stcn_statistics, '-- ~w: ~w', [A3,V3]),
 
   A4 = 'Number of DBpedia authors (including pseudonyms)',
-  setoff(
-    DBpediaAuthor,
+  aggregate_all(
+    set(DBpediaAuthor),
     (
       rdfs(_PPN, stcnv:author, AuthorPPN, G),
       owl_resource_identity(AuthorPPN, DBpediaAuthor),
@@ -168,8 +168,8 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   debug(stcn_statistics, '-- ~w: ~w', [A4,V4]),
 
   A5 = 'Publications written under at least one pseudonym',
-  setoff(
-    PPN_Pseudonym,
+  aggregate_all(
+    set(PPN_Pseudonym),
     (
       rdfs(PPN_Pseudonym, stcnv:author, Author, G),
       rdf_string(Author, stcnv:pseudonym, Pseudonym, G)
@@ -180,8 +180,8 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   debug(stcn_statistics, '-- ~w: ~w', [A5,V5]),
 
   A6 = 'Number of pseudonyms',
-  setoff(
-    Pseudonym,
+  aggregate_all(
+    set(Pseudonym),
     rdf_string(_, stcnv:pseudonym, Pseudonym, G),
     NumberOfPseudonyms
   ),

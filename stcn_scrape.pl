@@ -18,8 +18,8 @@ Fully automated scrape for the STCN.
 */
 
 :- use_module(generics(atom_ext)).
-:- use_module(generics(meta_ext)).
 :- use_module(generics(list_script)).
+:- use_module(library(aggregate)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
 :- use_module(os(file_ext)).
@@ -89,8 +89,8 @@ stcn_scrape_category_relation('PrinterPublisher', picarta:printer_publisher).
 stcn_scrape_category_relation('TranslatorEditor', picarta:translator_editor).
 
 stcn_scrape_ppns(_G, 'Publication', PPNs):- !,
-  setoff(
-    PPN3,
+  aggregate_all(
+    set(PPN3),
     (
       % @tbd Restrict this to triples in graph `G`.
       rdfs_individual_of(PPN1, stcnv:'Publication'),
@@ -101,8 +101,8 @@ stcn_scrape_ppns(_G, 'Publication', PPNs):- !,
   ).
 stcn_scrape_ppns(G, C, PPNs):-
   once(stcn_scrape_category_relation(C, P)),
-  setoff(
-    PPN3,
+  aggregate_all(
+    set(PPN3),
     (
       rdf(_, P, PPN1, G),
       rdf_global_id(stcn:PPN2, PPN1),

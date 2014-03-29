@@ -11,18 +11,7 @@ The STCN SW package.
 :- use_module(html(html)).
 :- use_module(os(file_ext)).
 
-:- assert(user:file_search_path(kmc,          stcn('KMC'     ))).
-:- assert(user:file_search_path(datasets,     stcn('Datasets'))).
-:- assert(user:file_search_path(generic,      stcn('Generics'))).
-:-   assert(user:file_search_path(graph_theory, generic('Graph Theory'))).
-:-   assert(user:file_search_path(math,         generic('Math'        ))).
-:-   assert(user:file_search_path(owl,          generic('OWL'         ))).
-:-   assert(user:file_search_path(rdf,          generic('RDF'         ))).
-:-   assert(user:file_search_path(rdfs,         generic('RDFS'        ))).
-:-   assert(user:file_search_path(skos,         generic('SKOS'        ))).
-:-   assert(user:file_search_path(sparql,       generic(sparql        ))).
-:- assert(user:file_search_path(standards,    stcn('Standards'   ))).
-:- assert(user:file_search_path(vocabularies, stcn('Vocabularies'))).
+user:file_search_path(kmc, stcn('KMC').
 
 :-
   % Data files directory.
@@ -48,8 +37,8 @@ The STCN SW package.
 :- use_module(cliopatria(hooks)).
 :- use_module(library(http/http_dispatch)).
 
-:- db_add_novel(http:location(stcn, cliopatria(stcn), [])).
-
+:- multifile(http:location/3).
+http:location(stcn, cliopatria(stcn), []).
 :- http_handler(stcn(stcn_main), stcn_main, []).
 
 cliopatria:menu_item(100=stcn/stcn_main, 'Dataset info').

@@ -63,7 +63,7 @@ Also see kmc_4040.pl for dating.
 :- use_module(dcg(dcg_content)). % Meta-DCG.
 :- use_module(dcg(dcg_generic)).
 :- use_module(generics(list_ext)).
-:- use_module(generics(meta_ext)).
+:- use_module(library(aggregate)).
 :- use_module(library(debug)).
 :- use_module(nlp(dcg_year)).
 :- use_module(rdf(rdf_build)).
@@ -149,8 +149,8 @@ statistics_kmc_1100(G, [[A1,V1],[A2,V2],[A3,V3]|T]):-
   count_subjects(stcnv:earliest_publication_year, _, G, V3),
   debug(stcn_statistics, '-- ~w: ~w', [A3,V3]),
 
-  setoff(
-    Year,
+  aggregate_all(
+    set(Year),
     rdf_datatype(_, stcnv:exact_publication_year, Year, xsd:gYear, G),
     Years
   ),

@@ -120,8 +120,8 @@ Extra space at beginning.
 :- rdf_meta(kmc_4062_extra(?,r)).
 :- rdf_meta(translate_format(r,?)).
 
-:- db_add_novel(user:file_search_path(images, project('Images'))).
-:- db_add_novel(user:prolog_file_type(png, png)).
+user:file_search_path(images, project('Images')).
+user:prolog_file_type(png, png).
 
 
 

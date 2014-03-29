@@ -29,8 +29,9 @@ Web front-end for the STCN.
 :- web_module_add('STCN', stcn_web).
 
 % /html
-:- db_add_novel(http:location(html, root(html), [])).
-:- db_add_novel(user:file_search_path(stcn_html, stcn('HTML'))).
+:- multifile(http:location/3).
+http:location(html, root(html), []).
+user:file_search_path(stcn_html, stcn('HTML')).
 :- http_handler(html(.), serve_files_in_directory(stcn_html), [prefix]).
 :- html_resource(css('wallace.css'), []).
 
