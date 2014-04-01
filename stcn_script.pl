@@ -26,7 +26,7 @@ These predicate should be converted to some other module or be removed.
 :- use_module(rdf(rdf_graph_name)).
 :- use_module(rdf_term(rdf_literal)).
 :- use_module(rdf_term(rdf_literal)).
-:- use_module(rdf(rdf_serial)).
+:- use_module(rdf_file(rdf_serial)).
 :- use_module(stcn(collect_lines)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(stcn(stcn_parse)).
