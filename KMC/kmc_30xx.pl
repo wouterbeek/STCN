@@ -98,7 +98,7 @@ link_to_dbpedia_agents(G):-
     ),
     Agents
   ),
-  run_on_sublists(Agents, link_to_dbpedia_agents(G)).
+  run_on_sublists(Agents, link_to_dbpedia_agents(G), 10).
 
 link_to_dbpedia_agents(G, Agents):-
   maplist(link_to_dbpedia_agent(G), Agents).

@@ -78,7 +78,7 @@ process_life_years(G):-
     rdf_string(Agent, stcn:life_years, LifeYears, G),
     Pairs
   ),
-  run_on_sublists(Pairs, process_life_years(G)).
+  run_on_sublists(Pairs, process_life_years(G), 10).
 
 process_life_years(G, Pairs):-
   maplist(process_lifeyears1(G), Pairs).
@@ -100,7 +100,7 @@ process_name_normals(G):-
     rdf_assert_string(Agent, stcn:name_normal, UnparsedName, G),
     Pairs
   ),
-  run_on_sublists(Pairs, process_name_normals(G)).
+  run_on_sublists(Pairs, process_name_normals(G), 10).
 
 process_name_normals(G, Pairs):-
   maplist(process_name_normal(G), Pairs).
@@ -159,7 +159,7 @@ process_professions(G):-
     rdf_string(Agent, stcn:profession, Profession, G),
     Pairs
   ),
-  run_on_sublists(Pairs, process_professions(G)).
+  run_on_sublists(Pairs, process_professions(G), 10).
 
 process_professions(G, Pairs):-
   maplist(process_profession(G), Pairs).
@@ -314,7 +314,7 @@ scrape_picarta(G, Class):-
     'About to scrape ~w individuals of type ~w.\n',
     [Length,Class]
   ),
-  run_on_sublists(Individuals, scrape_picarta1(G, Class)).
+  run_on_sublists(Individuals, scrape_picarta1(G, Class), 10).
 
 %! scrape_picarta_progress(+PicartaGraph:atom, +StcnGraph:atom) is det.
 % Sends scraping statistics to the debug console.
