@@ -26,7 +26,7 @@ Web front-end for the STCN.
 
 :- http_handler(root(stcn), stcn_web, [prefix,priority(10)]).
 
-:- web_module_add('STCN', stcn_web).
+user:web_module('STCN', stcn_web).
 
 % /html
 :- multifile(http:location/3).
