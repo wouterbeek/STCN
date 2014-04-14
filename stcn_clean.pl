@@ -10,7 +10,7 @@
 Cleaning the STCN database.
 
 This assumes that the STCN_SCRAPE script has been successfully completed
-and the STCN graph files are in =|/Data|=.
+and the STCN graph files are in the `data` subdirectory.
 
 @author Wouter Beek
 @version 2013/01-2013/03, 2013/06, 2013/09, 2014/03
