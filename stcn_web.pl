@@ -20,7 +20,6 @@ Web front-end for the STCN.
 :- use_module(library(http/html_write)).
 :- use_module(library(lists)).
 :- use_module(server(app_ui)).
-:- use_module(server(web_error)).
 :- use_module(server(web_modules)).
 :- use_module(stcn(stcn_statistics)).
 
