@@ -54,7 +54,9 @@ are mapped to ISO 639-3 for language families.
 
 !!kmc_1500!!'iso639-5'!!2!!
 
-TODO: See whether languages can be related to their language families.
+@tbd See whether languages can be related to their language families.
+
+--
 
 @author Wouter Beek
 @tbd http://www.kb.nl/kbhtml/stcnhandleiding/1500.html

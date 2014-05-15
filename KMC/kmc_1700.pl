@@ -30,7 +30,7 @@ KMC 1700 contains the country code.
 !!kmc_1700!!unrecognized_country!!2!!
 
 Some of these countries no longer exist, e.g. Czechoslovakia (code =cs=).
-TODO: See whether these countries can be related to their current equivalents,
+@tbd See whether these countries can be related to their current equivalents,
 using the city of the publisher as well (to discriminate between multiple
 country options).
 

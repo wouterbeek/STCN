@@ -66,7 +66,7 @@ the =OtherFormat= main format, which takes no modifiers).
 | =|2ê|=                 | =|2°|=                 | E.g. PPN 108495264                   |
 | <m> x <n> mm           | =Unknown=              | E.g. PPN 317798766                   |
 
-TODO: Verify this using KMC 2275 redundancy.
+@tbd Verify this using KMC 2275 redundancy.
 
 # PPN 333614321
 
