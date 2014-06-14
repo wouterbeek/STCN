@@ -26,7 +26,6 @@ These are considered to be the same. Mapped to upper case X using option
 @version 2013/01-2013/03, 2013/05-2013/06, 2013/09, 2013/12-2014/01, 2014/03
 */
 
-:- use_module(dbpedia(dbpedia_agent)).
 :- use_module(dcg(dcg_ascii)). % Meta-DCG.
 :- use_module(dcg(dcg_generic)).
 :- use_module(generics(thread_ext)).
@@ -45,7 +44,10 @@ These are considered to be the same. Mapped to upper case X using option
 :- use_module(rdfs(rdfs_label_ext)).
 :- use_module(rdfs(rdfs_read)).
 :- use_module(stcn(stcn_generic)).
-:- use_module(sparql(sparql_cache)).
+
+:- use_module(plSparql(sparql_api)).
+:- use_module(plSparql(sparql_cache)).
+
 :- use_module(xml(xml_namespace)).
 
 :- xml_register_namespace(foaf, 'http://xmlns.com/foaf/0.1/').
@@ -81,7 +83,15 @@ link_to_dbpedia_agent(G, Agent):-
   rdf_datatype(Agent, stcnv:death, Death, xsd:gYear, G),
   rdfs_assert_label(stcnv:death, sterftejaar, nl, G),
 
-  dbpedia_find_agent(Name, Birth, Death, DBpediaAgent),
+  sparql_select(dbpedia, [dbp,foaf], [writer], [
+      rdf(var(writer), rdf:type, foaf:'Person'),
+      rdf(var(writer), rdfs:label, var(label)),
+      filter(regex(var(label), string(Name), [case_insensitive])),
+      rdf(var(writer), dbpprop:dateOfBirth, var(birth)),
+      filter(regex(var(birth), string(Birth))),
+      rdf(var(writer), dbpprop:dateOfDeath, var(death)),
+      filter(regex(var(death), string(Death)))
+    ], DBpediaAgent, [distinct(true),limit(1)]).
   owl_assert_resource_identity(Agent, DBpediaAgent, G),
   debug(
     dbpedia,
