@@ -7,3 +7,30 @@
 [submodule "plSparql"]
 	path = plSparql
 	url = https://github.com/wouterbeek/plSparql.git
+[submodule "plGraph"]
+	path = plGraph
+	url = https://github.com/wouterbeek/plGraph.git
+[submodule "plHtml"]
+	path = plHtml
+	url = https://github.com/wouterbeek/plHtml.git
+[submodule "plHttp"]
+	path = plHttp
+	url = https://github.com/wouterbeek/plHttp.git
+[submodule "plLangTag"]
+	path = plLangTag
+	url = https://github.com/wouterbeek/plLangTag.git
+[submodule "plSet"]
+	path = plSet
+	url = https://github.com/wouterbeek/plSet.git
+[submodule "plTree"]
+	path = plTree
+	url = https://github.com/wouterbeek/plTree.git
+[submodule "plUri"]
+	path = plUri
+	url = https://github.com/wouterbeek/plUri.git
+[submodule "plXml"]
+	path = plXml
+	url = https://github.com/wouterbeek/plXml.git
+[submodule "plXsd"]
+	path = plXsd
+	url = https://github.com/wouterbeek/plXsd.git

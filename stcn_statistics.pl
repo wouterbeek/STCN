@@ -94,30 +94,31 @@ Note that only includes about half of the STCN data.
 New parse results are coming soon!
 
 @author Wouter Beek
-@version 2013/01-2013/03, 2013/06
+@version 2013/01-2013/03, 2013/06, 2015/02
 */
 
-:- use_module(rdf(rdf_stat)).
-:- use_module(kmc(kmc_0500)).
-:- use_module(kmc(kmc_1100)).
-:- use_module(kmc(kmc_1200)).
-:- use_module(kmc(kmc_1500)).
-:- use_module(kmc(kmc_1700)).
-:- use_module(kmc(kmc_3000)).
-:- use_module(kmc(kmc_3011)).
-:- use_module(kmc(kmc_4062)).
 :- use_module(library(debug)).
 :- use_module(library(lists)).
-:- use_module(xml(xml_namespace)).
 
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
+:- use_module(plRdf(vocabulary/rdf_stat)).
+
+:- use_module(stcn(kmc/kmc_0500)).
+:- use_module(stcn(kmc/kmc_1100)).
+:- use_module(stcn(kmc/kmc_1200)).
+:- use_module(stcn(kmc/kmc_1500)).
+:- use_module(stcn(kmc/kmc_1700)).
+:- use_module(stcn(kmc/kmc_3000)).
+:- use_module(stcn(kmc/kmc_3011)).
+:- use_module(stcn(kmc/kmc_4062)).
 
 
 
-stcn_statistics([[A1, V1] | Rows]):-
+
+
+stcn_statistics([[A1,V1]|Rows]):-
   % Generic statistics.
   A1 = 'Parsed PPNs',
-  count_individuals(stcnv:'Publication', stcn, V1),
+  count_individuals(stcno:'Publication', stcn, V1),
   debug(stcn_statistics, '~w: ~w', [A1, V1]),
 
   statistics_kmc_0500(_, Rows0500),

@@ -1,4 +1,5 @@
 *~
-Data/*
+data/*
+*.db
 *.ttl
 .Rhistory

@@ -8,17 +8,17 @@ The STCN SW package.
 @version 2013/04
 */
 
-:- use_module(html(html)).
-:- use_module(os(file_ext)).
+:- use_module(plHtml(html)).
+:- use_module(plc(io/dir_ext)).
 
-user:file_search_path(kmc, stcn('KMC').
+:- initialization(init).
 
-:-
+init:-
   % Data files directory.
   absolute_file_name(stcn('Debug'), DebugDirectory),
   create_directory(DebugDirectory),
   assert(user:file_search_path(debug, stcn('Debug'))),
-  
+
   % Standards-supporting data files.
   absolute_file_name(data('Standards'), StandardsDirectory),
   create_directory(StandardsDirectory),
@@ -37,8 +37,10 @@ user:file_search_path(kmc, stcn('KMC').
 :- use_module(cliopatria(hooks)).
 :- use_module(library(http/http_dispatch)).
 
+:- dynamic(http:location/3).
 :- multifile(http:location/3).
 http:location(stcn, cliopatria(stcn), []).
+
 :- http_handler(stcn(stcn_main), stcn_main, []).
 
 cliopatria:menu_item(100=stcn/stcn_main, 'Dataset info').

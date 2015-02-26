@@ -13,22 +13,23 @@ Parser for the STCN redactiebladen file.
 This parses 139.817 PPN entries in the redactiebladen file.
 
 @author Wouter Beek
-@version 2013/09
+@version 2013/09, 2015/02
 */
 
-:- use_module(dcg(dcg_content)).
-:- use_module(dcg(dcg_generic)).
 :- use_module(library(debug)).
 :- use_module(library(pio)).
-:- use_module(rdf(rdf_build)).
+
+:- use_module(plc(dcg/content)).
+:- use_module(plc(dcg/dcg_generics)).
+
+:- use_module(plRdf(api/rdf_build)).
+
 :- use_module(stcn(stcn_generic)).
 :- use_module(stcn(stcn_kmc)).
-:- use_module(xml(xml_namespace)).
-
-:- xml_register_namespace(stcn,  'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 :- assert(user:prolog_file_type(txt, text)).
+
+
 
 
 
@@ -48,7 +49,7 @@ redactiebladen(G, _PPN) -->
   {
     flag(publications, N, N + 1),
     (N rem 1000 =:= 0 -> debug(stcn_parse, '~w PPNs parsed.', [N]) ; true),
-    rdf_assert_individual(PPN, stcnv:'Publication', G)
+    rdf_assert_instance(PPN, stcno:'Publication', G)
   },
   dcg_until([end_mode(inclusive)], end_of_line, _),
   redactiebladen(G, PPN).

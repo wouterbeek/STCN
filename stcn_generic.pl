@@ -17,19 +17,16 @@ Things that are used throughout the STCN project,
 but are not generic enough to be in PGC.
 
 @author Wouter Beek
-@version 2013/06, 2013/09-2013/10
+@version 2013/06, 2013/09-2013/10, 2015/02
 */
 
-:- use_module(dcg(dcg_ascii)).
-:- use_module(dcg(dcg_multi)).
-:- use_module(library(semweb/rdf_db)).
-:- use_module(xml(xml_namespace)).
+:- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
-:- xml_register_namespace(foaf,  'http://xmlns.com/foaf/0.1/').
-:- xml_register_namespace(stcn,  'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
+:- use_module(plc(dcg/dcg_ascii)).
 
 :- rdf_meta(category_class(?,r)).
+
+
 
 
 

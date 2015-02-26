@@ -1,20 +1,36 @@
 % The load file for the STCN project.
 
-:- multifile(user:project/2).
-user:project('STCN', 'Short Title Catalogue of the Netherlands').
+:- use_module(library(ansi_term)).
 
-:- initialization(load_stcn).
+:- dynamic(user:project/3).
+:- multifile(user:project/3).
+user:project('STCN', 'Short Title Catalogue of the Netherlands', stcn).
 
-load_stcn:-
-  % Entry point.
-  source_file(load_stcn, ThisFile),
-  file_directory_name(ThisFile, ThisDir),
+:- use_module(load_project).
+:- load_project([
+  plc-'Prolog-Library-Collection',
+  plGraph,
+  plHtml,
+  plHttp,
+  plLangTag,
+  plRdf,
+  plSet,
+  plSparql,
+  plTree,
+  plUri,
+  plXml,
+  plXsd
+]).
 
-  % STCN
-  assert(user:file_search_path(stcn,    ThisDir        )),
-  assert(user:file_search_path(kmc,     stcn('KMC'    ))),
-  assert(user:file_search_path(picarta, stcn('Picarta'))),
-  assert(user:file_search_path(wnt,     stcn('WNT'    ))),
-  
-  use_module(stcn(stcn_web)).
+
+
+:- use_module(library(semweb/rdf_db), except([rdf_node/1])).
+
+:- rdf_register_prefix(picarta, 'http://picarta.pica.nl/').
+:- rdf_register_prefix(stcn, 'http://stcn.org/resource/').
+:- rdf_register_prefix(stcno, 'http://stcn.org/ontology/').
+
+
+:- use_module(plRdf(management/rdf_prefixes)).
+:- assert_cc_prefixes.
 

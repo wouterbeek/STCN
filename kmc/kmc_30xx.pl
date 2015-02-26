@@ -23,65 +23,57 @@ These are considered to be the same. Mapped to upper case X using option
 =|case(upper)|=.
 
 @author Wouter Beek
-@version 2013/01-2013/03, 2013/05-2013/06, 2013/09, 2013/12-2014/01, 2014/03
+@version 2013/01-2013/03, 2013/05-2013/06, 2013/09, 2013/12-2014/01, 2014/03,
+         2015/02
 */
 
-:- use_module(dcg(dcg_ascii)). % Meta-DCG.
-:- use_module(dcg(dcg_generic)).
-:- use_module(generics(thread_ext)).
 :- use_module(library(aggregate)).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
-:- use_module(owl(owl_build)).
-:- use_module(owl(owl_read)).
-:- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_stat)).
-:- use_module(rdf_term(rdf_datatype)).
-:- use_module(rdf_term(rdf_string)).
-:- use_module(rdf_term(rdf_term)).
-:- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_ext)).
-:- use_module(rdfs(rdfs_read)).
+
+:- use_module(plc(dcg/dcg_ascii)). % Meta-DCG.
+:- use_module(plc(dcg/dcg_generics)).
+:- use_module(plc(process/thread_ext)).
+
+:- use_module(plRdf(api/rdf_build)).
+:- use_module(plRdf(api/rdfs_read)).
+:- use_module(plRdf(owl/owl_build)).
+:- use_module(plRdf(owl/owl_read)).
+:- use_module(plRdf(vocabulary/rdf_stat)).
+
 :- use_module(stcn(stcn_generic)).
-
-:- use_module(plSparql(sparql_api)).
-:- use_module(plSparql(sparql_cache)).
-
-:- use_module(xml(xml_namespace)).
-
-:- xml_register_namespace(foaf, 'http://xmlns.com/foaf/0.1/').
-:- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
 
 :- rdf_meta(link_to_dbpedia_agent(+,r)).
 
 
 
+
+
 assert_schema_kmc_30xx(G):-
   % Author.
-  rdfs_assert_subclass(stcnv:'Author', foaf:'Agent', G),
-  rdfs_assert_label(stcnv:'Author', author, en, G),
-  rdfs_assert_label(stcnv:'Author', auteur, nl, G),
+  rdfs_assert_subclass(stcno:'Author', foaf:'Agent', G),
+  rdfs_assert_label(stcno:'Author', author, en, G),
+  rdfs_assert_label(stcno:'Author', auteur, nl, G),
 
   % Has author.
-  rdf_assert_property(stcnv:author, G),
-  rdfs_assert_label(stcnv:author, 'has author', en, G),
-  rdfs_assert_label(stcnv:author, 'heeft auteur', nl, G),
+  rdf_assert_property(stcno:author, G),
+  rdfs_assert_label(stcno:author, 'has author', en, G),
+  rdfs_assert_label(stcno:author, 'heeft auteur', nl, G),
 
   % Author name.
   rdf_assert_property(stcn:author_name, G),
-  rdfs_assert_label(stcnv:author_name, 'has author name', en, G),
-  rdfs_assert_label(stcnv:author_name, 'heeft auteursnaam', nl, G).
+  rdfs_assert_label(stcno:author_name, 'has author name', en, G),
+  rdfs_assert_label(stcno:author_name, 'heeft auteursnaam', nl, G).
 
 link_to_dbpedia_agent(G, Agent):-
   rdf_string(Agent, foaf:name, Name, G),
 
-  rdf_datatype(Agent, stcnv:birth, Birth, xsd:gYear, G),
-  rdfs_assert_label(stcnv:birth, geboortejaar, nl, G),
+  rdf_datatype(Agent, stcno:birth, Birth, xsd:gYear, G),
+  rdfs_assert_label(stcno:birth, geboortejaar, nl, G),
 
-  rdf_datatype(Agent, stcnv:death, Death, xsd:gYear, G),
-  rdfs_assert_label(stcnv:death, sterftejaar, nl, G),
+  rdf_datatype(Agent, stcno:death, Death, xsd:gYear, G),
+  rdfs_assert_label(stcno:death, sterftejaar, nl, G),
 
   sparql_select(dbpedia, [dbp,foaf], [writer], [
       rdf(var(writer), rdf:type, foaf:'Person'),
@@ -144,14 +136,14 @@ populate_dbpedia(DBpediaG):-
 
 statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   A1 = 'Publications with at least one author',
-  count_subjects(stcnv:author, _, G, V1),
+  count_subjects(stcno:author, _, G, V1),
   debug(stcn_statistics, '~w: ~w', [A1,V1]),
 
   A2 = 'Publications with at least one DBpedia author',
   aggregate_all(
     set(DBpediaAuthorPPN),
     (
-      rdfs(DBpediaAuthorPPN, stcnv:author, AuthorPPN, G),
+      rdfs(DBpediaAuthorPPN, stcno:author, AuthorPPN, G),
       owl_resource_identity(AuthorPPN, _DBpediaAuthor),
       rdf_global_id(dbpedia:_, DBpediaAuthor)
     ),
@@ -161,14 +153,14 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   debug(stcn_statistics, '-- ~w: ~w', [A2,V2]),
 
   A3 = 'Number of authors (including pseudonyms)',
-  count_individuals(stcnv:'Author', G, V3),
+  count_individuals(stcno:'Author', G, V3),
   debug(stcn_statistics, '-- ~w: ~w', [A3,V3]),
 
   A4 = 'Number of DBpedia authors (including pseudonyms)',
   aggregate_all(
     set(DBpediaAuthor),
     (
-      rdfs(_PPN, stcnv:author, AuthorPPN, G),
+      rdfs(_PPN, stcno:author, AuthorPPN, G),
       owl_resource_identity(AuthorPPN, DBpediaAuthor),
       rdf_global_id(dbpedia:_, DBpediaAuthor)
     ),
@@ -181,8 +173,8 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   aggregate_all(
     set(PPN_Pseudonym),
     (
-      rdfs(PPN_Pseudonym, stcnv:author, Author, G),
-      rdf_string(Author, stcnv:pseudonym, Pseudonym, G)
+      rdfs(PPN_Pseudonym, stcno:author, Author, G),
+      rdf_string(Author, stcno:pseudonym, Pseudonym, G)
     ),
     PPN_Pseudonyms
   ),
@@ -192,7 +184,7 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   A6 = 'Number of pseudonyms',
   aggregate_all(
     set(Pseudonym),
-    rdf_string(_, stcnv:pseudonym, Pseudonym, G),
+    rdf_string(_, stcno:pseudonym, Pseudonym, G),
     NumberOfPseudonyms
   ),
   length(NumberOfPseudonyms, V6),

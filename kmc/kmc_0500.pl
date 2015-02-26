@@ -20,23 +20,20 @@ Encodes the 'status' of a work.
 @see http://www.kb.nl/kbhtml/stcnhandleiding/0500.html
 @see http://support.oclc.org/ggc/richtlijnen/php/showPresentation.php?id=12&ln=nl&sec=k-0500
 @see http://support.oclc.org/ggc/richtlijnen/php/showPresentation.php?id=13&ln=nl&par=p-103
-@version 2013/01-2013/04, 2013/06, 2013/09
+@version 2013/01-2013/04, 2013/06, 2013/09, 2015/02
 */
 
 :- use_module(library(debug)).
-:- use_module(library(semweb/rdf_db)).
-:- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_stat)).
-:- use_module(rdf_term(rdf_string)).
-:- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_ext)).
-:- use_module(xml(xml_namespace)).
+:- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
-:- xml_register_namespace(stcn,  'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
+:- use_module(plRdf(api/rdf_build)).
+:- use_module(plRdf(api/rdf_read)).
+:- use_module(plRdf(vocabulary/rdf_stat)).
 
 :- meta_predicate(kmc_0500_oclc(+,+,+,3)).
 :- meta_predicate(kmc_0500_status_value(3,+,-,-)).
+
+
 
 
 
@@ -44,112 +41,145 @@ Encodes the 'status' of a work.
 
 assert_schema_kmc_0500(G):-
   % Status values
-  rdfs_assert_class(stcnv:'StatusValue', G),
-  rdfs_assert_label(stcnv:'StatusValue', 'status value', G),
-  rdfs_assert_comment(stcnv:'StatusValue',
-    'The GGC assigns meaning to each status code individually.', G),
-  rdfs_assert_seeAlso(stcnv:'StatusValue',
-    'http://support.oclc.org/ggc/richtlijnen/php/showPresentation.php?id=12&ln=nl&sec=k-0500', G),
+  rdfs_assert_class(stcno:'StatusValue', G),
+  rdfs_assert_label(stcno:'StatusValue', 'status value', G),
+  rdfs_assert_comment(
+    stcno:'StatusValue',
+    'The GGC assigns meaning to each status code individually.',
+    G
+  ),
+  rdfs_assert_seeAlso(
+    stcno:'StatusValue',
+    'http://support.oclc.org/ggc/richtlijnen/php/showPresentation.php?id=12&ln=nl&sec=k-0500',
+    G
+  ),
 
   % STCN status values
-  rdfs_assert_subclass(stcnv:'StatusValue/STCN', stcnv:'StatusValue', G),
-  rdfs_assert_label(stcnv:'StatusValue/STCN', 'STCN status value', G),
-  rdfs_assert_comment(stcnv:'StatusValue/STCN',
-    'The STCN assigns extra meaning to the three status codes combined.', G),
-  rdfs_assert_seeAlso(stcnv:'StatusValue/STCN',
-    'http://www.kb.nl/kbhtml/stcnhandleiding/0500.html', G),
+  rdfs_assert_subclass(stcno:'StatusValue/STCN', stcno:'StatusValue', G),
+  rdfs_assert_label(stcno:'StatusValue/STCN', 'STCN status value', G),
+  rdfs_assert_comment(
+    stcno:'StatusValue/STCN',
+    'The STCN assigns extra meaning to the three status codes combined.',
+    G
+  ),
+  rdfs_assert_seeAlso(
+    stcno:'StatusValue/STCN',
+    'http://www.kb.nl/kbhtml/stcnhandleiding/0500.html',
+    G
+  ),
 
   % Monograph
-  rdf_assert_individual(stcnv:'Aav', stcnv:'StatusValue/STCN', G),
-  rdfs_assert_label(stcnv:'Aav', en, monograph, G),
-  rdfs_assert_label(stcnv:'Aav', nl, monografie, G),
+  rdf_assert_instance(stcno:'Aav', stcno:'StatusValue/STCN', G),
+  rdfs_assert_label(stcno:'Aav', monograph, G),
+  rdfs_assert_label(stcno:'Aav', [nl]-monografie, G),
 
   % Multipart work
-  rdf_assert_individual(stcnv:'Abv', stcnv:'StatusValue/STCN', G),
-  rdfs_assert_label(stcnv:'Abv', en, 'multipart work', G),
-  rdfs_assert_label(stcnv:'Abv', nl, 'meerdelig werk', G),
+  rdf_assert_instance(stcno:'Abv', stcno:'StatusValue/STCN', G),
+  rdfs_assert_label(stcno:'Abv', 'multipart work', G),
+  rdfs_assert_label(stcno:'Abv', [nl]-'meerdelig werk', G),
 
   % Magazine
-  rdf_assert_individual(stcnv:'Acv', stcnv:'StatusValue/STCN', G),
-  rdfs_assert_label(stcnv:'Acv', en, magazine, G),
-  rdfs_assert_label(stcnv:'Acv', nl, tijdschrift, G),
+  rdf_assert_instance(stcno:'Acv', stcno:'StatusValue/STCN', G),
+  rdfs_assert_label(stcno:'Acv', magazine, G),
+  rdfs_assert_label(stcno:'Acv', [nl]-tijdschrift, G),
 
   % First position status values.
-  rdfs_assert_subclass(stcnv:'StatusValue/Pos1', stcnv:'StatusValue', G),
+  rdfs_assert_subclass(stcno:'StatusValue/Pos1', stcno:'StatusValue', G),
   forall(
     'kmc_0500-1'(Char, Label, Comment),
     (
       kmc_0500_status_value('kmc_0500-1', Char, Value, _Pred1),
-      rdf_assert_individual(Value, stcnv:'StatusValue/Pos1', G),
+      rdf_assert_instance(Value, stcno:'StatusValue/Pos1', G),
       rdfs_assert_label(Value, nl, Label, G),
       rdfs_assert_comment(Value, nl, Comment, G)
     )
   ),
 
   % Second position status values.
-  rdfs_assert_subclass(stcnv:'StatusValue/Pos2', stcnv:'StatusValue', G),
+  rdfs_assert_subclass(stcno:'StatusValue/Pos2', stcno:'StatusValue', G),
   forall(
     'kmc_0500-2'(Char, Label, Comment),
     (
       kmc_0500_status_value('kmc_0500-2', Char, Value, _Pred2),
-      rdf_assert_individual(Value, stcnv:'StatusValue/Pos2', G),
-      rdfs_assert_label(Value, nl, Label, G),
-      rdfs_assert_comment(Value, nl, Comment, G)
+      rdf_assert_instance(Value, stcno:'StatusValue/Pos2', G),
+      rdfs_assert_label(Value, [nl]-Label, G),
+      rdfs_assert_comment(Value, [nl]-Comment, G)
     )
   ),
 
   % Third position status values.
-  rdfs_assert_subclass(stcnv:'StatusValue/Pos3', stcnv:'StatusValue', G),
-  rdfs_assert_label(stcnv:'StatusValue/Pos3', 'PAR 103 status value', G),
-  rdfs_assert_comment(stcnv:'StatusValue/Pos3',
-    'Status values as defined by PAR 103.', en, G),
+  rdfs_assert_subclass(stcno:'StatusValue/Pos3', stcno:'StatusValue', G),
+  rdfs_assert_label(stcno:'StatusValue/Pos3', 'PAR 103 status value', G),
+  rdfs_assert_comment(
+    stcno:'StatusValue/Pos3',
+    'Status values as defined by PAR 103.',
+    G
+  ),
   forall(
     par_103(Char, Label, Comment),
     (
       kmc_0500_status_value(par_103, Char, Value, _Pred3),
-      rdf_assert_individual(Value, stcnv:'StatusValue/Pos3', G),
+      rdf_assert_instance(Value, stcno:'StatusValue/Pos3', G),
       rdfs_assert_label(Value, Label, nl, G),
       rdfs_assert_comment(Value, Comment, nl, G)
     )
   ),
 
   % The status relationship.
-  rdf_assert_property(stcnv:status, G),
-  rdfs_assert_label(stcnv:status, status, en, G),
-  rdfs_assert_label(stcnv:status, status, nl, G),
-  rdf_assert_string(stcnv:status, stcnv:kb_name, 'KMC 0500', G),
-  rdfs_assert_seeAlso(stcnv:status,
-    'http://www.kb.nl/kbhtml/stcnhandleiding/0500.html', G),
-  rdfs_assert_domain(stcnv:status, stcnv:'Publication', G),
-  rdfs_assert_range(stcnv:status, stcnv:'StatusValue', G),
+  rdf_assert_property(stcno:status, G),
+  rdfs_assert_label(stcno:status, status, G),
+  rdfs_assert_label(stcno:status, [nl]-status, G),
+  rdf_assert_string(stcno:status, stcno:kb_name, 'KMC 0500', G),
+  rdfs_assert_seeAlso(
+    stcno:status,
+    'http://www.kb.nl/kbhtml/stcnhandleiding/0500.html',
+    G
+  ),
+  rdfs_assert_domain(stcno:status, stcno:'Publication', G),
+  rdfs_assert_range(stcno:status, stcno:'StatusValue', G),
 
   % Status 1 property.
-  rdfs_assert_subproperty(stcnv:status_pos1, stcnv:status, G),
-  rdfs_assert_label(stcnv:status_pos1, 'status positie 1', nl, G),
-  rdfs_assert_comment(stcnv:status_pos1, 'Algemene inhoudsaanduiding.', nl,
-      G),
-  rdfs_assert_seeAlso(stcnv:status_pos1,
-      'http://support.oclc.org/ggc/richtlijnen/php/showPresentation.php?id=12&ln=nl&sec=k-0500#positie_1_kmc_0500',
-      G),
+  rdfs_assert_subproperty(stcno:status_pos1, stcno:status, G),
+  rdfs_assert_label(stcno:status_pos1, [nl]-'status positie 1', G),
+  rdfs_assert_comment(
+    stcno:status_pos1,
+    [nl]-'Algemene inhoudsaanduiding.',
+    G
+  ),
+  rdfs_assert_seeAlso(
+    stcno:status_pos1,
+    'http://support.oclc.org/ggc/richtlijnen/php/showPresentation.php?id=12&ln=nl&sec=k-0500#positie_1_kmc_0500',
+    G
+  ),
 
   % Status 2 property.
-  rdfs_assert_subproperty(stcnv:status_pos2, stcnv:status, G),
-  rdfs_assert_label(stcnv:status_pos2, 'status positie 2', nl, G),
-  rdfs_assert_comment(stcnv:status_pos2,
-    'Het correct invullen van positie 2 van kmc 0500 is van groot belang.\c
-     Wijzig positie 2 alleen als dat noodzakelijk is en breng bij een\c
-     belangrijke wijziging (bijv. \'a\' wordt veranderd in \'b\') de\c
-     medegebruikers van de titel via Picamail op de hoogte (zie PAR 052).',
-     nl, G),
-  rdfs_assert_seeAlso(stcnv:status_pos2,
-    'http://support.oclc.org/ggc/richtlijnen/php/showPresentation.php?id=12&ln=nl&sec=k-0500#positie_2_kmc_0500', G),
+  rdfs_assert_subproperty(stcno:status_pos2, stcno:status, G),
+  rdfs_assert_label(stcno:status_pos2, 'status positie 2', nl, G),
+  rdfs_assert_comment(
+    stcno:status_pos2,
+    [nl]-'Het correct invullen van positie 2 van kmc 0500 is van groot \c
+          belang. \c
+          Wijzig positie 2 alleen als dat noodzakelijk is en breng bij een \c
+          belangrijke wijziging (bijv. \'a\' wordt veranderd in \'b\') de \c
+          medegebruikers van de titel via Picamail op de hoogte
+          (zie PAR 052).',
+     G
+  ),
+  rdfs_assert_seeAlso(
+    stcno:status_pos2,
+    'http://support.oclc.org/ggc/richtlijnen/php/showPresentation.php?id=12&ln=nl&sec=k-0500#positie_2_kmc_0500',
+    G
+  ),
 
   % Status 3 property.
-  rdfs_assert_subproperty(stcnv:status_pos3, stcnv:status, G),
-  rdfs_assert_label(stcnv:status_pos3, 'status positie 3', nl, G),
-  rdf_assert_string(stcnv:status_pos3, stcnv:kb_name, 'PAR 103', G),
-  rdfs_assert_seeAlso(stcnv:status_pos3,
-    'http://support.oclc.org/ggc/richtlijnen/php/showPresentation.php?id=13&ln=nl&par=p-103', G).
+  rdfs_assert_subproperty(stcno:status_pos3, stcno:status, G),
+  rdfs_assert_label(stcno:status_pos3, 'status positie 3', nl, G),
+  rdf_assert_string(stcno:status_pos3, stcno:kb_name, 'PAR 103', G),
+  rdfs_assert_seeAlso(
+    stcno:status_pos3,
+    'http://support.oclc.org/ggc/richtlijnen/php/showPresentation.php?id=13&ln=nl&par=p-103',
+    G
+  ).
 
 
 
@@ -174,11 +204,11 @@ kmc_0500(_G, PPN) -->
   {debug(kmc_0500, '[PPN ~w] Unrecognized KMC 0500 status value.', [PPN])}.
 
 kmc_0500_stcn(G, PPN, 'Aav'):- !,
-  rdf_assert(PPN, stcnv:status, stcnv:'StatusValue/STCN/Aav', G).
+  rdf_assert(PPN, stcno:status, stcno:'StatusValue/STCN/Aav', G).
 kmc_0500_stcn(G, PPN, 'Abv'):- !,
-  rdf_assert(PPN, stcnv:status, stcnv:'StatusValue/STCN/Abv', G).
+  rdf_assert(PPN, stcno:status, stcno:'StatusValue/STCN/Abv', G).
 kmc_0500_stcn(G, PPN, 'Acv'):- !,
-  rdf_assert(PPN, stcnv:status, stcnv:'StatusValue/STCN/Acv', G).
+  rdf_assert(PPN, stcno:status, stcno:'StatusValue/STCN/Acv', G).
 kmc_0500_stcn(_G, PPN, Value):-
   debug(kmc_0500, '[PPN ~w] Unrecognized compound type: ~w.', [PPN,Value]).
 
@@ -199,15 +229,15 @@ kmc_0500_oclc(_G, PPN, Code, Base):-
 kmc_0500_status_value(_Mod:Base1, Char, Value, Pred):-
   (  Base1 == 'kmc_0500-1'
   -> Base2 = 'StatusValue/Pos1',
-     rdf_global_id(stcnv:status_pos1, Pred)
+     rdf_global_id(stcno:status_pos1, Pred)
   ;  Base1 == 'kmc_0500-2'
   -> Base2 = 'StatusValue/Pos2',
-     rdf_global_id(stcnv:status_pos2, Pred)
+     rdf_global_id(stcno:status_pos2, Pred)
   ;  Base1 == par_103
   -> Base2 = 'StatusValue/Pos3',
-     rdf_global_id(stcnv:status_pos3, Pred)),
+     rdf_global_id(stcno:status_pos3, Pred)),
   atomic_list_concat([Base2,Char], '/', Name),
-  rdf_global_id(stcnv:Name, Value).
+  rdf_global_id(stcno:Name, Value).
 
 
 
@@ -302,5 +332,5 @@ par_103(y, 'bibliografisch onvolledig', 'Bibliografisch onvolledig.').
 % STATISTICS %
 
 statistics_kmc_0500(G, [['Status (KMC 0500)','Occurrences']|L]):-
-  rdf_property_table(stcnv:status, G, L).
+  rdf_property_table(stcno:status, G, L).
 

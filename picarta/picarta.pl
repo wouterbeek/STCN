@@ -11,7 +11,7 @@
 
 % SCRAPING
     scrape_picarta/2, % +PicartaGraph:atom
-                      % +Class:oneof([stcnv:'Author',stcnv:'Printer',stcnv:'Publication',stcnv:'Topic'])
+                      % +Class:oneof([stcno:'Author',stcno:'Printer',stcno:'Publication',stcno:'Topic'])
     scrape_picarta_progress/2 % +PicartaGraph:atom
                               % +StcnGraph:atom
   ]
@@ -31,38 +31,32 @@ We make a distinction between three portions of code in this module:
     * KMC 1700, country of publication.
 
 @author Wouter Beek
-@version 2013/01-2013/04, 2013/06, 2013/09-2013/10, 2014/03
+@version 2013/01-2013/04, 2013/06, 2013/09-2013/10, 2014/03, 2015/02
 */
 
-:- use_module(generics(atom_ext)).
-:- use_module(generics(list_ext)).
-:- use_module(generics(parse_ext)).
-:- use_module(generics(thread_ext)).
 :- use_module(library(aggregate)).
 :- use_module(library(apply)).
 :- use_module(library(debug)).
-:- use_module(library(semweb/rdf_db)).
+:- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 :- use_module(library(semweb/rdfs)).
 :- use_module(library(xpath)).
-:- use_module(owl(owl_build)).
-:- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_read)).
-:- use_module(rdf(rdf_stat)).
-:- use_module(rdf_term(rdf_string)).
-:- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_read)).
-:- use_module(skos(skos_build)).
-:- use_module(standards(html)).
-:- use_module(xml(xml_namespace)).
+
+:- use_module(plc(generics/atom_ext)).
+:- use_module(plc(generics/list_ext)).
+:- use_module(plc(process/thread_ext)).
+
+:- use_module(plRdf(api/rdf_build)).
+:- use_module(plRdf(api/rdf_read)).
+:- use_module(plRdf(api/rdfs_build)).
+:- use_module(plRdf(api/rdfs_read)).
+:- use_module(plRdf(owl/owl_build)).
+:- use_module(plRdf(vocabulary/rdf_stat)).
 
 :- rdf_meta(assert_schema_picarta(+,r)).
 :- rdf_meta(scrape_picarta(+,r)).
 :- rdf_meta(translate_profession(+,r)).
 
-:- xml_register_namespace(foaf, 'http://xmlns.com/foaf/0.1/').
-:- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
-:- xml_register_namespace(xsd, 'http://www.w3.org/2001/XMLSchema#').
+
 
 
 
@@ -86,8 +80,8 @@ process_life_years(G, Pairs):-
 process_lifeyears1(G, Agent/LifeYears):-
   atom_codes(LifeYears, LifeYearsCodes),
   parse_date(Birth/Death, LifeYearsCodes-[]),
-  rdf_assert_datatype(Agent, stcnv:birth, Birth, xsd:gYear, G),
-  rdf_assert_datatype(Agent, stcnv:death, Death, xsd:gYear, G),
+  rdf_assert_datatype(Agent, stcno:birth, Birth, xsd:gYear, G),
+  rdf_assert_datatype(Agent, stcno:death, Death, xsd:gYear, G),
   rdf_retractall_string(Agent, stcn:life_years, G).
 
 
@@ -139,10 +133,10 @@ parse_name(AuthorName, AuthorName).
 % processed.
 
 assert_schema_profession(G):-
-  rdfs_assert_class(stcnv:'Profession', G),
+  rdfs_assert_class(stcno:'Profession', G),
   forall(
     profession(URI),
-    rdf_assert_individual(URI, stcnv:'Profession', G)
+    rdf_assert_instance(URI, stcno:'Profession', G)
   ),
   rdf_assert_property(stcn:has_profession, G),
   rdf_assert_property(stcn:profession,     G),
@@ -201,7 +195,7 @@ translate_profession(bookseller, URI):-
 translate_profession('paper seller', URI):-
   rdf_global_id(stcn:paper_seller, URI).
 translate_profession(printer, URI):-
-  rdf_global_id(stcnv:printer, URI).
+  rdf_global_id(stcno:printer, URI).
 
 
 
@@ -210,7 +204,7 @@ translate_profession(printer, URI):-
 process_pseudonyms(G):-
   forall(
     (
-      rdf_assert_string(Agent1, stcnv:pseudonym, Pseudonym, G),
+      rdf_assert_string(Agent1, stcno:pseudonym, Pseudonym, G),
       rdf_assert_string(Agent2, stcn:author_name, Pseudonym, G)
     ),
     (
@@ -224,7 +218,7 @@ process_pseudonyms(G):-
 % PROCESSING : TOPICS HIERARCHY %
 
 export_topics_hierarchy:-
-  rdf_global_id(stcnv:'Topic', Root),
+  rdf_global_id(stcno:'Topic', Root),
   rdf_global_id(skos:broader, Predicate),
   beam([], Root, [Predicate], Topics, _Edges),
   findall(
@@ -251,7 +245,7 @@ process_topics_hierarchy(G):-
   aggregate_all(
     set(List/Topic),
     (
-      rdfs_individual_of(Topic, stcnv:'Topic'),
+      rdfs_individual_of(Topic, stcno:'Topic'),
       rdf_string(Topic, stcn:synonym, TopicCode1, G),
       atom_codes(TopicCode1, TopicCode2),
       contains([], [decimal_digit], TopicCode2-[]),
@@ -284,7 +278,7 @@ topic_size(Topic, Size):-
     set(Publication),
     (
       member(SubVertex, SubVertices),
-      rdf(Publication, stcnv:topic, SubVertex)
+      rdf(Publication, stcno:topic, SubVertex)
     ),
     Publications
   ),
@@ -324,22 +318,22 @@ scrape_picarta(G, Class):-
 
 scrape_picarta_progress(PicartaGraph, StcnGraph):-
   % Author.
-  count_individuals(stcnv:'Author', PicartaGraph, X1),
-  count_individuals(stcnv:'Author', StcnGraph, Y1),
+  count_individuals(stcno:'Author', PicartaGraph, X1),
+  count_individuals(stcno:'Author', StcnGraph, Y1),
   debug(picarta, 'Authors: ~w of ~w.\n', [X1, Y1]),
   
   % Printer.
-  count_individuals(stcnv:'Printer', PicartaGraph, X2),
-  count_individuals(stcnv:'Printer', StcnGraph, Y2),
+  count_individuals(stcno:'Printer', PicartaGraph, X2),
+  count_individuals(stcno:'Printer', StcnGraph, Y2),
   debug(picarta, 'Printers: ~w of ~w.\n', [X2, Y2]),
   
   % Publications.
-  count_individuals(stcnv:'Publication', PicartaGraph, X3),
-  count_individuals(stcnv:'Publication', StcnGraph, Y3),
+  count_individuals(stcno:'Publication', PicartaGraph, X3),
+  count_individuals(stcno:'Publication', StcnGraph, Y3),
   debug(picarta, 'Publications: ~w of ~w.\n', [X3, Y3]),
   
   % Topics.
-  count_individuals(stcnv:'Topic', PicartaGraph, X4),
-  count_individuals(stcnv:'Topic', StcnGraph, Y4),
+  count_individuals(stcno:'Topic', PicartaGraph, X4),
+  count_individuals(stcno:'Topic', StcnGraph, Y4),
   debug(picarta, 'Topics: ~w of ~w.\n', [X4, Y4]).
 

@@ -13,16 +13,16 @@ This assumes that the STCN_SCRAPE script has been successfully completed
 and the STCN graph files are in the `data` subdirectory.
 
 @author Wouter Beek
-@version 2013/01-2013/03, 2013/06, 2013/09, 2014/03
+@version 2013/01-2013/03, 2013/06, 2013/09, 2014/03, 2015/02
 */
 
-:- use_module(dcg(dcg_generic)).
-:- use_module(kmc(kmc_1200)).
-:- use_module(rdf_term(rdf_string)).
-:- use_module(xml(xml_namespace)).
+:- use_module(plc(dcg/dcg_generics)).
 
-:- xml_register_namespace(picarta, 'http://picarta.pica.nl/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
+:- use_module(plRdf(api/rdf_read)).
+
+:- use_module(stcn(kmc/kmc_1200)).
+
+
 
 
 

@@ -2,7 +2,7 @@
   picarta_query,
   [
     picarta_query_ppn/3 % +PPN:atom
-                        % -PicartaURI:uri
+                        % -PicartaUri:uri
                         % -Pairs:list(pair)
   ]
 ).
@@ -13,16 +13,21 @@ This module contains predicate for querying the Picarta online dataset
 via its URI-baset/REST API.
 
 @author Wouter Beek
-@version 2013/01-2013/04, 2013/06, 2013/09-2013/10
+@version 2013/01-2013/04, 2013/06, 2013/09-2013/10, 2015/02
 */
 
-:- use_module(dcg(dcg_generic)).
-:- use_module(generics(atom_ext)).
-:- use_module(html(html)).
 :- use_module(library(debug)).
 :- use_module(library(uri)).
 :- use_module(library(xpath)).
+
+:- use_module(plc(dcg/dcg_generics)).
+:- use_module(plc(generics/atom_ext)).
+
+:- use_module(plHtml(html)).
+
 :- use_module(stcn(stcn_generic)).
+
+
 
 
 
@@ -67,11 +72,11 @@ picarta_attribute('Zie\240\ook:\240\',                  see_also               )
 
 picarta_path('/DB=3.11/SET=1/TTL=1/CMD').
 
-%! picarta_query_ppn(+PPN:atom, -PicartaURI:uri, -Pairs:list) is det.
+%! picarta_query_ppn(+PPN:atom, -PicartaUri:uri, -Pairs:list) is det.
 % Queries for the given PPN code, returning the attribute/value-pairs that
 % are contained in the Picarta dataset for the given PPN code.
 
-picarta_query_ppn(PPN, URI, Pairs):-
+picarta_query_ppn(PPN, Uri, Pairs):-
   picarta_scheme(Scheme),
   picarta_authority(Authority),
   picarta_path(Path),
@@ -82,14 +87,14 @@ picarta_query_ppn(PPN, URI, Pairs):-
     ['ACT'='SRCHA','IKT'=1016,'REC'='*','SRT'='YOP','TRM'=TRM_Value]
   ),
   uri_components(
-    URI,
+    Uri,
     uri_components(Scheme, Authority, Path, Search, Fragment)
   ),
-  download_html([html_dialect(html4)], URI, HTML),
+  download_html_dom(Uri, Dom, [dialect(html4)]),
   findall(
     TranslatedAttribute/ProcessedValue,
     (
-      xpath(HTML, //tr(@style='display:table-row;'), TR),
+      xpath(Dom, //tr(@style='display:table-row;'), TR),
       xpath(TR, td(@class='rec_lable'), TD1),
       xpath(TD1, div, DIV1),
       xpath(DIV1, span, SPAN1),
@@ -111,7 +116,7 @@ picarta_query_ppn(PPN, URI, Pairs):-
     ),
     Pairs
   ), !.
-picarta_query_ppn(PPN, _URI, []):-
+picarta_query_ppn(PPN, _Uri, []):-
   debug(picarta_query, 'PPN ~w could not be parsed in Picarta.', [PPN]).
 
 picarta_scheme(http).
@@ -133,9 +138,9 @@ ppn_link_prefix --> "TRM=".
 
 % If the link points to a PPN, then we take that PPN code as the value.
 strip_link(element(a, Attributes, _Content), PPN):-
-  memberchk(href=URI1, Attributes),
-  atom_codes(URI1, URI2),
-  phrase(ppn_link(PPN), URI2), !.
+  memberchk(href=Uri1, Attributes),
+  atom_codes(Uri1, Uri2),
+  phrase(ppn_link(PPN), Uri2), !.
 % If the link does not point to a PPN, then we take the content.
 strip_link(element(a, _Attributes, [Content]), Content):- !.
 % Non-link content is returned as-is.

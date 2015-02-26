@@ -93,27 +93,22 @@ Extra space at beginning.
 # Duodecimolong or Duodecimocommon
 
 @author Wouter Beek
-@version 2013/01-2013/03, 2013/06, 2013/09, 2014/03
+@version 2013/01-2013/03, 2013/06, 2013/09, 2014/03, 2015/02
 */
 
-:- use_module(dcg(dcg_ascii)).
-:- use_module(dcg(dcg_cardinal)).
-:- use_module(dcg(dcg_content)).
-:- use_module(dcg(dcg_generic)).
-:- use_module(generics(db_ext)).
 :- use_module(library(debug)).
-:- use_module(library(semweb/rdf_db)).
-:- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_stat)).
-:- use_module(rdf_term(rdf_language_tagged_string)).
-:- use_module(rdf_term(rdf_literal)).
-:- use_module(rdf_term(rdf_string)).
-:- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_ext)).
-:- use_module(xml(xml_namespace)).
+:- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
-:- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
+:- use_module(plc(dcg/dcg_ascii)).
+:- use_module(plc(dcg/dcg_cardinal)).
+:- use_module(plc(dcg/dcg_content)).
+:- use_module(plc(dcg/dcg_generics)).
+:- use_module(plc(generics/db_ext)).
+
+:- use_module(plRdf(api/rdf_build)).
+:- use_module(plRdf(api/rdfs_build)).
+:- use_module(plRdf(api/rdfs_read)).
+:- use_module(plRdf(vocabulary/rdf_stat)).
 
 :- meta_predicate(parse_value(+,+,-)).
 
@@ -125,64 +120,72 @@ user:prolog_file_type(png, png).
 
 
 
+
+
 assert_schema_kmc_4062(G):-
-  rdfs_assert_class(stcnv:'FormatValue', G),
-  rdfs_assert_label(stcnv:'FormatValue', 'formaat waarde', nl, G),
+  rdfs_assert_class(stcno:'FormatValue', G),
+  rdfs_assert_label(stcno:'FormatValue', [nl]-'formaat waarde', G),
   
-  rdfs_assert_subclass(stcnv:'PrimaryFormatValue', stcnv:'FormatValue', G),
-  rdfs_assert_label(stcnv:'PrimaryFormatValue', 'eerste formaat waarde', nl,
-    G),
+  rdfs_assert_subclass(stcno:'PrimaryFormatValue', stcno:'FormatValue', G),
+  rdfs_assert_label(
+    stcno:'PrimaryFormatValue',
+    [nl]-'eerste formaat waarde',
+    G
+  ),
   
-  rdfs_assert_subclass(stcnv:'SecondaryFormatValue', stcnv:'FormatValue', G),
-  rdfs_assert_label(stcnv:'SecondaryFormatValue',
-    'tweede formaat waarde', nl, G),
+  rdfs_assert_subclass(stcno:'SecondaryFormatValue', stcno:'FormatValue', G),
+  rdfs_assert_label(
+    stcno:'SecondaryFormatValue',
+    [nl]-'tweede formaat waarde',
+    G
+  ),
   
-  rdf_assert_property(stcnv:image, G),
-  rdfs_assert_label(stcnv:image, 'heeft afbeelding', nl, G),
+  rdf_assert_property(stcno:image, G),
+  rdfs_assert_label(stcno:image, [nl]-'heeft afbeelding', G),
   
-  rdf_assert_property(stcnv:format, G),
-  rdfs_assert_label(stcnv:format, 'heeft formaat', nl, G),
-  rdf_assert_string(stcnv:format, stcnv:kb_name, 'KMC 4062', G),
-  rdf_assert(stcnv:format, stcnv:documentatie,
-      'http://www.kb.nl/kbhtml/stcnhandleiding/4062.html', G),
-  rdf_assert_language_tagged_string(stcnv:format, stcnv:picarta_name,
-      'formaat', nl, G),
+  rdf_assert_property(stcno:format, G),
+  rdfs_assert_label(stcno:format, [nl]-'heeft formaat', G),
+  rdf_assert_string(stcno:format, stcno:kb_name, 'KMC 4062', G),
+  rdf_assert(
+    stcno:format,
+    stcno:documentatie,
+    'http://www.kb.nl/kbhtml/stcnhandleiding/4062.html',
+    G
+  ),
+  rdf_assert_langstring(stcno:format, stcno:picarta_name, [nl]-'formaat', G),
   
   forall(
     format(FormatID, _Symbol, _NumberOfLeaflets, _Kettinglijnen, _, _),
     (
       rdf_global_id(stcn:FormatID, Format),
-      rdf_assert_individual(Format, stcnv:'PrimaryFormatValue',  G),
-      rdfs_assert_label(Format, FormatID, nl, G),
-      (
-        once(has_image(FormatID, ImageID))
-      ->
-        absolute_file_name(
-          images(ImageID),
-          Image,
-          [access(read),file_type(png)]
-        ),
-        rdf_assert_string(Format, stcnv:image, Image, G)
-      ;
-        % Not every format has an image.
-        true
+      rdf_assert_instance(Format, stcno:'PrimaryFormatValue', G),
+      rdfs_assert_label(Format, [nl]-FormatID, G),
+      (   once(has_image(FormatID, ImageID))
+      ->  absolute_file_name(
+            images(ImageID),
+            Image,
+            [access(read),file_type(png)]
+          ),
+          rdf_assert_string(Format, stcno:image, Image, G)
+      ;   % Not every format has an image.
+          true
       )
     )
   ),
-  rdf_assert_individual(stcnv:agenda, stcnv:'SecondaryFormatValue', G),
-  rdfs_assert_label(stcnv:agenda, agenda, nl, G),
+  rdf_assert_instance(stcno:agenda, stcno:'SecondaryFormatValue', G),
+  rdfs_assert_label(stcno:agenda, [nl]-agenda, G),
   
-  rdf_assert_individual(stcnv:broadsheet, stcnv:'SecondaryFormatValue', G),
-  rdfs_assert_label(stcnv:broadsheet, broadsheet, nl, G),
+  rdf_assert_instance(stcno:broadsheet, stcno:'SecondaryFormatValue', G),
+  rdfs_assert_label(stcno:broadsheet, [nl]-broadsheet, G),
   
-  rdf_assert_individual(stcnv:oblong, stcnv:'SecondaryFormatValue', G),
-  rdfs_assert_label(stcnv:oblong, oblong, nl, G),
+  rdf_assert_instance(stcno:oblong, stcno:'SecondaryFormatValue', G),
+  rdfs_assert_label(stcno:oblong, [nl]-oblong, G),
   
-  rdf_assert_individual(stcnv:other_format, stcnv:'FormatValue', G),
-  rdfs_assert_label(stcnv:other_format, 'ander formaat', nl, G),
+  rdf_assert_instance(stcno:other_format, stcno:'FormatValue', G),
+  rdfs_assert_label(stcno:other_format, [nl]-'ander formaat', G),
   
-  rdf_assert_individual(stcnv:unknown_format, stcnv:'FormatValue', G),
-  rdfs_assert_label(stcnv:unknown_format, 'onbekend formaat', nl, G).
+  rdf_assert_instance(stcno:unknown_format, stcno:'FormatValue', G),
+  rdfs_assert_label(stcno:unknown_format, [nl]-'onbekend formaat', G).
 
 %! format(
 %!   ?Name:atom,
@@ -245,8 +248,8 @@ kmc_4062_extra(G, PPN) -->
   {
     Word \== '',
     downcase_atom(Word, LowercaseWord),
-    rdf_global_id(stcnv:LowercaseWord, Format),
-    rdf_assert(PPN, stcnv:format, Format, G)
+    rdf_global_id(stcno:LowercaseWord, Format),
+    rdf_assert(PPN, stcno:format, Format, G)
   },
   blanks.
 kmc_4062_extra(_G, _PPN) --> [].
@@ -259,7 +262,7 @@ kmc_4062_main(G, PPN) -->
   integer(_Second),
   blanks,
   `mm`,
-  {rdf_assert(PPN, stcnv:format, stcnv:unknown_format, G)}.
+  {rdf_assert(PPN, stcno:format, stcno:unknown_format, G)}.
 kmc_4062_main(G, PPN) -->
   blanks,
   number(Number),
@@ -279,20 +282,20 @@ kmc_4062_main(G, PPN) -->
   ),
   {
     translate_format(Format, Number, _NumberOFLeaflets),
-    rdf_assert(PPN, stcnv:format, Format, G)
+    rdf_assert(PPN, stcno:format, Format, G)
   }.
 % Broadsheet.
 % Some PPNs have a format that is not in the documentation for this KMC.
 kmc_4062_main(G, PPN) -->
   atom('Broadsheet'),
-  {rdf_assert(PPN, stcnv:format, stcnv:broadsheet, G)}.
+  {rdf_assert(PPN, stcno:format, stcno:broadsheet, G)}.
 % Undocumented and/or malformed formats.
 kmc_4062_main(G, PPN) -->
   {kmc_4062_malformed(FormatAtom, FormatName)},
   atom(FormatAtom),
   {
     rdf_global_id(stcn:FormatName, Format),
-    rdf_assert(PPN, stcnv:format, Format, G)
+    rdf_assert(PPN, stcno:format, Format, G)
   }.
 
 % Some PPNs have no specific format information but do have this KMC.
@@ -312,19 +315,19 @@ kmc_4062_malformed('0', unknown_format).
 
 statistics_kmc_4062(G, [[A1, V1], [A2, V2] | T]):-
   A1 = 'Publications with an STCN format',
-  count_subjects(stcnv:format, _, G, V1),
+  count_subjects(stcno:format, _, G, V1),
   debug(stcn_statistics, '~w: ~w', [A1, V1]),
 
   A2 = 'Publications with no STCN format',
-  count_subjects(stcnv:format, stcnv:unknown_format, G, V2),
+  count_subjects(stcno:format, stcno:unknown_format, G, V2),
   debug(stcn_statistics, '-- ~w: ~w', [A2, V2]),
 
   findall(
     [A, V],
     (
       format(Name, _Symbol, _NumberOfLeaflets, _Kettinglijnen, _, _),
-      rdf_global_id(stcnv:Name, Format),
-      count_subjects(stcnv:format, Format, G, V),
+      rdf_global_id(stcno:Name, Format),
+      count_subjects(stcno:format, Format, G, V),
       format(atom(A), 'Publications with format ~w', [Name]),
       debug(stcn_statistics, '-- ~w: ~w', [A, V])
     ),
@@ -334,25 +337,25 @@ statistics_kmc_4062(G, [[A1, V1], [A2, V2] | T]):-
 %! translate_format(?Format:uri, ?Number:integer, ?Name:atom) is nondet.
 
 translate_format(Format, 1, '1°'):-
-  rdf_equal(Format, stcnv:plano).
+  rdf_equal(Format, stcno:plano).
 translate_format(Format, 2, '2°'):-
-  rdf_equal(Format, stcnv:folio).
+  rdf_equal(Format, stcno:folio).
 translate_format(Format, 4, '4°'):-
-  rdf_equal(Format, stcnv:quarto).
+  rdf_equal(Format, stcno:quarto).
 translate_format(Format, 8, '8°'):-
-  rdf_equal(Format, stcnv:octavo).
+  rdf_equal(Format, stcno:octavo).
 translate_format(Format, 12, '12°'):-
-  rdf_equal(Format, stcnv:duodecimo).
+  rdf_equal(Format, stcno:duodecimo).
 translate_format(Format, 16, '16°'):-
-  rdf_equal(Format, stcnv:'16mo').
+  rdf_equal(Format, stcno:'16mo').
 translate_format(Format, 18, '18°'):-
-  rdf_equal(Format, stcnv:'18mo').
+  rdf_equal(Format, stcno:'18mo').
 translate_format(Format, 24, '24°'):-
-  rdf_equal(Format, stcnv:'24mo').
+  rdf_equal(Format, stcno:'24mo').
 translate_format(Format, 32, '32°'):-
-  rdf_equal(Format, stcnv:'32mo').
+  rdf_equal(Format, stcno:'32mo').
 translate_format(Format, 48, '48°'):-
-  rdf_equal(Format, stcnv:'48mo').
+  rdf_equal(Format, stcno:'48mo').
 translate_format(Format, 64, '64°'):-
-  rdf_equal(Format, stcnv:'64mo').
+  rdf_equal(Format, stcno:'64mo').
 

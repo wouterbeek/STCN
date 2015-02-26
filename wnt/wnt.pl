@@ -28,16 +28,17 @@ http://gtb.inl.nl/iWDB/search?
   &lemmodern=cabaalmaker
 
 @author Wouter Beek
-@version 2013/02, 2014/01, 2014/03
+@version 2013/02, 2014/01, 2014/03, 2015/02
 */
 
-:- use_module(dcg(dcg_content)).
-:- use_module(dcg(dcg_generic)).
-:- use_module(generics(atom_ext)).
 :- use_module(library(http/http_open)).
 :- use_module(library(sgml)).
 :- use_module(library(xpath)).
-:- use_module(picarta(picarta)).
+
+:- use_module(plc(dcg/dcg_generics)).
+:- use_module(plc(generics/atom_ext)).
+
+
 
 
 
@@ -98,7 +99,7 @@ dom_sense(DOM, sense(SenseNumber, Definition, Quotes)):-
   % Sense number
   xpath(DIV_Sense, //span(@class=sensenumber), SPAN_SenseNumber),
   xpath(SPAN_SenseNumber, /self(text), SenseNumber0),
-  
+
   first_split(SenseNumber0, '.', SenseNumber),
 
   % Definition

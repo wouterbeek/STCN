@@ -7,26 +7,27 @@ These predicate should be converted to some other module or be removed.
 
 @author Wouter Beek
 @see http://www.kb.nl/kbhtml/stcnhandleiding/frames.html
-@version 2013/09-2013/10, 2013/12
+@version 2013/09-2013/10, 2013/12, 2015/02
 */
 
-:- use_module(ap(ap)).
-:- use_module(dcg(dcg_generic)).
-:- use_module(generics(replace_in_file)).
-:- use_module(generics(thread_ext)).
 :- use_module(library(archive)).
 :- use_module(library(debug)).
 :- use_module(library(filesex)).
-:- use_module(library(semweb/rdf_db)).
+:- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 :- use_module(library(semweb/rdfs)).
-:- use_module(os(archive_ext)).
-:- use_module(os(datetime_ext)).
-:- use_module(os(file_ext)).
-:- use_module(rdf(rdf_build)).
-:- use_module(rdf(rdf_graph_name)).
-:- use_module(rdf_term(rdf_literal)).
-:- use_module(rdf_term(rdf_literal)).
-:- use_module(rdf_file(rdf_serial)).
+
+:- use_module(plc(dcg/dcg_generics)).
+:- use_module(plc(dcg/replace_in_file)).
+:- use_module(plc(process/thread_ext)).
+:- use_module(plc(io/archive_ext)).
+:- use_module(plc(io/file_ext)).
+:- use_module(plc(os/datetime_ext)).
+
+:- use_module(plRdf(api/rdf_build)).
+:- use_module(plRdf(api/rdf_read)).
+:- use_module(plRdf(graph/rdf_graph)).
+:- use_module(plRdf(graph/rdf_graph_name)).
+
 :- use_module(stcn(collect_lines)).
 :- use_module(stcn(stcn_generic)).
 :- use_module(stcn(stcn_parse)).
@@ -34,6 +35,8 @@ These predicate should be converted to some other module or be removed.
 :- use_module(stcn(stcn_scrape)).
 :- use_module(stcn(stcn_void)).
 :- use_module(void(void_file)).
+
+
 
 
 
@@ -98,10 +101,10 @@ assert_stcn_void(_PS, _FromDir, ToFile):-
 
 % Picarta scraping for publications.
 picarta_scrape_publications(_PS, FromFile, ToFile):-
-  file_to_graph_name(FromFile, FromG),
-  rdf_load_any([format(turtle),graph(FromG)], FromFile),
+  rdf_new_graph(FromFile, FromG),
+  rdf_load_any(FromFile, [format(turtle),graph(FromG)]),
 
-  file_to_graph_name(ToFile, ToG),
+  rdf_new_graph(ToFile, ToG),
   stcn_scrape(FromG, 'Publication', ToG),
   debug(
     stcn_script,
@@ -111,30 +114,55 @@ picarta_scrape_publications(_PS, FromFile, ToFile):-
 
   rdf_save([format(turtle)], ToG, ToFile),
   debug(stcn_script, 'Done scraping Picarta for publications.', []),
-  rdf_unload_graph_debug(ToG).
+  rdf_unload_graph(ToG).
 
 picarta_scrape_publications_split(_, FromFile, ToFile):-
-  file_to_graph_name(FromFile, Graph),
-  rdf_load_any([format(turtle),graph(Graph)], FromFile),
+  rdf_new_graph(FromFile, Graph),
+  rdf_load_any(FromFile, [format(turtle),graph(Graph)]),
 
   % Assert occurrences in literal enumerations as separate triples.
-  rdf_update_literal(_, picarta:printer_publisher, _, _, _, Graph,
-      split_lexical_form('; ')
+  rdf_update_literal(
+    _,
+    picarta:printer_publisher,
+    _,
+    _,
+    _,
+    Graph,
+    split_lexical_form('; ')
   ),
   debug(stcn_script, 'Printer-publishers were split.', []),
   
-  rdf_update_literal(_, picarta:printer_publisher, _, _, _, Graph,
-      lexical_form(strip_atom([' ']))
+  rdf_update_literal(
+    _,
+    picarta:printer_publisher,
+    _,
+    _,
+    _,
+    Graph,
+    lexical_form(strip_atom([' ']))
   ),
   debug(stcn_script, 'Printer-publishers were stripped.', []),
   
-  rdf_update_literal(_, picarta:topical_keyword, _, _, _, Graph,
-      split_lexical_form('; ')
+  rdf_update_literal(
+    _,
+    picarta:topical_keyword,
+    _,
+    _,
+    _,
+    Graph,
+    split_lexical_form('; ')
   ),
   debug(stcn_script, 'Topics were split.', []),
   
-  rdf_update_literal(_, picarta:typographic_information, _, _, _, Graph,
-      split_lexical_form(' , ')),
+  rdf_update_literal(
+    _,
+    picarta:typographic_information,
+    _,
+    _,
+    _,
+    Graph,
+    split_lexical_form(' , ')
+  ),
   debug(stcn_script, 'Typographic information was split.', []),
 
   rdf_save([format(turtle)], G, ToFile),
@@ -143,10 +171,10 @@ picarta_scrape_publications_split(_, FromFile, ToFile):-
     'The Picarta scrape with splits was saved to file ~w.',
     [ToFile]
   ),
-  rdf_unload_graph_debug(G).
+  rdf_unload_graph(G).
 
 picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
-  file_to_graph_name(FromFile, G),
+  rdf_new_graph(FromFile, G),
   rdf_load_any([format(turtle),graph(Graph)], FromFile),
 
   % Turn PPN literals into IRIs.
@@ -184,11 +212,11 @@ picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
     'Done saving the scraped redactiebladen to file ~w.',
     [ToFile]
   ),
-  rdf_unload_graph_debug(G).
+  rdf_unload_graph(G).
 
 picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
   % Load the Picarta publications.
-  file_to_graph_name(FromFile, G),
+  rdf_new_graph(FromFile, G),
   rdf_load_any([format(turtle),graph(Graph)], FromFile),
 
   % Load the Picarta topics.
@@ -215,7 +243,7 @@ picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
     'Done saving the scraped redactiebladen to file ~w.',
     [ToFile]
   ),
-  rdf_unload_graph_debug(G).
+  rdf_unload_graph(G).
 
 % Picarta scraping for authors, printer-publishers, topics, and
 % translator-editors.
@@ -227,7 +255,7 @@ picarta_scrape_others(_PS, _FromFile, ToDir):-
   ), !.
 picarta_scrape_others(_PS, FromFile, ToDir):-
   % Load the Picarta publications.
-  file_to_graph_name(FromFile, FromG),
+  rdf_new_graph(FromFile, FromG),
   rdf_load_any([format(turtle),graph(FromG)], FromFile),
   forall_thread(
     (

@@ -17,31 +17,30 @@ Fully automated scrape for the STCN.
 @version 2013/06, 2013/09-2013/10, 2014/03
 */
 
-:- use_module(generics(atom_ext)).
-:- use_module(generics(list_script)).
 :- use_module(library(aggregate)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
-:- use_module(os(file_ext)).
-:- use_module(picarta(picarta_query)).
-:- use_module(rdf(rdf_build)).
-:- use_module(rdf_term(rdf_literal)).
-:- use_module(rdf_term(rdf_string)).
-:- use_module(rdfs(rdfs_build)).
-:- use_module(stcn(stcn_generic)).
-:- use_module(xml(xml_namespace)).
 
-:- xml_register_namespace(picarta, 'http://picarta.pica.nl/').
-:- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
+:- use_module(plc(generics/atom_ext)).
+:- use_module(plc(generics/list_script)).
+:- use_module(plc(io/file_ext)).
+
+:- use_module(plRdf(api/rdf_build)).
+:- use_module(plRdf(api/rdf_read)).
+:- use_module(plRdf(api/rdfs_build)).
+
+:- use_module(stcn(stcn_generic)).
+:- use_module(stcn(picarta/picarta_query)).
 
 :- rdf_meta(stcn_scrape_category_relation(r,r)).
 
 
 
+
+
 %! stcn_scrape(
 %!   +FromGraph:atom,
-%!   +RDFS_Class:oneof(['Author','PrinterPublisher','Publication','Topic','TranslatorEditor']),
+%!   +Class:oneof(['Author','PrinterPublisher','Publication','Topic','TranslatorEditor']),
 %!   +ToGraph:atom
 %! ) is det.
 % First we check whether the STCN content that we are after is already
@@ -93,7 +92,7 @@ stcn_scrape_ppns(_G, 'Publication', PPNs):- !,
     set(PPN3),
     (
       % @tbd Restrict this to triples in graph `G`.
-      rdfs_individual_of(PPN1, stcnv:'Publication'),
+      rdfs_individual_of(PPN1, stcno:'Publication'),
       rdf_global_id(stcn:PPN2, PPN1),
       atomic_list_concat(['Publication',PPN3], '/', PPN2) % split
     ),
@@ -114,8 +113,8 @@ stcn_scrape_ppns(G, C, PPNs):-
 picarta_scrape(Category1, G, PPN_Name):-
   picarta_query_ppn(PPN_Name, ScrapeSite, NVPairs),
   ppn_resource(Category1, PPN_Name, PPN),
-  rdf_global_id(stcnv:Category1, Category2),
-  rdf_assert_individual(PPN, Category2, G),
+  rdf_global_id(stcno:Category1, Category2),
+  rdf_assert_instance(PPN, Category2, G),
   rdfs_assert_seeAlso(PPN, ScrapeSite, G),
   forall(
     member(N/V, NVPairs),

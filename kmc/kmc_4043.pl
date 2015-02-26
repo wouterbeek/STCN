@@ -25,46 +25,52 @@ E.g. PPN 234597046.
 ## PPN 173117708
 
 @author Wouter Beek
-@version 2013/03, 2013/06, 2013/09, 2014/03
+@version 2013/03, 2013/06, 2013/09, 2014/03, 2015/02
 */
 
-:- use_module(dcg(dcg_ascii)).
-:- use_module(dcg(dcg_content)).
-:- use_module(dcg(dcg_generic)).
-:- use_module(library(semweb/rdf_db)).
-:- use_module(rdf(rdf_build)).
-:- use_module(rdf_term(rdf_language_tagged_string)).
-:- use_module(rdf_term(rdf_literal)).
-:- use_module(rdf_term(rdf_string)).
-:- use_module(rdfs(rdfs_build)).
-:- use_module(rdfs(rdfs_label_ext)).
-:- use_module(stcn(stcn_generic)).
-:- use_module(xml(xml_namespace)).
+:- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
-:- xml_register_namespace(stcn, 'http://stcn.data2semantics.org/resource/').
-:- xml_register_namespace(stcnv, 'http://stcn.data2semantics.org/vocab/').
+:- use_module(plc(dcg/dcg_ascii)).
+:- use_module(plc(dcg/dcg_content)).
+:- use_module(plc(dcg/dcg_generics)).
+
+:- use_module(plRdf(api/rdf_build)).
+:- use_module(plRdf(api/rdf_read)).
+:- use_module(plRdf(api/rdfs_build)).
+:- use_module(plRdf(api/rdfs_read)).
+
+:- use_module(stcn(stcn_generic)).
+
+
 
 
 
 assert_schema_kmc_4043(G):-
-  rdfs_assert_class(stcnv:'Printer', G),
-  rdfs_assert_label(stcnv:'Printer', drukker, nl, G),
+  rdfs_assert_class(stcno:'Printer', G),
+  rdfs_assert_label(stcno:'Printer', [nl]-drukker, G),
   
-  rdf_assert_property(stcnv:printer, G),
-  rdfs_assert_label(stcnv:printer, 'heeft drukker', nl, G),
-  rdf_assert_string(stcnv:printer, stcnv:kb_name, 'KMC 4043', G),
-  rdfs_assert_seeAlso(stcnv:printer,
-      'http://www.kb.nl/kbhtml/stcnhandleiding/4043.html', G),
-  rdf_assert_language_tagged_string(stcnv:printer, stcnv:picarta_name,
-      'Drukker / Uitgever', nl, G),
+  rdf_assert_property(stcno:printer, G),
+  rdfs_assert_label(stcno:printer, [nl]-'heeft drukker', G),
+  rdf_assert_string(stcno:printer, stcno:kb_name, 'KMC 4043', G),
+  rdfs_assert_seeAlso(
+    stcno:printer,
+    'http://www.kb.nl/kbhtml/stcnhandleiding/4043.html',
+    G
+  ),
+  rdf_assert_langstring(
+    stcno:printer,
+    stcno:picarta_name,
+    [nl]-'Drukker / Uitgever',
+    G
+  ),
   
-  rdfs_assert_label(stcnv:'City', stad, nl, G),
+  rdfs_assert_label(stcno:'City', stad, nl, G),
   % Assert the cities that act as printers/publishers.
   forall(
     city_printer(CityName, PPN),
     (
       rdf_global_id(stcn:PPN, Resource),
-      rdf_assert_individual(Resource, stcnv:'City', G),
+      rdf_assert_instance(Resource, stcno:'City', G),
       rdfs_assert_label(Resource, CityName, G)
     )
   ).
@@ -242,7 +248,7 @@ kmc_4043(_G, PPN) -->
   exclamation_mark,
   {
     ppn_resource(printer_publisher, PrinterPPN, Printer),
-    rdf_assert(PPN, stcnv:printer, Printer, stcn)
+    rdf_assert(PPN, stcno:printer, Printer, stcn)
   }.
 % E.g. PPN 317155091.
 kmc_4043(_G, _PPN) -->
@@ -253,7 +259,7 @@ kmc_4043(G, PPN) -->
   {
     once(city_printer(PrinterName, PPN)),
     ppn_resource(printer_publisher, PPN, Printer),
-    rdf_assert(PPN, stcnv:printer, Printer, G)
+    rdf_assert(PPN, stcno:printer, Printer, G)
   }.
 
 statistics_kmc4043(_G, []).
