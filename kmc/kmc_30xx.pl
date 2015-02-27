@@ -53,29 +53,33 @@ These are considered to be the same. Mapped to upper case X using option
 assert_schema_kmc_30xx(G):-
   % Author.
   rdfs_assert_subclass(stcno:'Author', foaf:'Agent', G),
-  rdfs_assert_label(stcno:'Author', author, en, G),
-  rdfs_assert_label(stcno:'Author', auteur, nl, G),
+  rdfs_assert_label(stcno:'Author', author, G),
+  rdfs_assert_label(stcno:'Author', [nl]-auteur, G),
 
   % Has author.
   rdf_assert_property(stcno:author, G),
-  rdfs_assert_label(stcno:author, 'has author', en, G),
-  rdfs_assert_label(stcno:author, 'heeft auteur', nl, G),
+  rdfs_assert_label(stcno:author, 'has author', G),
+  rdfs_assert_label(stcno:author, [nl]-'heeft auteur', G),
 
   % Author name.
   rdf_assert_property(stcn:author_name, G),
-  rdfs_assert_label(stcno:author_name, 'has author name', en, G),
-  rdfs_assert_label(stcno:author_name, 'heeft auteursnaam', nl, G).
+  rdfs_assert_label(stcno:author_name, 'has author name', G),
+  rdfs_assert_label(stcno:author_name, [nl]-'heeft auteursnaam', G).
 
 link_to_dbpedia_agent(G, Agent):-
   rdf_string(Agent, foaf:name, Name, G),
 
-  rdf_datatype(Agent, stcno:birth, Birth, xsd:gYear, G),
-  rdfs_assert_label(stcno:birth, geboortejaar, nl, G),
+  rdf_typed_literal(Agent, stcno:birth, Birth, xsd:gYear, G),
+  rdfs_assert_label(stcno:birth, [nl]-geboortejaar, G),
 
-  rdf_datatype(Agent, stcno:death, Death, xsd:gYear, G),
-  rdfs_assert_label(stcno:death, sterftejaar, nl, G),
+  rdf_typed_literal(Agent, stcno:death, Death, xsd:gYear, G),
+  rdfs_assert_label(stcno:death, [nl]-sterftejaar, G),
 
-  sparql_select(dbpedia, [dbp,foaf], [writer], [
+  sparql_select(
+    dbpedia,
+    [dbp,foaf],
+    [writer],
+    [
       rdf(var(writer), rdf:type, foaf:'Person'),
       rdf(var(writer), rdfs:label, var(label)),
       filter(regex(var(label), string(Name), [case_insensitive])),
@@ -83,7 +87,10 @@ link_to_dbpedia_agent(G, Agent):-
       filter(regex(var(birth), string(Birth))),
       rdf(var(writer), dbpprop:dateOfDeath, var(death)),
       filter(regex(var(death), string(Death)))
-    ], DBpediaAgent, [distinct(true),limit(1)]).
+    ],
+    DBpediaAgent,
+    [distinct(true),limit(1)]
+  ),
   owl_assert_resource_identity(Agent, DBpediaAgent, G),
   debug(
     dbpedia,

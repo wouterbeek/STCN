@@ -86,26 +86,32 @@ are mapped to ISO 639-3 for language families.
 
 assert_schema_kmc_1500(G):-
   rdf_assert_property(stcno:language, G),
-  rdfs_assert_label(stcno:language, language, en, G),
-  rdfs_assert_label(stcno:language, taal, nl, G),
-  rdf_assert_typed_literal(stcno:language, stcno:kb_name, 'KMC 1500', xsd:string, G),
-  rdfs_assert_seeAlso(stcno:language,
-      'http://www.kb.nl/kbhtml/stcnhandleiding/1500.html', G),
-  rdfs_assert_seeAlso(stcno:language,
-      'http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1500', G),
+  rdfs_assert_label(stcno:language, language, G),
+  rdfs_assert_label(stcno:language, [nl]-taal, G),
+  rdf_assert_string(stcno:language, stcno:kb_name, 'KMC 1500', G),
+  rdfs_assert_seeAlso(
+    stcno:language,
+    'http://www.kb.nl/kbhtml/stcnhandleiding/1500.html',
+    G
+  ),
+  rdfs_assert_seeAlso(
+    stcno:language,
+    'http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1500',
+    G
+  ),
 
   rdf_assert_instance(stcno:actual_language, stcno:'LanguageProperty', G),
-  rdfs_assert_label(stcno:actual_language, 'actual language', en, G),
-  rdfs_assert_label(stcno:actual_language, 'daadwerkelijke taal', nl, G),
+  rdfs_assert_label(stcno:actual_language, 'actual language', G),
+  rdfs_assert_label(stcno:actual_language, [nl]-'daadwerkelijke taal', G),
   rdfs_assert_subproperty(stcno:actual_language, stcno:language, G),
 
   rdfs_assert_subproperty(stcno:translated_via, stcno:language, G),
-  rdfs_assert_label(stcno:actual_language, 'translated via', en, G),
-  rdfs_assert_label(stcno:translated_via, 'vertaald via', nl, G),
+  rdfs_assert_label(stcno:actual_language, 'translated via', G),
+  rdfs_assert_label(stcno:translated_via, [nl]-'vertaald via', G),
 
   rdfs_assert_subproperty(stcno:translated_from, stcno:language, G),
-  rdfs_assert_label(stcno:actual_language, 'translated from', en, G),
-  rdfs_assert_label(stcno:translated_from, 'vertaald uit', nl, G),
+  rdfs_assert_label(stcno:actual_language, 'translated from', G),
+  rdfs_assert_label(stcno:translated_from, [nl]-'vertaald uit', G),
 
   'assert_iso639-3_schema'(G),
   % Use OCLC information to add Dutch labels to ISO 639-3 language codes.
@@ -114,18 +120,15 @@ assert_schema_kmc_1500(G):-
       rdfs_individual_of(Lang1, 'iso639-3':'Language'),
       rdf_global_id('iso639-3':Lang2, Lang1)
     ),
-    (
-      recognized_language(Lang2, Name)
-    ->
-      rdfs_assert_label(Lang1, Name, nl, G)
-    ;
-      true
+    (   recognized_language(Lang2, Name)
+    ->  rdfs_assert_label(Lang1, [nl]-Name, G)
+    ;   true
     )
   ),
   'assert_iso639-5_schema'(G).
 
 kmc_1500(G, PPN) -->
-  `/`,
+  "/",
   language_property(Pred),
   language(PPN, Lang),
   {rdf_assert(PPN, Pred, Lang, G)}, !,
@@ -643,10 +646,7 @@ same_language('Vlaams', 'Nederlands').
 same_language('Wendisch', 'Sorbisch').
 same_language('Yoruba', 'Joruba').
 
-statistics_kmc_1500(
-  G,
-  [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]|L]
-):-
+statistics_kmc_1500(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]|L]):-
   rdf_property_table(stcno:actual_language, G, L1),
   rdf_property_table(stcno:translated_via, G, L2),
   rdf_property_table(stcno:translated_from, G, L3),

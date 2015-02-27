@@ -78,8 +78,8 @@ Also see kmc_4040.pl for dating.
 
 assert_schema_kmc_1100(G):-
   rdf_assert_property(stcno:publication_year, G),
-  rdfs_assert_label(stcno:publication_year, 'publication year', en, G),
-  rdfs_assert_label(stcno:publication_year, publicatiejaar, nl, G),
+  rdfs_assert_label(stcno:publication_year, 'publication year', G),
+  rdfs_assert_label(stcno:publication_year, [nl]-publicatiejaar, G),
   rdfs_assert_domain(stcno:publication_year, stcno:'Publication', G),
   rdfs_assert_range(stcno:publication_year, xsd:gYear, G),
   rdf_assert_string(stcno:publication_year, stcno:kb_name, 'KMC 1100', G),

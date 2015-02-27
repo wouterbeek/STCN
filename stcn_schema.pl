@@ -32,20 +32,23 @@ stcn_schema(G):-
   
   % Publication
   rdfs_assert_class(stcno:'Publication', G),
-  rdfs_assert_label(stcno:'Publication', en, publication, G),
-  rdfs_assert_label(stcno:'Publication', nl, publicatie, G),
+  rdfs_assert_label(stcno:'Publication', publication, G),
+  rdfs_assert_label(stcno:'Publication', [nl]-publicatie, G),
   
   % Topic
   rdfs_assert_class(stcno:'Topic', G),
-  rdfs_assert_label(stcno:'Topic', en, topic, G),
-  rdfs_assert_label(stcno:'Topic', nl, onderwerp, G),
+  rdfs_assert_label(stcno:'Topic', topic, G),
+  rdfs_assert_label(stcno:'Topic', [nl]-onderwerp, G),
 
   % Denotes relations between a PPN and the location from which information
   % about that PPN was extracted.
   rdf_assert_property(stcno:scrapedFrom, G),
-  rdfs_assert_label(stcno:scrapedFrom, en, 'scraped from', G),
-  rdfs_assert_comment(stcno:scrapedFrom, en,
-    'Some information of this PPN was scraped from this location.', G),
+  rdfs_assert_label(stcno:scrapedFrom, 'scraped from', G),
+  rdfs_assert_comment(
+    stcno:scrapedFrom,
+    'Some information of this PPN was scraped from this location.',
+    G
+  ),
   rdfs_assert_domain(stcno:scrapedFrom, stcno:'Publication', G),
   
   % The KB uses this predicate letter to denote the same property.

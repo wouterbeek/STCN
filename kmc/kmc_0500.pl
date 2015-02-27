@@ -120,8 +120,8 @@ assert_schema_kmc_0500(G):-
     (
       kmc_0500_status_value(par_103, Char, Value, _Pred3),
       rdf_assert_instance(Value, stcno:'StatusValue/Pos3', G),
-      rdfs_assert_label(Value, Label, nl, G),
-      rdfs_assert_comment(Value, Comment, nl, G)
+      rdfs_assert_label(Value, [nl]-Label, G),
+      rdfs_assert_comment(Value, [nl]-Comment, G)
     )
   ),
 
@@ -154,7 +154,7 @@ assert_schema_kmc_0500(G):-
 
   % Status 2 property.
   rdfs_assert_subproperty(stcno:status_pos2, stcno:status, G),
-  rdfs_assert_label(stcno:status_pos2, 'status positie 2', nl, G),
+  rdfs_assert_label(stcno:status_pos2, [nl]-'status positie 2', G),
   rdfs_assert_comment(
     stcno:status_pos2,
     [nl]-'Het correct invullen van positie 2 van kmc 0500 is van groot \c
@@ -173,7 +173,7 @@ assert_schema_kmc_0500(G):-
 
   % Status 3 property.
   rdfs_assert_subproperty(stcno:status_pos3, stcno:status, G),
-  rdfs_assert_label(stcno:status_pos3, 'status positie 3', nl, G),
+  rdfs_assert_label(stcno:status_pos3, [nl]-'status positie 3', G),
   rdf_assert_string(stcno:status_pos3, stcno:kb_name, 'PAR 103', G),
   rdfs_assert_seeAlso(
     stcno:status_pos3,
