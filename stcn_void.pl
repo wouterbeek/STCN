@@ -15,16 +15,10 @@ Generates the VoID description of the STCN dataset.
 
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
-:- use_module(plc(dcg/dcg_atom)).
-:- use_module(plc(os/datetime_ext)).
-
 :- use_module(plXsd(dateTime/xsd_dateTime_functions)).
 
 :- use_module(plRdf(api/rdf_build)).
-:- use_module(plRdf(api/rdf_read)).
 :- use_module(plRdf(api/rdfs_build)).
-:- use_module(plRdf(api/rdfs_read)).
-:- use_module(plRdf(term/rdf_datatype)).
 
 
 
@@ -33,7 +27,7 @@ Generates the VoID description of the STCN dataset.
 stcn_void(G):-
   % STCN dataset
   rdf_assert_instance(stcn:'STCN', void:'DatasetDescription', G),
-  
+
   % Contributors.
   % Albert
   rdf_assert_instance(stcn:'AlbertMeroñoPeñuela', foaf:'Person', G),
@@ -64,7 +58,7 @@ stcn_void(G):-
   rdfs_assert_label(stcn:'WouterBeek', [nl]-'Wouter Beek', G),
   rdf_assert(stcn:'WouterBeek', foaf:mbox, 'mailto:me@wouterbeek.com', G),
   rdf_assert(stcn:'STCN', dcterms:contributor, stcn:'WouterBeek', G),
-  
+
   % Creation time.
   get_time(POSIX_TS),
   posix_timestamp_to_xsd_dateTime(POSIX_TS, XSD_DT),
@@ -75,7 +69,7 @@ stcn_void(G):-
     xsd:dateTime,
     G
   ),
-  
+
   % Title
   rdf_assert_langstring(
     stcn:'STCN',
@@ -83,7 +77,7 @@ stcn_void(G):-
     'Short-Title Catalogue, Netherlands',
     G
   ),
-  
+
   % Description
   rdf_assert_langstring(
     stcn:'STCN',
@@ -93,17 +87,17 @@ stcn_void(G):-
           boeken.',
     G
   ),
-  
+
   % Vocabulary namespaces.
   rdf_current_prefix(stcn, StcnNs),
   rdf_current_prefix(stcno, StcnoNs),
   rdf_assert(stcn:'STCN', void:vocabulary, StcnNs, G),
   rdf_assert(stcn:'STCN', void:vocabulary, StcnoNs, G),
-  
+
   % VoID Feature: RDF serialization format.
   % @tbd Automate this based on rdf_save/3.
   rdf_assert(stcn:'STCN', void:feature, formats:'Turtle', G),
-  
+
   % SPARQL endpoint.
   rdf_assert(
     stcn:'STCN',
@@ -111,7 +105,7 @@ stcn_void(G):-
     'http://semanticweb.cs.vu.nl/prasem/sparql/',
     G
   ),
-  
+
   % Web pages.
   rdf_assert(
     stcn:'STCN',
@@ -125,11 +119,11 @@ stcn_void(G):-
     'http://support.oclc.org/ggc/richtlijnen/',
     G
   ),
-  
+
   % Example resource
   % @tbd What is this?
   rdf_assert(stcn:'STCN', void:exampleResource, stcno:'Publication', G),
-  
+
   stcn_void_authors(G),
   rdf_assert(stcn:'STCN', void:'ClassPartition', stcn:'STCN_Authors', G),
   stcn_void_printers(G),
@@ -138,13 +132,13 @@ stcn_void(G):-
   rdf_assert(stcn:'STCN', void:'ClassPartition', stcn:'STCN_Publications', G),
   stcn_void_topics(G),
   rdf_assert(stcn:'STCN', void:'ClassPartition', stcn:'STCN_Topics', G),
-  
+
   stcn_void_dbpedia(G),
   rdf_assert(stcn:'STCN', void:subset, stcn:'DBpedia_STCN', G),
   rdf_assert(stcn:'STCN', void:subset, stcn:'STCN2DBpedia', G),
   stcn_void_stcnv(G),
   rdf_assert(stcn:'STCN', void:subset, stcn:'STCNV', G),
-  
+
   % @tbd Relate this to stcn:'STCN'.
   stcn_void_authors2dbpedia(G).
 

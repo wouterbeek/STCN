@@ -1,8 +1,6 @@
 :- module(
   picarta,
   [
-    assert_schema_picarta/1, % +G:atom
-
 % PROCESSING
     process_life_years/1, % +G:atom
     process_name_normals/1, % +G:atom
@@ -37,11 +35,13 @@ We make a distinction between three portions of code in this module:
 :- use_module(library(aggregate)).
 :- use_module(library(apply)).
 :- use_module(library(debug)).
+:- use_module(library(lists), except([delete/3,subset/2])).
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 :- use_module(library(semweb/rdfs)).
 :- use_module(library(xpath)).
 
 :- use_module(plc(generics/atom_ext)).
+:- use_module(plc(generics/lambda_meta)).
 :- use_module(plc(generics/list_ext)).
 :- use_module(plc(process/thread_ext)).
 
@@ -54,7 +54,6 @@ We make a distinction between three portions of code in this module:
 
 :- use_module(plRdfEntailment(rdf_ent_stat)).
 
-:- rdf_meta(assert_schema_picarta(+,r)).
 :- rdf_meta(scrape_picarta(+,r)).
 :- rdf_meta(translate_profession(+,r)).
 
@@ -85,6 +84,8 @@ process_lifeyears1(G, Agent/LifeYears):-
   rdf_assert_datatype(Agent, stcno:birth, Birth, xsd:gYear, G),
   rdf_assert_datatype(Agent, stcno:death, Death, xsd:gYear, G),
   rdf_retractall_string(Agent, stcn:life_years, G).
+
+
 
 
 
@@ -201,6 +202,8 @@ translate_profession(printer, URI):-
 
 
 
+
+
 % PROCESSING: PSEUDONYMS %
 
 process_pseudonyms(G):-
@@ -217,12 +220,14 @@ process_pseudonyms(G):-
 
 
 
+
+
 % PROCESSING : TOPICS HIERARCHY %
 
 export_topics_hierarchy:-
-  rdf_global_id(stcno:'Topic', Root),
+  rdf_global_id(stcno:'Topic', RootTopic),
   rdf_global_id(skos:broader, Predicate),
-  beam([], Root, [Predicate], Topics, _Edges),
+  graph_closure([RootTopic], \X^Y^rdf_has(X, Predicate, Y), Topics, []),
   findall(
     [Label,Size],
     (
@@ -272,19 +277,22 @@ subtopics(AllPairs, List/Topic, Topic-Trees):-
   ).
 
 topic_label(Topic, Label):-
-  once(rdf_string(Vertex, stcn:synonym, Label, _)).
+  once(rdf_string(Topic, stcn:synonym, Label, _)).
 
-topic_size(Topic, Size):-
-  beam([], Topic, [Predicate], SubTopics, _),
+topic_size(RootTopic, Size):-
+  rdf_global_id(skos:broader, Predicate),
+  graph_closure([RootTopic], \X^Y^rdf_has(X, Predicate, Y), SubTopics, []),
   aggregate_all(
     set(Publication),
     (
-      member(SubVertex, SubVertices),
-      rdf(Publication, stcno:topic, SubVertex)
+      member(SubTopic, SubTopics),
+      rdf(Publication, stcno:topic, SubTopic)
     ),
     Publications
   ),
   length(Publications, Size).
+
+
 
 
 

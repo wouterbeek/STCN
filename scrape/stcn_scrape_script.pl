@@ -26,7 +26,6 @@ Script for scraping the STCN from Picarta.
 :- use_module(plRdf(management/rdf_save_any)).
 
 :- use_module(stcn(stcn_generics)).
-:- use_module(stcn(stcn_void)).
 :- use_module(stcn(scrape/stcn_scrape)).
 
 
@@ -43,7 +42,7 @@ stcn_scrape_script(PGraph):-
     [access(write),file_type(turtle)]
   ),
   debug(stcn_script, 'Done scraping Picarta for publications.', []),
-  
+
   % Turn PPN literals into IRIs.
   forall(
     member(
@@ -71,7 +70,7 @@ stcn_scrape_script(PGraph):-
       )
     )
   ),
-  
+
 /*
   % Load the Picarta topics.
   absolute_file_name(
@@ -89,7 +88,7 @@ stcn_scrape_script(PGraph):-
     )
   ),
 */
-  
+
   forall_thread(
     (
       member(C, ['Author','PrinterPublisher','TranslatorEditor']),
@@ -114,6 +113,6 @@ stcn_scrape_script(PGraph):-
     stcn_script,
     Msg
   ),
-  
+
   rdf_save_any(SFile, [format(turtle),graph(SGraph)]).
 
