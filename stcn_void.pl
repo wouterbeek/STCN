@@ -15,7 +15,10 @@ Generates the VoID description of the STCN dataset.
 
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
+:- use_module(plc(dcg/dcg_atom)).
 :- use_module(plc(os/datetime_ext)).
+
+:- use_module(plXsd(dateTime/xsd_dateTime_functions)).
 
 :- use_module(plRdf(api/rdf_build)).
 :- use_module(plRdf(api/rdf_read)).
@@ -99,7 +102,7 @@ stcn_void(G):-
   
   % VoID Feature: RDF serialization format.
   % @tbd Automate this based on rdf_save/3.
-  rdf_assert(stcn:'STCN', void:feature, format:'Turtle', G),
+  rdf_assert(stcn:'STCN', void:feature, formats:'Turtle', G),
   
   % SPARQL endpoint.
   rdf_assert(
@@ -226,7 +229,7 @@ stcn_void_dbpedia(G):-
   % Datadump
   rdf_assert(stcn:'DBpedia_STCN', void:dataDump, 'DBpedia_STCN.ttl', G),
   % VoID feature: RDF serialization format.
-  rdf_assert(stcn:'DBpedia_STCN', void:feature, format:'Turtle', G),
+  rdf_assert(stcn:'DBpedia_STCN', void:feature, formats:'Turtle', G),
   % Web page
   rdf_assert(stcn:'DBpedia_STCN', foaf:page, 'http://dbpedia.org/About', G).
 

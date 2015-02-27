@@ -5,7 +5,7 @@
     kmc_30xx//3, % +Graph:atom
                  % +PPN:uri
                  % +Predicate
-    populate_dbpedia/1, % +DBpedia_Graph:atom
+    populate_dbpedia/0,
     statistics_kmc30xx/2 % +Graph:atom
                           % -Rows:list(list)
   ]
@@ -29,7 +29,7 @@ These are considered to be the same. Mapped to upper case X using option
 
 :- use_module(library(aggregate)).
 :- use_module(library(debug)).
-:- use_module(library(semweb/rdf_db)).
+:- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 :- use_module(library(semweb/rdfs)).
 
 :- use_module(plc(dcg/dcg_ascii)). % Meta-DCG.
@@ -37,12 +37,21 @@ These are considered to be the same. Mapped to upper case X using option
 :- use_module(plc(process/thread_ext)).
 
 :- use_module(plRdf(api/rdf_build)).
+:- use_module(plRdf(api/rdf_read)).
+:- use_module(plRdf(api/rdfs_build)).
 :- use_module(plRdf(api/rdfs_read)).
 :- use_module(plRdf(owl/owl_build)).
 :- use_module(plRdf(owl/owl_read)).
+:- use_module(plRdf(term/rdf_term)).
 :- use_module(plRdf(vocabulary/rdf_stat)).
 
-:- use_module(stcn(stcn_generic)).
+:- use_module(plSparql(query/sparql_query_api)).
+
+:- use_module(lodCache(lod_cache)).
+
+:- use_module(plRdfEntailment(rdf_ent_stat)).
+
+:- use_module(stcn(stcn_generics)).
 
 :- rdf_meta(link_to_dbpedia_agent(+,r)).
 
@@ -121,24 +130,14 @@ kmc_30xx(G, PPN, Pred) -->
     rdf_assert(PPN, Pred, Author, G)
   }.
 
-populate_dbpedia(DBpediaG):-
+populate_dbpedia:-
   forall(
     (
       rdfs_individual_of(Agent, foaf:'Agent'),
       owl_resource_identity(Agent, DBpedia_Agent),
       rdf_global_id(dbpedia:_, DBpedia_Agent)
     ),
-    (
-      sparql_cache(DBpedia_Agent, _, Propositions),
-      forall(
-        member([S,P,O], Propositions),
-        (
-          rdf_assert(S, P, O, DBpediaG),
-          flag(populate_dbpedia_triples, Id1, Id1 + 1)
-        )
-      ),
-      flag(populate_dbpedia_agents, Id2, Id2 + 1)
-    )
+    lod_cache_assert(DBpedia_Agent, [])
   ).
 
 statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
@@ -150,7 +149,7 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   aggregate_all(
     set(DBpediaAuthorPPN),
     (
-      rdfs(DBpediaAuthorPPN, stcno:author, AuthorPPN, G),
+      rdf(DBpediaAuthorPPN, stcno:author, AuthorPPN, G),
       owl_resource_identity(AuthorPPN, _DBpediaAuthor),
       rdf_global_id(dbpedia:_, DBpediaAuthor)
     ),
@@ -160,14 +159,14 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   debug(stcn_statistics, '-- ~w: ~w', [A2,V2]),
 
   A3 = 'Number of authors (including pseudonyms)',
-  count_individuals(stcno:'Author', G, V3),
+  count_instances_by_class(stcno:'Author', V3),
   debug(stcn_statistics, '-- ~w: ~w', [A3,V3]),
 
   A4 = 'Number of DBpedia authors (including pseudonyms)',
   aggregate_all(
     set(DBpediaAuthor),
     (
-      rdfs(_PPN, stcno:author, AuthorPPN, G),
+      rdf(_, stcno:author, AuthorPPN, G),
       owl_resource_identity(AuthorPPN, DBpediaAuthor),
       rdf_global_id(dbpedia:_, DBpediaAuthor)
     ),
@@ -180,7 +179,7 @@ statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
   aggregate_all(
     set(PPN_Pseudonym),
     (
-      rdfs(PPN_Pseudonym, stcno:author, Author, G),
+      rdf(PPN_Pseudonym, stcno:author, Author, G),
       rdf_string(Author, stcno:pseudonym, Pseudonym, G)
     ),
     PPN_Pseudonyms

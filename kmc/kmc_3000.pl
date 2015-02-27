@@ -41,6 +41,7 @@ http://picarta.pica.nl/DB=3.11/SET=1/TTL=1/CMD?
 
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
+:- use_module(plRdf(api/rdf_build)).
 :- use_module(plRdf(api/rdf_read)).
 :- use_module(plRdf(api/rdfs_build)).
 :- use_module(plRdf(api/rdfs_read)).

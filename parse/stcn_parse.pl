@@ -19,12 +19,11 @@ This parses 139.817 PPN entries in the redactiebladen file.
 :- use_module(library(debug)).
 :- use_module(library(pio)).
 
-:- use_module(plc(dcg/content)).
 :- use_module(plc(dcg/dcg_generics)).
 
 :- use_module(plRdf(api/rdf_build)).
 
-:- use_module(stcn(stcn_generic)).
+:- use_module(stcn(stcn_generics)).
 :- use_module(stcn(stcn_kmc)).
 
 :- assert(user:prolog_file_type(txt, text)).

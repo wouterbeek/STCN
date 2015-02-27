@@ -1,7 +1,7 @@
 :- module(
-  stcn_statistics,
+  stcn_stats,
   [
-    stcn_statistics/1 % -Rows:list(list)
+    stcn_stats/1 % -Rows:list(list)
   ]
 ).
 
@@ -102,6 +102,8 @@ New parse results are coming soon!
 
 :- use_module(plRdf(vocabulary/rdf_stat)).
 
+:- use_module(plRdfEntailment(rdf_ent_stat)).
+
 :- use_module(stcn(kmc/kmc_0500)).
 :- use_module(stcn(kmc/kmc_1100)).
 :- use_module(stcn(kmc/kmc_1200)).
@@ -115,10 +117,10 @@ New parse results are coming soon!
 
 
 
-stcn_statistics([[A1,V1]|Rows]):-
+stcn_stats([[A1,V1]|Rows]):-
   % Generic statistics.
   A1 = 'Parsed PPNs',
-  count_individuals(stcno:'Publication', stcn, V1),
+  count_instances_by_class(stcno:'Publication', stcn, V1),
   debug(stcn_statistics, '~w: ~w', [A1, V1]),
 
   statistics_kmc_0500(_, Rows0500),

@@ -92,6 +92,7 @@ are not included in a 4-2-2-1 search. [?]
 @version 2013/01-2013/03, 2013/06, 2013/09, 2014/03, 2015/02
 */
 
+:- use_module(library(dcg/basics)).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
@@ -99,7 +100,7 @@ are not included in a 4-2-2-1 search. [?]
 :- use_module(plc(dcg/dcg_content)).
 
 :- use_module(plRdf(api/rdf_build)).
-:- use_module(pLRdf(vocabulary/rdf_stat)).
+:- use_module(plRdf(vocabulary/rdf_stat)).
 
 
 
@@ -300,7 +301,7 @@ bible_book(nt, 'Titus').
 bible_book(_,  'Metrical Psalms').
 
 kmc_3210(G, PPN) -->
-  ampersand,
+  "&",
   {anonymous_popular(Title)},
   atom(Title),
   {
@@ -312,30 +313,14 @@ kmc_3210(G, PPN) -->
     )
   }.
 kmc_3210(G, PPN) -->
-  ampersand,
+  "&",
   atom('Bible'),
-  space,
-  language(G, PPN).
+  " ",
+  atom(Language),
+  % Just checking!
+  {rdf(PPN, stcn:language, Language, G)}.
 kmc_3210(_G, PPN) -->
   {debug(kmc_3210, 'Cannot parse title for publication ~w.', [PPN])}.
-
-language(G, PPN) -->
-  word(Word),
-  {
-    % Just checking!
-    (
-      find_language([language(en)], Word, Language),
-      rdf(PPN, stcn:language, Language, G)
-    ->
-      debug(
-        kmc_3210,
-        'Checked language ~w (~w) for publication ~w.',
-        [Word,Language,PPN]
-      )
-    ;
-      debug(kmc_3210, 'Failed language ~w for publication ~w.', [Word,PPN])
-    )
-  }.
 
 statistics_kmc3210(G, [[A1,V1]]):-
   A1 = 'Publications with title',

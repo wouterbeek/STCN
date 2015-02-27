@@ -31,6 +31,7 @@ E.g. PPN 234597046.
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
 :- use_module(plc(dcg/dcg_ascii)).
+:- use_module(plc(dcg/dcg_atom)).
 :- use_module(plc(dcg/dcg_content)).
 :- use_module(plc(dcg/dcg_generics)).
 
@@ -39,7 +40,7 @@ E.g. PPN 234597046.
 :- use_module(plRdf(api/rdfs_build)).
 :- use_module(plRdf(api/rdfs_read)).
 
-:- use_module(stcn(stcn_generic)).
+:- use_module(stcn(stcn_generics)).
 
 
 
@@ -255,7 +256,7 @@ kmc_4043(_G, _PPN) -->
   atom('THESAUREREN').
 % E.g. PPN 234597046.
 kmc_4043(G, PPN) -->
-  word(PrinterName),
+  atom(PrinterName),
   {
     once(city_printer(PrinterName, PPN)),
     ppn_resource(printer_publisher, PPN, Printer),

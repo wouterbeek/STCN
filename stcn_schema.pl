@@ -16,8 +16,8 @@ Schema for the STCN database.
 
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
-:- use_module(plRdf(rdf_build)).
-:- use_module(plRdf(rdfs_build)).
+:- use_module(plRdf(api/rdf_build)).
+:- use_module(plRdf(api/rdfs_build)).
 
 :- use_module(stcn(stcn_kmc)).
 :- use_module(stcn(picarta/picarta_query)). % Make private call.
@@ -27,9 +27,6 @@ Schema for the STCN database.
 
 
 stcn_schema(G):-
-  % Add the RDFS statements for XSD.
-  xsd_assert_schema(G),
-  
   % Publication
   rdfs_assert_class(stcno:'Publication', G),
   rdfs_assert_label(stcno:'Publication', publication, G),

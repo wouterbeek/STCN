@@ -6,8 +6,7 @@
                  % +PPN:uri
     kmc_1200_picarta//2, % +Graph:atom
                          % +PPN:uri
-    statistics_kmc_1200/2 % +Graph:atom
-                          % -Rows:list(list)
+    statistics_kmc_1200_web//1 % +Graph:atom
   ]
 ).
 
@@ -192,9 +191,11 @@ kopie van de tp. (zie ook kmc 7134)
 */
 
 :- use_module(library(debug)).
+:- use_module(library(http/html_write)).
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
 :- use_module(plc(dcg/dcg_ascii)).
+:- use_module(plc(dcg/dcg_atom)).
 :- use_module(plc(dcg/dcg_content)).
 :- use_module(plc(dcg/dcg_generics)).
 
@@ -202,6 +203,8 @@ kopie van de tp. (zie ook kmc 7134)
 :- use_module(plRdf(api/rdfs_build)).
 :- use_module(plRdf(api/rdfs_read)).
 :- use_module(plRdf(vocabulary/rdf_stat)).
+
+:- use_module(plRdfHtml(rdf_html_triple_table)).
 
 
 
@@ -513,8 +516,13 @@ kmc_1200_picarta(_G, PPN) -->
 
 
 
+
+
 % STATISTICS %
 
-statistics_kmc_1200(G, [['Typografosch kenmerk (KMC 1200)','Occurrences']|L]):-
-  rdf_property_table(stcno:typographic_property, G, L).
+statistics_kmc_1200_web(G) -->
+  html([
+    h2('Typografosch kenmerk (KMC 1200)'),
+    rdf_html_triple_table(_, stcno:typographic_property, _, G, plTabular)
+  ]).
 

@@ -21,6 +21,7 @@ Support for STCN KMCs.
 */
 
 :- use_module(plc(dcg/dcg_ascii)).
+:- use_module(plc(dcg/dcg_abnf)).
 :- use_module(plc(dcg/dcg_generics)).
 :- use_module(plc(dcg/dcg_meta)).
 
@@ -125,9 +126,8 @@ kmc_code('7134', false).
 kmc_code('7800', false).
 kmc_code('7900', false).
 
-kmc_start(KMC) -->
-  dcg_multi1(decimal_digit, 4, Codes),
+kmc_start(Kmc) -->
+  '#'(4, decimal_digit, Kmc, [convert1(codes_atom)]),
   " ",
-  {atom_codes(KMC, Codes)},
-  {stcn_kmc:kmc_code(KMC, _Active, _Suffix)}, !.
+  {stcn_kmc:kmc_code(Kmc, _Active, _Suffix)}, !.
 

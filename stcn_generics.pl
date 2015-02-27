@@ -1,5 +1,5 @@
 :- module(
-  stcn_generic,
+  stcn_generics,
   [
     ppn//0,
     ppn//1, % -PPN:atom
@@ -23,6 +23,7 @@ but are not generic enough to be in PGC.
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
 :- use_module(plc(dcg/dcg_ascii)).
+:- use_module(plc(dcg/dcg_abnf)).
 
 :- rdf_meta(category_class(?,r)).
 
@@ -33,10 +34,14 @@ but are not generic enough to be in PGC.
 ppn -->
   ppn(_PPN).
 
+
+
 %! ppn(-PPN:atom)//
 
 ppn(PPN) -->
-  dcg_multi1(ppn_char, 9, PPN, [convert(codes_atom)]).
+  '#'(9, ppn_char, PPN, [convert(codes_atom)]).
+
+
 
 %! ppn(+Category:atom, -PPN:iri)// is det.
 % Parses a PPN identifier and returns its IRI.
@@ -49,6 +54,8 @@ ppn(Category, PPN2) -->
 
 ppn_char(C) --> decimal_digit(C).
 ppn_char(C) --> x(C).
+
+
 
 %! ppn_resource(+Category:atom, +PPN_Name:atom, -PPN:iri) is det.
 

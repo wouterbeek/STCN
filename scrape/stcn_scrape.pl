@@ -14,22 +14,19 @@ Fully automated scrape for the STCN.
 @author Wouter Beek
 @tbd Automate the generation of the list of initial publication PPNs
      based on the redactiebladen (using module STCN_PARSE).
-@version 2013/06, 2013/09-2013/10, 2014/03
+@version 2013/06, 2013/09-2013/10, 2014/03, 2015/02
 */
 
 :- use_module(library(aggregate)).
 :- use_module(library(semweb/rdf_db)).
 :- use_module(library(semweb/rdfs)).
 
-:- use_module(plc(generics/atom_ext)).
-:- use_module(plc(generics/list_script)).
-:- use_module(plc(io/file_ext)).
+:- use_module(plc(process/list_script)).
 
 :- use_module(plRdf(api/rdf_build)).
-:- use_module(plRdf(api/rdf_read)).
 :- use_module(plRdf(api/rdfs_build)).
 
-:- use_module(stcn(stcn_generic)).
+:- use_module(stcn(stcn_generics)).
 :- use_module(stcn(picarta/picarta_query)).
 
 :- rdf_meta(stcn_scrape_category_relation(r,r)).
@@ -58,30 +55,12 @@ Fully automated scrape for the STCN.
 % Without a prior TODO file.
 stcn_scrape(FromG, C, ToG):-
   stcn_scrape_ppns(FromG, C, PPNs),
-
   % Write the PPNs of the given category to a TODO file.
-  atomic_list_concat(['TODO',C], '_', TODO_FileName),
-  create_file(data('.'), TODO_FileName, text, TODO_File),
-  setup_call_cleanup(
-    open(TODO_File, write, Stream, []),
-    forall(
-      member(PPN, PPNs),
-      (
-        format(Stream, '~w', [PPN]),
-        nl(Stream),
-        flush_output(Stream)
-      )
-    ),
-    close(Stream)
-  ),
-
-  % Start the actual scraping, using the TODO file.
-  % DONE file.
-  atomic_list_concat(['DONE',C], '_', DONE_FileName),
-  create_file(data('.'), DONE_FileName, text, DONE_File),
-
-  % Process the TODO file.
-  list_script(picarta_scrape(C, ToG), TODO_File, DONE_File).
+  list_script(
+    picarta_scrape(C, ToG),
+    PPNs,
+    [message('PPN'),overview(true)]
+  ).
 
 stcn_scrape_category_relation('Author', picarta:author).
 stcn_scrape_category_relation('PrinterPublisher', picarta:printer_publisher).

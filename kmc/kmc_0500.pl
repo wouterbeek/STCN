@@ -7,8 +7,7 @@
     kmc_0500//2, % +Graph:atom
                  % +PPN:uri
 % STATISTICS
-    statistics_kmc_0500/2 % +Graph:atom
-                          % -Rows:list(list)
+    statistics_kmc_0500_web//1 % +Graph:atom
   ]
 ).
 
@@ -28,7 +27,10 @@ Encodes the 'status' of a work.
 
 :- use_module(plRdf(api/rdf_build)).
 :- use_module(plRdf(api/rdf_read)).
+:- use_module(plRdf(api/rdfs_build)).
 :- use_module(plRdf(vocabulary/rdf_stat)).
+
+:- use_module(plRdfHtml(rdf_html_triple_table)).
 
 :- meta_predicate(kmc_0500_oclc(+,+,+,3)).
 :- meta_predicate(kmc_0500_status_value(3,+,-,-)).
@@ -90,8 +92,8 @@ assert_schema_kmc_0500(G):-
     (
       kmc_0500_status_value('kmc_0500-1', Char, Value, _Pred1),
       rdf_assert_instance(Value, stcno:'StatusValue/Pos1', G),
-      rdfs_assert_label(Value, nl, Label, G),
-      rdfs_assert_comment(Value, nl, Comment, G)
+      rdfs_assert_label(Value, [nl]-Label, G),
+      rdfs_assert_comment(Value, [nl]-Comment, G)
     )
   ),
 
@@ -329,8 +331,12 @@ par_103(y, 'bibliografisch onvolledig', 'Bibliografisch onvolledig.').
 
 
 
+
 % STATISTICS %
 
-statistics_kmc_0500(G, [['Status (KMC 0500)','Occurrences']|L]):-
-  rdf_property_table(stcno:status, G, L).
+statistics_kmc_0500_web(G) -->
+  html([
+    h2('Status (KMC 0500)'),
+    \rdf_html_triple_table(_, stcno:status, _, G, plTabular)
+  ]).
 

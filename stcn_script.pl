@@ -1,4 +1,9 @@
-:- module(stcn_script, []).
+:- module(
+  stcn_script,
+  [
+    stcn_script/0
+  ]
+).
 
 /** <module> STCN script
 
@@ -27,78 +32,75 @@ These predicate should be converted to some other module or be removed.
 :- use_module(plRdf(api/rdf_read)).
 :- use_module(plRdf(graph/rdf_graph)).
 :- use_module(plRdf(graph/rdf_graph_name)).
+:- use_module(plRdf(management/rdf_load_any)).
+:- use_module(plRdf(management/rdf_save_any)).
 
-:- use_module(stcn(collect_lines)).
-:- use_module(stcn(stcn_generic)).
-:- use_module(stcn(stcn_parse)).
+:- use_module(stcn(stcn_generics)).
 :- use_module(stcn(stcn_schema)).
-:- use_module(stcn(stcn_scrape)).
 :- use_module(stcn(stcn_void)).
-:- use_module(void(void_file)).
+%:- use_module(stcn(parse/collect_lines)).
+%:- use_module(stcn(parse/stcn_parse)).
+%:- use_module(stcn(scrape/stcn_scrape)).
 
 
 
 
 
 stcn_script:-
-  ap(
-    [process(db_create),project(stcn),to('VoID',turtle)],
+  stcn_schema('STCN-Ontology'),
+  /*
+  ap_stage(
+    [from(input,'redactiebladen.txt',archive),to(_,redactiebladen,text)],
+    extract_archive
+  ),
+  ap_stage(
     [
-      ap_stage([to(output,'STCNV',turtle)], stcn_schema),
-      ap_stage(
-        [from(input,'redactiebladen.txt',archive),to(_,redactiebladen,text)],
-        extract_archive
-      ),
-      ap_stage(
-        [
-          from(input,'PicartaTopics.ttl',archive),
-          to(output,'PicartaTopics',turtle)
-        ],
-        extract_archive
-      ),
-      ap_stage(
-        [from(_,redactiebladen,text),to(_,redactiebladen,text)],
-        redactiebladen_prepare
-      ),
-      ap_stage(
-        [from(_,redactiebladen,text),to(_,'Redactiebladen',turtle)],
-        redactiebladen_parse
-      ),
-      ap_stage(
-        [from(_,'Redactiebladen',turtle),to(_,'PicartaPublications',turtle)],
-        picarta_scrape_publications
-      ),
-      ap_stage(
-        [
-          from(_,'PicartaPublications',turtle),
-          to(_,'PicartaPublications',turtle)
-        ],
-        picarta_scrape_publications_split
-      ),
-      ap_stage(
-        [
-          from(_,'PicartaPublications',turtle),
-          to(_,'PicartaPublications',turtle)
-        ],
-        picarta_scrape_publications_ppns
-      ),
-      ap_stage(
-        [
-          from(_,'PicartaPublications',turtle),
-          to(_,'PicartaPublications',turtle)
-        ],
-        picarta_scrape_publications_topics
-      ),
-      ap_stage([from(_,'PicartaPublications',turtle)], picarta_scrape_others),
-      ap_stage([to(output,'VoID',turtle)], assert_stcn_void)
-    ]
-  ).
+      from(input,'PicartaTopics.ttl',archive),
+      to(output,'PicartaTopics',turtle)
+    ],
+    extract_archive
+  ),
+  ap_stage(
+    [from(_,redactiebladen,text),to(_,redactiebladen,text)],
+    redactiebladen_prepare
+  ),
+  ap_stage(
+    [from(_,redactiebladen,text),to(_,'Redactiebladen',turtle)],
+    redactiebladen_parse
+  ),
+  ap_stage(
+    [from(_,'Redactiebladen',turtle),to(_,'PicartaPublications',turtle)],
+    picarta_scrape_publications
+  ),
+  ap_stage(
+    [
+      from(_,'PicartaPublications',turtle),
+      to(_,'PicartaPublications',turtle)
+    ],
+    picarta_scrape_publications_split
+  ),
+  ap_stage(
+    [
+      from(_,'PicartaPublications',turtle),
+      to(_,'PicartaPublications',turtle)
+    ],
+    picarta_scrape_publications_ppns
+  ),
+  ap_stage(
+    [
+      from(_,'PicartaPublications',turtle),
+      to(_,'PicartaPublications',turtle)
+    ],
+    picarta_scrape_publications_topics
+  ),
+  ap_stage([from(_,'PicartaPublications',turtle)], picarta_scrape_others),
+*/
 
-assert_stcn_void(_PS, _FromDir, ToFile):-
-  G = 'VoID',
-  stcn_void(G),
-  void_save(G, ToFile).
+  % STCN-VoID
+  stcn_void('STCN-VoID'),
+  rdf_save_any([format(turtle),graph('STCN-VoID')]).
 
+/*
 % Picarta scraping for publications.
 picarta_scrape_publications(_PS, FromFile, ToFile):-
   rdf_new_graph(FromFile, FromG),
@@ -112,13 +114,13 @@ picarta_scrape_publications(_PS, FromFile, ToFile):-
     []
   ),
 
-  rdf_save([format(turtle)], ToG, ToFile),
+  rdf_save_any(ToFile, [format(turtle),graph(ToG)]),
   debug(stcn_script, 'Done scraping Picarta for publications.', []),
   rdf_unload_graph(ToG).
 
 picarta_scrape_publications_split(_, FromFile, ToFile):-
-  rdf_new_graph(FromFile, Graph),
-  rdf_load_any(FromFile, [format(turtle),graph(Graph)]),
+  rdf_new_graph(FromFile, G),
+  rdf_load_any(FromFile, [format(turtle),graph(G)]),
 
   % Assert occurrences in literal enumerations as separate triples.
   rdf_update_literal(
@@ -127,45 +129,45 @@ picarta_scrape_publications_split(_, FromFile, ToFile):-
     _,
     _,
     _,
-    Graph,
+    G,
     split_lexical_form('; ')
   ),
   debug(stcn_script, 'Printer-publishers were split.', []),
-  
+
   rdf_update_literal(
     _,
     picarta:printer_publisher,
     _,
     _,
     _,
-    Graph,
+    G,
     lexical_form(strip_atom([' ']))
   ),
   debug(stcn_script, 'Printer-publishers were stripped.', []),
-  
+
   rdf_update_literal(
     _,
     picarta:topical_keyword,
     _,
     _,
     _,
-    Graph,
+    G,
     split_lexical_form('; ')
   ),
   debug(stcn_script, 'Topics were split.', []),
-  
+
   rdf_update_literal(
     _,
     picarta:typographic_information,
     _,
     _,
     _,
-    Graph,
+    G,
     split_lexical_form(' , ')
   ),
   debug(stcn_script, 'Typographic information was split.', []),
 
-  rdf_save([format(turtle)], G, ToFile),
+  rdf_save_any([format(turtle),graph(G)]),
   debug(
     stcn_script,
     'The Picarta scrape with splits was saved to file ~w.',
@@ -175,7 +177,7 @@ picarta_scrape_publications_split(_, FromFile, ToFile):-
 
 picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
   rdf_new_graph(FromFile, G),
-  rdf_load_any([format(turtle),graph(Graph)], FromFile),
+  rdf_load_any(FromFile, [format(turtle),graph(G)]),
 
   % Turn PPN literals into IRIs.
   forall(
@@ -206,7 +208,7 @@ picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
   ),
 
   % Save the processed scrape results.
-  rdf_save([format(turtle)], G, ToFile),
+  rdf_save_any(ToFile, [format(turtle),graph(G)]),
   debug(
     stcn_script,
     'Done saving the scraped redactiebladen to file ~w.',
@@ -217,7 +219,7 @@ picarta_scrape_publications_ppns(_PS, FromFile, ToFile):-
 picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
   % Load the Picarta publications.
   rdf_new_graph(FromFile, G),
-  rdf_load_any([format(turtle),graph(Graph)], FromFile),
+  rdf_load_any(FromFile, [format(turtle),graph(G)]),
 
   % Load the Picarta topics.
   absolute_file_name(
@@ -225,7 +227,7 @@ picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
     TopicFile,
     [access(read),file_type(turtle)]
   ),
-  rdf_load_any([format(turtle),graph('PicartaTopics')], TopicFile),
+  rdf_load_any(TopicFile, [format(turtle),graph('PicartaTopics')]),
 
   forall(
     rdf_string(PPN, picarta:topical_keyword, TopicLit, G),
@@ -237,7 +239,7 @@ picarta_scrape_publications_topics(_PS, FromFile, ToFile):-
   ),
 
   % Save the processed scrape results.
-  rdf_save([format(turtle)], G, ToFile),
+  rdf_save_any(ToFile, [format(turtle),graph(G)]),
   debug(
     stcn_script,
     'Done saving the scraped redactiebladen to file ~w.',
@@ -271,7 +273,7 @@ picarta_scrape_others(_PS, FromFile, ToDir):-
         ToFile,
         [access(write),file_type(turtle),relative_to(ToDir)]
       ),
-      rdf_save([format(turtle)], ToG, ToFile),
+      rdf_save_any(ToFile, [format(turtle),graph(ToG)]),
       debug(
         stcn_script,
         'Done saving the scraped class ~w from Picarta.',
@@ -287,7 +289,7 @@ redactiebladen_parse(_PS, FromFile, ToFile):-
   parse_redactiebladen(FromFile, 'Redactiebladen'),
   debug(stcn_script, 'Done parsing the redactiebladen.', []),
 
-  rdf_save([format(turtle)], 'Redactiebladen', ToFile),
+  rdf_save_any(ToFile, [format(turtle),graph('Redactiebladen')]),
   debug(stcn_script, 'Done saving the parsed redactiebladen.', []).
 
 % Prepares the redactiebladen file.
@@ -306,4 +308,6 @@ redactiebladen_prepare(_PS, FromFile, ToFile):-
 % Asserts the schema for STCN.
 stcn_schema(_PS, _FromDir, ToFile):-
   stcn_schema('STCNV'),
-  rdf_save([format(turtle)], 'STCNV', ToFile).
+  rdf_save_any(ToFile, [format(turtle),graph('STCNV')]).
+*/
+

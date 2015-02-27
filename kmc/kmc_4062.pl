@@ -96,6 +96,7 @@ Extra space at beginning.
 @version 2013/01-2013/03, 2013/06, 2013/09, 2014/03, 2015/02
 */
 
+:- use_module(library(dcg/basics)).
 :- use_module(library(debug)).
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
@@ -109,8 +110,6 @@ Extra space at beginning.
 :- use_module(plRdf(api/rdfs_build)).
 :- use_module(plRdf(api/rdfs_read)).
 :- use_module(plRdf(vocabulary/rdf_stat)).
-
-:- meta_predicate(parse_value(+,+,-)).
 
 :- rdf_meta(kmc_4062_extra(?,r)).
 :- rdf_meta(translate_format(r,?)).
@@ -244,7 +243,7 @@ kmc_4062_extra(G, PPN) -->
   blanks,
   % Case-insensitive parsing is needed, because sometimes
   % 'Agenda' and 'agenda' occur, as well as 'Oblong' and 'oblong'.
-  word(Word),
+  atom(Word),
   {
     Word \== '',
     downcase_atom(Word, LowercaseWord),
@@ -265,7 +264,7 @@ kmc_4062_main(G, PPN) -->
   {rdf_assert(PPN, stcno:format, stcno:unknown_format, G)}.
 kmc_4062_main(G, PPN) -->
   blanks,
-  number(Number),
+  integer(Number),
   blanks,
   (
     % °

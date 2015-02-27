@@ -21,11 +21,10 @@ via its URI-baset/REST API.
 :- use_module(library(xpath)).
 
 :- use_module(plc(dcg/dcg_generics)).
-:- use_module(plc(generics/atom_ext)).
 
 :- use_module(plHtml(html)).
 
-:- use_module(stcn(stcn_generic)).
+:- use_module(stcn(stcn_generics)).
 
 
 

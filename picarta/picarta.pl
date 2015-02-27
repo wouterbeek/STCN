@@ -52,6 +52,8 @@ We make a distinction between three portions of code in this module:
 :- use_module(plRdf(owl/owl_build)).
 :- use_module(plRdf(vocabulary/rdf_stat)).
 
+:- use_module(plRdfEntailment(rdf_ent_stat)).
+
 :- rdf_meta(assert_schema_picarta(+,r)).
 :- rdf_meta(scrape_picarta(+,r)).
 :- rdf_meta(translate_profession(+,r)).
@@ -318,22 +320,22 @@ scrape_picarta(G, Class):-
 
 scrape_picarta_progress(PicartaGraph, StcnGraph):-
   % Author.
-  count_individuals(stcno:'Author', PicartaGraph, X1),
-  count_individuals(stcno:'Author', StcnGraph, Y1),
+  count_instances_by_class(stcno:'Author', PicartaGraph, X1),
+  count_instances_by_class(stcno:'Author', StcnGraph, Y1),
   debug(picarta, 'Authors: ~w of ~w.\n', [X1, Y1]),
   
   % Printer.
-  count_individuals(stcno:'Printer', PicartaGraph, X2),
-  count_individuals(stcno:'Printer', StcnGraph, Y2),
+  count_instances_by_class(stcno:'Printer', PicartaGraph, X2),
+  count_instances_by_class(stcno:'Printer', StcnGraph, Y2),
   debug(picarta, 'Printers: ~w of ~w.\n', [X2, Y2]),
   
   % Publications.
-  count_individuals(stcno:'Publication', PicartaGraph, X3),
-  count_individuals(stcno:'Publication', StcnGraph, Y3),
+  count_instances_by_class(stcno:'Publication', PicartaGraph, X3),
+  count_instances_by_class(stcno:'Publication', StcnGraph, Y3),
   debug(picarta, 'Publications: ~w of ~w.\n', [X3, Y3]),
   
   % Topics.
-  count_individuals(stcno:'Topic', PicartaGraph, X4),
-  count_individuals(stcno:'Topic', StcnGraph, Y4),
+  count_instances_by_class(stcno:'Topic', PicartaGraph, X4),
+  count_instances_by_class(stcno:'Topic', StcnGraph, Y4),
   debug(picarta, 'Topics: ~w of ~w.\n', [X4, Y4]).
 

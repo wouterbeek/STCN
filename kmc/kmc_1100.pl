@@ -67,6 +67,10 @@ Also see kmc_4040.pl for dating.
 :- use_module(plc(dcg/dcg_generics)).
 :- use_module(plc(generics/list_ext)).
 
+:- use_module(plNlp(dcg_year)).
+
+:- use_module(plXsd(dateTime/xsd_dateTime_aux)).
+
 :- use_module(plRdf(api/rdf_build)).
 :- use_module(plRdf(api/rdf_read)). % Meta-call.
 :- use_module(plRdf(api/rdfs_build)).
