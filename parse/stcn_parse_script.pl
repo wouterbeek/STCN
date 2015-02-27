@@ -1,7 +1,8 @@
 :- module(
   stcn_parse_script,
   [
-    stcn_parse_script/1 % -Graph:atom
+    stcn_parse_script/2 % +Uri:atom
+                        % -Graph:atom
   ]
 ).
 
@@ -19,6 +20,8 @@ Script for parsing the STCN from redactiebladen.
 :- use_module(plc(dcg/replace_in_file)).
 :- use_module(plc(io/archive_ext)).
 
+:- use_module(plHttp(download_to_file)).
+
 :- use_module(plRdf(management/rdf_save_any)).
 
 :- use_module(stcn(parse/collect_lines)).
@@ -28,10 +31,10 @@ Script for parsing the STCN from redactiebladen.
 
 
 
-stcn_parse_script(G):-
+stcn_parse_script(Uri, G):-
   % Unarchive the redactiebladen.
-  absolute_file_name(stcn('rdf/redactiebladen.tar.gz'), GzFile, [access(read)]),
-  archive_extract(GzFile, _, [LocalName-_]),
+  download_to_file(Uri, ArchiveFile, []),
+  archive_extract(ArchiveFile, _, [LocalName-_]),
   
   % Prepare the redactiebladen.
   absolute_file_name(data(LocalName), F0),

@@ -36,7 +36,10 @@ stcn_script:-
   rdf_save_any([format(turtle),graph(OGraph)]),
 
   % Parse the redactiebladen.
-  stcn_parse_script(PGraph),
+  stcn_parse_script(
+    'http://truthberead.com/wb-files/redactiebladen.tar.gz',
+    PGraph
+  ),
 
   % Scrape Picarta.
   stcn_scrape_script(PGraph),
