@@ -50,9 +50,10 @@ assert_schema_kmcs(G):-
     kmc_code(_, true, Suffix),
     (
       format(atom(Predicate), 'assert_schema_kmc_~w', [Suffix]),
-      (  current_predicate(stcn_kmc:Predicate/1)
-      -> call(Predicate, G)
-      ;  true)
+      (   current_predicate(stcn_kmc:Predicate/1)
+      ->  call(Predicate, G)
+      ;   true
+      )
     )
   ).
 

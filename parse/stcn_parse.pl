@@ -1,8 +1,8 @@
 :- module(
   stcn_parse,
   [
-    parse_redactiebladen/2 % +File:atom
-                           % +Graph:atom
+    redactiebladen//2 % +Graph:atom
+                      % -PPN:atom
   ]
 ).
 
@@ -19,6 +19,7 @@ This parses 139.817 PPN entries in the redactiebladen file.
 :- use_module(library(debug)).
 :- use_module(library(pio)).
 
+:- use_module(plc(dcg/dcg_ascii)).
 :- use_module(plc(dcg/dcg_generics)).
 
 :- use_module(plRdf(api/rdf_build)).
@@ -31,12 +32,6 @@ This parses 139.817 PPN entries in the redactiebladen file.
 
 
 
-
-parse_redactiebladen(F, G):-
-  access_file(F, read),
-  phrase_from_file(redactiebladen(G, _PPN), F, [encoding(utf8),type(text)]),
-  flag(publications, N, N),
-  debug(stcn_parse, '~w PPNs were processed.', [N]).
 
 redactiebladen(G, PPN) -->
   end_of_line, !,

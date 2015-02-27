@@ -18,6 +18,7 @@ and the STCN graph files are in the `data` subdirectory.
 
 :- use_module(plc(dcg/dcg_generics)).
 
+:- use_module(plRdf(api/rdf_build)).
 :- use_module(plRdf(api/rdf_read)).
 
 :- use_module(stcn(kmc/kmc_1200)).
@@ -27,12 +28,57 @@ and the STCN graph files are in the `data` subdirectory.
 
 
 stcn_clean(G):-
+  % Assert occurrences in literal enumerations as separate triples.
+  rdf_update_literal(
+    _,
+    picarta:printer_publisher,
+    _,
+    _,
+    _,
+    G,
+    split_lexical_form('; ')
+  ),
+  debug(stcn_script, 'Printer-publishers were split.', []),
+
+  rdf_update_literal(
+    _,
+    picarta:printer_publisher,
+    _,
+    _,
+    _,
+    G,
+    lexical_form(strip_atom([' ']))
+  ),
+  debug(stcn_script, 'Printer-publishers were stripped.', []),
+
+  rdf_update_literal(
+    _,
+    picarta:topical_keyword,
+    _,
+    _,
+    _,
+    G,
+    split_lexical_form('; ')
+  ),
+  debug(stcn_script, 'Topics were split.', []),
+
+  rdf_update_literal(
+    _,
+    picarta:typographic_information,
+    _,
+    _,
+    _,
+    G,
+    split_lexical_form(' , ')
+  ),
+  debug(stcn_script, 'Typographic information was split.', []),
+  
   % KMC 1200
   forall(
     rdf_string(PPN, picarta:typographic_information, LexicalForm, G),
     (
       dcg_phrase(kmc_1200_picarta(G, PPN), LexicalForm),
-      rdf_retractall_string(PPN, picarta:typographic_information, LexicalForm, G)
+      rdf_retractall_string(PPN, picarta:typographic_information, G)
     )
   ).
 

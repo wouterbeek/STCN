@@ -118,16 +118,15 @@ assert_schema_kmc_1700(G):-
         atomic_list_concat(['Country',Abbr1], '/', Abbr2),
         rdf_global_id(stcno:Abbr2, Abbr3),
         rdf_assert_instance(Abbr3, stcno:'Country', G),
-        rdfs_assert_label(Abbr3, Name, en, G)
+        rdfs_assert_label(Abbr3, Name, G)
      )
   ),
-
   % Add Dutch labels for countries that occur in the OCLC.
-  rdf_load_any(stcn('rdf/iso3166-1'), [format(turtle),graph('iso3166-1')]),
+  rdf_load_any(stcn('rdf/iso3166-1.ttl'), [format(turtle),graph('iso3166-1')]),
   forall(
     (
       recognized_country(LocalName0, NL_Name),
-      to_upper(LocalName0, LocalName),
+      upcase_atom(LocalName0, LocalName),
       rdf_global_id('iso3166-1':LocalName, Country)
     ),
     rdfs_assert_label(Country, [nl]-NL_Name, G)
@@ -140,7 +139,7 @@ kmc_1700(G, PPN) -->
   country_property(P),
   atom(LocalName0),
   (   {
-        to_upper(LocalName0, LocalName),
+        upcase_atom(LocalName0, LocalName),
         rdf_global_id('iso3166-1':LocalName, Country),
         rdf(Country, _, _, 'iso3166-1')
       }

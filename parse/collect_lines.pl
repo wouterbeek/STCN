@@ -21,9 +21,13 @@ The database dump is ambiguous.
 
 :- use_module(library(pio)).
 
+:- use_module(plc(dcg/dcg_abnf)).
 :- use_module(plc(dcg/dcg_ascii)).
+:- use_module(plc(dcg/dcg_atom)).
 :- use_module(plc(dcg/dcg_generics)).
+:- use_module(plc(dcg/dcg_peek)).
 :- use_module(plc(generics/code_ext)).
+:- use_module(plc(io/file_ext)).
 
 :- use_module(stcn(stcn_kmc)).
 
@@ -32,7 +36,7 @@ The database dump is ambiguous.
 
 
 collect_lines(F1, F2):-
-  new_file(F1, F2),
+  new_file_name(F1, F2),
   setup_call_cleanup(
     open(F2, write, Out, [encoding(utf8),type(text)]),
     phrase_from_file(collect_lines(Out), F1, [encoding(utf8),type(text)]),

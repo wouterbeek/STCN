@@ -224,7 +224,7 @@ export_topics_hierarchy:-
   rdf_global_id(skos:broader, Predicate),
   beam([], Root, [Predicate], Topics, _Edges),
   findall(
-    [Label, Size],
+    [Label,Size],
     (
       member(Topic, Topics),
       topic_label(Topic, Label),
@@ -234,9 +234,9 @@ export_topics_hierarchy:-
   ),
   write(Rows).
 
-%! process_topics_hierarchy(+G:atom) is det.
-% Constructs the topics hierarchy. This is added to the graph in wich these
-% topics reside.
+%! process_topics_hierarchy(+Graph:atom) is det.
+% Constructs the topics hierarchy.
+% This is added to the graph in which these topics reside.
 %
 % This method uses a copied version of trees:all_subpaths_to_tree/2,
 % adapted to work with pairs.
@@ -257,7 +257,7 @@ process_topics_hierarchy(G):-
   ),
   rdf_global_id(stcn:'Topic', RootTopic),
   rdf_global_id(stcn:'dummy', Dummy),
-  subtopics([['15','70']/Dummy | Pairs], []/RootTopic, Tree),
+  subtopics([['15','70']/Dummy|Pairs], []/RootTopic, Tree),
   skos_assert_hierarchy(Tree, stcn:'TopicScheme', G).
 
 subtopics(AllPairs, List/Topic, Topic-Trees):-
