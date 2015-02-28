@@ -34,8 +34,8 @@ Script for parsing the STCN from redactiebladen.
 stcn_parse_script(Uri, G):-
   % Unarchive the redactiebladen.
   download_to_file(Uri, ArchiveFile, []),
-  archive_extract(ArchiveFile, _, [LocalName-_]),
-  
+  archive_extract(ArchiveFile, _, _, [LocalName-_]),
+
   % Prepare the redactiebladen.
   absolute_file_name(data(LocalName), F0),
   collect_lines(F0, F1),
@@ -48,7 +48,7 @@ stcn_parse_script(Uri, G):-
     'Done with preparing the redactiebladen file for scraping.',
     []
   ),
-  
+
   % Parse the redactiebladen.
   flag(publications, _, 0),
   G = 'Redactiebladen',
