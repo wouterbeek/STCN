@@ -17,10 +17,12 @@ These predicate should be converted to some other module or be removed.
 
 :- use_module(library(lists), except([delete/3,subset/2])).
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
+:- use_module(library(settings)).
 
 :- use_module(plRdf(management/rdf_save_any)).
 
 :- use_module(stcn(stcn_schema)).
+:- use_module(stcn(stcn_settings)).
 :- use_module(stcn(stcn_void)).
 :- use_module(stcn(parse/stcn_parse_script)).
 :- use_module(stcn(scrape/stcn_scrape_script)).
@@ -36,10 +38,8 @@ stcn_script:-
   rdf_save_any([format(turtle),graph(OGraph)]),
 
   % Parse the redactiebladen.
-  stcn_parse_script(
-    'http://truthberead.com/wb-files/redactiebladen.tar.gz',
-    PGraph
-  ),
+  setting(stcn_settings:input_location, Location),
+  stcn_parse_script(Location, PGraph),
 
   % Scrape Picarta.
   stcn_scrape_script(PGraph),
