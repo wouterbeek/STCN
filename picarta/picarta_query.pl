@@ -121,7 +121,7 @@ picarta_query_ppn(PPN, _Uri, []):-
 picarta_scheme(http).
 
 ppn_link(PPN) -->
-  dcg_until([end_mode(inclusive)], ppn_link_prefix, _), !,
+  dcg_until(ppn_link_prefix, _, [end_mode(inclusive)]), !,
   ppn(PPN),
   dcg_all.
 

@@ -196,15 +196,12 @@ kopie van de tp. (zie ook kmc 7134)
 
 :- use_module(plc(dcg/dcg_ascii)).
 :- use_module(plc(dcg/dcg_atom)).
+:- use_module(plc(dcg/dcg_bracket)).
 :- use_module(plc(dcg/dcg_content)).
 :- use_module(plc(dcg/dcg_generics)).
 
 :- use_module(plRdf(api/rdf_build)).
 :- use_module(plRdf(api/rdfs_build)).
-:- use_module(plRdf(api/rdfs_read)).
-:- use_module(plRdf(vocabulary/rdf_stat)).
-
-:- use_module(plRdfHtml(rdf_html_triple_table)).
 
 
 
@@ -443,7 +440,7 @@ kmc_1200(G, PPN, Char1):-
 % PPN 14162843X has a very strange value for this KMC.
 kmc_1200(_G, PPN) -->
   atom(aeloude), !,
-  dcg_until([end_mode(exclusive)], end_of_line, _),
+  dcg_until(end_of_line, _, [end_mode(exclusive)]),
   {debug(kmc_1200, '[PPN ~w] Unrecognized value for KMC 1200.', [PPN])}.
 % Because of typos we need to consider 2-character values as well.
 kmc_1200(G, PPN) -->
@@ -499,9 +496,8 @@ kmc_1200_translate('Y', y).
 kmc_1200_picarta(G, PPN) -->
   [Code],
   {code_type(Code, alnum)},
-  ` (`,
-  dcg_until([end_mode(inclusive),output_format(atom)], closing_bracket, _),
-  `)`,
+  " ",
+	bracketed('...'),
   {
     char_code(Char1, Code),
     kmc_1200_table(Category, Char1, _Label, _Comment1),

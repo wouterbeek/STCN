@@ -24,6 +24,7 @@ but are not generic enough to be in PGC.
 
 :- use_module(plc(dcg/dcg_ascii)).
 :- use_module(plc(dcg/dcg_abnf)).
+:- use_module(plc(generics/atom_ext)).
 
 :- rdf_meta(category_class(?,r)).
 

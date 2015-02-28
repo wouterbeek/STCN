@@ -20,6 +20,7 @@ This parses 139.817 PPN entries in the redactiebladen file.
 :- use_module(library(pio)).
 
 :- use_module(plc(dcg/dcg_ascii)).
+:- use_module(plc(dcg/dcg_atom)).
 :- use_module(plc(dcg/dcg_generics)).
 
 :- use_module(plRdf(api/rdf_build)).
@@ -38,18 +39,21 @@ redactiebladen(G, PPN) -->
   redactiebladen(G, PPN).
 redactiebladen(G, _PPN) -->
   "SET", !,
-  dcg_until([end_mode(inclusive)], atom('PPN: '), _),
+  dcg_until(atom('PPN: '), _, [end_mode(inclusive)]),
   ppn('Publication', PPN),
   {
     flag(publications, N, N + 1),
-    (N rem 1000 =:= 0 -> debug(stcn_parse, '~w PPNs parsed.', [N]) ; true),
+    (   N rem 1000 =:= 0
+    ->  debug(stcn_parse, '~w PPNs parsed.', [N])
+    ;   true
+    ),
     rdf_assert_instance(PPN, stcno:'Publication', G)
   },
-  dcg_until([end_mode(inclusive)], end_of_line, _),
+  dcg_until(end_of_line, _, [end_mode(inclusive)]),
   redactiebladen(G, PPN).
 redactiebladen(G, PPN) -->
   "Ingevoerd", !,
-  dcg_until([end_mode(inclusive)], end_of_line, _),
+  dcg_until(end_of_line, _, [end_mode(inclusive)]),
   redactiebladen(G, PPN).
 redactiebladen(G, PPN) -->
   kmc_start(KMC), !,
@@ -57,7 +61,7 @@ redactiebladen(G, PPN) -->
   end_of_line,
   redactiebladen(G, PPN).
 redactiebladen(G, PPN) -->
-  dcg_until([end_mode(exclusive),output_format(atom)], end_of_line, Line), !,
+  dcg_until(end_of_line, Line, [end_mode(exclusive),output_format(atom)]), !,
   {debug(stcn_parse, '[~w] .... ~w', [PPN,Line])},
   end_of_line,
   redactiebladen(G, PPN).

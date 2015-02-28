@@ -63,6 +63,7 @@ Also see kmc_4040.pl for dating.
 :- use_module(library(aggregate)).
 :- use_module(library(debug)).
 
+:- use_module(plc(dcg/dcg_ascii)).
 :- use_module(plc(dcg/dcg_content)). % Meta-DCG.
 :- use_module(plc(dcg/dcg_generics)).
 :- use_module(plc(generics/list_ext)).
@@ -183,7 +184,7 @@ kmc_1100(G, PPN) -->
   }.
 % Cannot parse.
 kmc_1100(_G, PPN) -->
-  dcg_until([end_mode(exclusive),output_format(atom)], end_of_line, Line),
+  dcg_until(end_of_line, Line, [end_mode(exclusive),output_format(atom)]),
   {debug(kmc_1100, '[PPN ~w] Could not parse KMC 1100: ~w', [PPN,Line])}.
 
 statistics_kmc_1100(G, [[A1,V1],[A2,V2],[A3,V3]|T]):-

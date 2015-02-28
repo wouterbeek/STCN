@@ -243,7 +243,7 @@ city_printer('Zwammerdam', '172217148').
 city_printer('Zwolle', '075566737').
 
 kmc_4043(_G, PPN) -->
-  dcg_until([end_mode(exclusive)], exclamation_mark, _Codes),
+  dcg_until(exclamation_mark, _, [end_mode(exclusive)]),
   % PPN codes for printers can contain non-numbers (just like any other PPN).
   ppn('Printer', PrinterPPN),
   exclamation_mark,

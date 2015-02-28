@@ -37,7 +37,8 @@ stcn_parse_script(Uri, G):-
   archive_extract(ArchiveFile, _, _, [LocalName-_]),
 
   % Prepare the redactiebladen.
-  absolute_file_name(data(LocalName), F0),
+  file_directory_name(ArchiveFile, ArchiveDir),
+  absolute_file_name(LocalName, F0, [access(read),relative_to(ArchiveDir)]),
   collect_lines(F0, F1),
   % Perform some in-file replacements.
   trim_spaces(F1, F2),

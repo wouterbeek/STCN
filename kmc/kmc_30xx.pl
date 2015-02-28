@@ -122,7 +122,7 @@ link_to_dbpedia_agents(G, Agents):-
   maplist(link_to_dbpedia_agent(G), Agents).
 
 kmc_30xx(G, PPN, Pred) -->
-  dcg_until([end_mode(exclusive)], exclamation_mark, _Codes),
+  dcg_until(exclamation_mark, _, [end_mode(exclusive)]),
   ppn('Author', AuthorPPN),
   "!",
   {
