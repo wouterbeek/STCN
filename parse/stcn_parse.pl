@@ -21,6 +21,7 @@ This parses 139.817 PPN entries in the redactiebladen file.
 
 :- use_module(plc(dcg/dcg_ascii)).
 :- use_module(plc(dcg/dcg_atom)).
+:- use_module(plc(dcg/dcg_content)).
 :- use_module(plc(dcg/dcg_generics)).
 
 :- use_module(plRdf(api/rdf_build)).
@@ -35,7 +36,7 @@ This parses 139.817 PPN entries in the redactiebladen file.
 
 
 redactiebladen(G, PPN) -->
-  end_of_line, !,
+  end_of_redactiebladen_line, !,
   redactiebladen(G, PPN).
 redactiebladen(G, _PPN) -->
   "SET", !,
@@ -49,22 +50,39 @@ redactiebladen(G, _PPN) -->
     ),
     rdf_assert_instance(PPN, stcno:'Publication', G)
   },
-  dcg_until(end_of_line, _, [end_mode(inclusive)]),
+  '...',
+  end_of_redactiebladen_line, !,
   redactiebladen(G, PPN).
 redactiebladen(G, PPN) -->
   "Ingevoerd", !,
-  dcg_until(end_of_line, _, [end_mode(inclusive)]),
+  '...',
+  end_of_redactiebladen_line, !,
   redactiebladen(G, PPN).
 redactiebladen(G, PPN) -->
   kmc_start(KMC), !,
   kmc(KMC, G, PPN),
-  end_of_line,
+  end_of_redactiebladen_line, !,
   redactiebladen(G, PPN).
 redactiebladen(G, PPN) -->
-  dcg_until(end_of_line, Line, [end_mode(exclusive),output_format(atom)]), !,
-  {debug(stcn_parse, '[~w] .... ~w', [PPN,Line])},
-  end_of_line,
+  '...'(Line),
+  end_of_redactiebladen_line, !,
+  {
+    atom_codes(Atom, Line),
+    debug(stcn_parse, 'Could not process line: ~a of PPN ~w', [Atom,PPN])
+  },
   redactiebladen(G, PPN).
-redactiebladen(_G, _PPN) -->
+redactiebladen(_, _) -->
   dcg_end, !.
 
+
+
+
+
+% HELPERS %
+
+end_of_redactiebladen_line -->
+  end_of_line,
+  {
+    flag(redactiebladen_lines, N, N + 1),
+    debug(stcn_parse, 'PARSE: ~D', [N])
+  }.

@@ -1,8 +1,7 @@
 :- module(
   collect_lines,
   [
-    collect_lines/2 % +FromFile:atom
-                    % +ToFile:atom
+    collect_lines//1 % +Input:stream
   ]
 ).
 
@@ -42,15 +41,15 @@ The database dump is ambiguous.
 collect_line(Line) -->
   dcg_peek(atom('SET')), !,
   '...'(Line),
-  end_of_line.
+  end_of_collected_line.
 % Ingevoerd line, always spans two rows.
 collect_line(Line) -->
   dcg_peek(atom('Ingevoerd')), !,
   '...'(Line1),
-  end_of_line,
+  end_of_collected_line,
   (   dcg_peek('#'(2, decimal_digit, []))
   ->  '...'(Line2),
-      end_of_line,
+      end_of_collected_line,
       {append(Line1, Line2, Line)}
   ;   {Line = Line1}
   ).
@@ -58,7 +57,7 @@ collect_line(Line) -->
 collect_line(Line) -->
   peek_kmc_start, !,
   '...'(Line1),
-  end_of_line,
+  end_of_collected_line,
   collect_the_rest_of_a_kmc_line(Line2),
   {append(Line1, Line2, Line)}.
 
@@ -67,7 +66,7 @@ collect_line(Line) -->
 % We are now inside a KMC line...
 % A blank line ends a KMC line.
 collect_the_rest_of_a_kmc_line([]) -->
-  end_of_line, !.
+  end_of_collected_line, !.
 % Another KMC ends a KMC line.
 collect_the_rest_of_a_kmc_line([]) -->
   peek_kmc_start, !.
@@ -81,27 +80,14 @@ collect_the_rest_of_a_kmc_line([]) -->
 collect_the_rest_of_a_kmc_line([]) -->
   dcg_end, !.
 % The KMC line continues.
-collect_the_rest_of_a_kmc_line(L) -->
-  dcg_until(end_of_line, H1, [end_mode(exclusive),output_format(codes)]),
-  end_of_line,
-  collect_the_rest_of_a_kmc_line(T),
-  % We sometimes have to add spaces and sometimes not,
-  % but we are not
-  {H2 = [32|H1]},
-  {append(H2, T, L)}.
-
-
-
-%! collect_lines(+FromFile:atom, -ToFile:atom) is det.
-
-collect_lines(F1, F2):-
-  new_file_name(F1, F2),
-  flag(collected_line, _, 0),
-  setup_call_cleanup(
-    open(F2, write, Out, [encoding(utf8),type(text)]),
-    phrase_from_file(collect_lines(Out), F1, [encoding(utf8),type(text)]),
-    close(Out)
-  ).
+collect_the_rest_of_a_kmc_line(Line) -->
+  '...'(Line0),
+  end_of_collected_line, !,
+  collect_the_rest_of_a_kmc_line(Line2),
+  % We sometimes have to add spaces and sometimes not.
+  % We add a space in very circumstance and trim spaces later.
+  {Line1 = [32|Line0]},
+  {append(Line1, Line2, Line)}.
 
 
 
@@ -111,7 +97,8 @@ collect_lines(F1, F2):-
 collect_lines(Out) -->
   end_of_collected_line, !,
   collect_lines(Out).
-% Line 2.946.252 contains the erratic character sequences:
+/*
+% Line  contains the erratic character sequences:
 %  - [239,187,191]
 %    - `ï`, Latin Small Letter I With Diaeresis
 %    - `»`, Right-Pointing Double Angle Quotation Mark
@@ -119,14 +106,21 @@ collect_lines(Out) -->
 collect_lines(Out) -->
   [239,187,191],
   end_of_collected_line, !,
-  {debug(collect_lines, '', [])},
+  {
+    flag(collected_lines, N, N),
+    debug(collect_lines, 'Irregular content [239,187,191] at line ~D.', [N])
+  },
   collect_lines(Out).
-%  - [65279]
-%    - Zero Width No-Break Space
+*/
+% Irregular content: code line [65279] (Zero Width No-Break Space)
+% at line 2,946,252.
 collect_lines(Out) -->
   [65279],
   end_of_collected_line, !,
-  {debug(collect_lines, '', [])},
+  {
+    flag(collected_lines, N, N),
+    debug(collect_lines, 'Irregular content [65279] at line ~D.', [N])
+  },
   collect_lines(Out).
 % A collected line.
 collect_lines(Out) -->
@@ -148,9 +142,12 @@ collect_lines(_) -->
 % HELPERS %
 
 peek_kmc_start -->
-  dcg_peek(5, Cs),
-  {phrase(kmc_start(_KMC), Cs)}.
+  dcg_peek(5, Codes),
+  {phrase(kmc_start(_), Codes)}.
 
 end_of_collected_line -->
   end_of_line,
-  {flag(collected_line, N, N + 1)}.
+  {
+    flag(collected_lines, N, N + 1)
+    %%%%debug(collect_lines, 'COLLECT-LINES ~D', [N])
+  }.
