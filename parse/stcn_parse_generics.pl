@@ -1,7 +1,7 @@
 :- module(
   stcn_parse_generics,
   [
-    kmc_start//1 % -Kmc:nonneg
+    kmc_start//2 % -Kmc:nonneg
                  % -Property:iri
   ]
 ).

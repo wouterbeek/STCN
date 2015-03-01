@@ -1,80 +1,24 @@
 :- module(
   kmc_4043,
   [
-    assert_schema_kmc_4043/1, % +Graph:graph
-    kmc_4043//2, % +Graph:atom
-                 % +PPN:uri
-    statistics_kmc4043/2 % +Graph:atom
-                          % -Rows:list(list)
+    city_printer/2 % ?Name:atom
+                   % ?PPN:atom
   ]
 ).
 
-/** <module> KMC 4043 - BOOKSELLER/PUBLISHER
+/** <module> Background Knowledge: KMC 4043 (Bookseller/Publisher)
 
-We expect that there are 222.585 publication/printer-pairs in the
-redactiebladen. This number is obtained using the search string "\n4043[^ ]".
+Background knowledge for KMC 4043.
 
-# Parse cities
-
-E.g. PPN 234597046.
-
-!!kmc_4043!!city_printer!!2!!
-
-# Parse errors/exceptions
-
-## PPN 173117708
+---
 
 @author Wouter Beek
 @version 2013/03, 2013/06, 2013/09, 2014/03, 2015/02
 */
 
-:- use_module(library(semweb/rdf_db), except([rdf_node/1])).
-
-:- use_module(plc(dcg/dcg_ascii)).
-:- use_module(plc(dcg/dcg_atom)).
-:- use_module(plc(dcg/dcg_content)).
-:- use_module(plc(dcg/dcg_generics)).
-
-:- use_module(plRdf(api/rdf_build)).
-:- use_module(plRdf(api/rdf_read)).
-:- use_module(plRdf(api/rdfs_build)).
-:- use_module(plRdf(api/rdfs_read)).
-
-:- use_module(stcn(stcn_generics)).
 
 
 
-
-
-assert_schema_kmc_4043(G):-
-  rdfs_assert_class(stcno:'Printer', G),
-  rdfs_assert_label(stcno:'Printer', [nl]-drukker, G),
-  
-  rdf_assert_property(stcno:printer, G),
-  rdfs_assert_label(stcno:printer, [nl]-'heeft drukker', G),
-  rdf_assert_string(stcno:printer, stcno:kb_name, 'KMC 4043', G),
-  rdfs_assert_seeAlso(
-    stcno:printer,
-    'http://www.kb.nl/kbhtml/stcnhandleiding/4043.html',
-    G
-  ),
-  rdf_assert_langstring(
-    stcno:printer,
-    stcno:picarta_name,
-    [nl]-'Drukker / Uitgever',
-    G
-  ),
-  
-  rdfs_assert_label(stcno:'City', stad, nl, G),
-  % Assert the cities that act as printers/publishers.
-  forall(
-    city_printer(CityName, PPN),
-    (
-      rdf_global_id(stcn:PPN, Resource),
-      rdf_assert_instance(Resource, stcno:'City', G),
-      rdfs_assert_label(Resource, CityName, G)
-    )
-  ).
 
 %! city_printer(?City:atom, ?PPN:atom) is nondet.
 % A 'printer' of books that is only indicated with a city name.
@@ -241,27 +185,3 @@ city_printer('Zierikzee', '075566710').
 city_printer('Zutphen', '075566729').
 city_printer('Zwammerdam', '172217148').
 city_printer('Zwolle', '075566737').
-
-kmc_4043(_G, PPN) -->
-  dcg_until(exclamation_mark, _, [end_mode(exclusive)]),
-  % PPN codes for printers can contain non-numbers (just like any other PPN).
-  ppn('Printer', PrinterPPN),
-  exclamation_mark,
-  {
-    ppn_resource(printer_publisher, PrinterPPN, Printer),
-    rdf_assert(PPN, stcno:printer, Printer, stcn)
-  }.
-% E.g. PPN 317155091.
-kmc_4043(_G, _PPN) -->
-  atom('THESAUREREN').
-% E.g. PPN 234597046.
-kmc_4043(G, PPN) -->
-  atom(PrinterName),
-  {
-    once(city_printer(PrinterName, PPN)),
-    ppn_resource(printer_publisher, PPN, Printer),
-    rdf_assert(PPN, stcno:printer, Printer, G)
-  }.
-
-statistics_kmc4043(_G, []).
-

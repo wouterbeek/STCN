@@ -1,110 +1,23 @@
 :- module(
   kmc_3210,
   [
-    assert_schema_kmc_3210/1, % +Graph:graph
-    kmc_3210//2, % +Graph:atom
-                 % +PPN:uri
-    statistics_kmc3210/2 % +Graph:atom
-                          % -Rows:list(list)
+    anonymous_popular/1 % ?Name:atom
   ]
 ).
 
-/** <module> KMC 3210 - SORTING TITLE
+/** <module> Background Knowledge: KMC 3210 (Sorting Title)
 
-Facultative field. Cannot be repeated.
-
-KMC 3210 contains the sorting title of bibles and anonymous popular proze.
-
-# § 65
-
-## Bibles
-
-Bibles and anonymous popular proze receive a sorting title in KMC 3210.
-The following table gives the sorting titles for popular bible books.
-
-!!kmc_3210!!bible_book!!2!!
-
-The basic structure for bibles is as follows:
-
-~~~{.txt}
-'@Bible' + LANGUAGE + ((';' + PART)! + ' ' + BOOK (+ ' ' + SELECTION)!)!
-~~~
-
-Examples:
-
-~~~{.txt}
-@Bible Polyglot ; O.T. Job
-@Bible Dutch ; O.T. Song of Solomon
-@Bible Dutch
-@Bible Dutch ; O.T. Apocrypha Tobit. Selection
-@Bible French ; Metrical Psalms
-~~~
-
-Older descriptions sometimes have a sorting code appearing before the =@=.
-These codes can be neglected.
-
-Metrical psalms are described distinctly and do not appear in between the
-other psalm prints. After the =/= the poet who put the text on rhyme is
-mentioned, after =|Rhymed version by|= instead of =Adaptation=,
-=|Translated from the French|=, etc. The name is taken up in thesaurus style
-in KMC 3011.
-
-Examples:
-
-~~~{.txt}
-kmc 4000: De @CL psalmen Davids. / Rhymed version by P. Dathenus
-kmc 3011: Petrus@Dathenus!068066961!
-~~~
-
-If the poet who put the text on rhyme is unknown, then use =|Rhymed version|=.
-
-Used for prints of the _Talmud_:
-=|Talmud Bavli|= or =|Talmud Yerusalmi|=  for the Babylonian and the
-Jerusalem Talmud, respectively.
-
-## Anonymous popular works
-
-Anonymous popular works also receive a sorting title in KIMC 3210 (see table).
-
-The following table enumerates the anonymous popular works.
-
-!!kmc_3210!!anonymous_popular!!2!!
-
-The same holds for several other works, i.e., =Almanak=, =Geuzenliedboek= and
-=Koran=.
-
-=Almanak= includes all kinds of [almanakken], including [comptoiralmanachs],
-provided that they appear yearly. The editors are included in KMC 3011.
-In KMC 4000 the editors are mentioned in the order in which they appear on the
-title page, preceded by =By= or =|Compiled by|=.
-
-Publications of the Heidelberg catechismus (first question: "Welke is uw
-enige troost beide in't leven ende sterven?") and the Augsburg confession
-(first article: "Eerstelijk wordt eendrachtig geleerd ende gehouden naar het
-besluit des Concilii Nicaeni") receive as sorting title in KMC 3210
-=|@Heidelberg Catechism (+ LANGUAGE)|= and
-=|@Augsburg Confession (+ LANGUAGE)|= respectively.
-
-Note that additions such as =profeet=, for instance in case of prophet David,
-are not included in a 4-2-2-1 search. [?]
+Background knowledge for KMC 3210.
 
 @author Wouter Beek
-@version 2013/01-2013/03, 2013/06, 2013/09, 2014/03, 2015/02
+@version 2015/02
 */
 
-:- use_module(library(dcg/basics)).
-:- use_module(library(debug)).
-:- use_module(library(semweb/rdf_db), except([rdf_node/1])).
-
-:- use_module(plc(dcg/dcg_ascii)).
-:- use_module(plc(dcg/dcg_content)).
-
-:- use_module(plRdf(api/rdf_build)).
-:- use_module(plRdf(vocabulary/rdf_stat)).
 
 
 
 
+%! anonymous_popular(?Name:atom) is nondet.
 
 anonymous_popular('9 quaetsten').
 anonymous_popular('Alexander (koning)').
@@ -203,7 +116,9 @@ anonymous_popular('Virgilius').
 anonymous_popular('Vrouwenpeerle').
 anonymous_popular('Wandelende jood').
 
-assert_schema_kmc_3210(_Graph).
+
+
+%! bible_book(?Name:atom) is nondet.
 
 bible_book(ot, 'Pentateuch').
 bible_book(ot, 'Prophets').
@@ -299,31 +214,3 @@ bible_book(nt, 'Timothy I').
 bible_book(nt, 'Timothy II').
 bible_book(nt, 'Titus').
 bible_book(_,  'Metrical Psalms').
-
-kmc_3210(G, PPN) -->
-  "&",
-  {anonymous_popular(Title)},
-  atom(Title),
-  {
-    rdf_assert_string(PPN, stcno:title, Title, G),
-    debug(
-      kmc_3210,
-      'Recognized title \'~w\' for publication ~w.',
-      [Title, PPN]
-    )
-  }.
-kmc_3210(G, PPN) -->
-  "&",
-  atom('Bible'),
-  " ",
-  atom(Language),
-  % Just checking!
-  {rdf(PPN, stcn:language, Language, G)}.
-kmc_3210(_G, PPN) -->
-  {debug(kmc_3210, 'Cannot parse title for publication ~w.', [PPN])}.
-
-statistics_kmc3210(G, [[A1,V1]]):-
-  A1 = 'Publications with title',
-  count_subjects(stcno:title, _, G, V1),
-  debug(stcn_statistics, '~w: ~w', [A1,V1]).
-

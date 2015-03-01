@@ -1,11 +1,10 @@
 :- module(
   kmc_1700,
   [
-    assert_schema_kmc_1700/1, % +Graph:graph
-    kmc_1700//2, % +Graph:atom
-                 % +PPN:uri
-    statistics_kmc_1700/2 % +Graph:atom
-                          % -Rows:list(list)
+    recognized_country/2, % ?Code:atom
+                          % ?Name:atom
+    unrecognized_country/2 % ?Code:atom
+                           % ?Name:atom
   ]
 ).
 
@@ -67,107 +66,7 @@ country options).
 
 
 
-assert_schema_kmc_1700(G):-
-  rdf_assert_property(stcno:landcode, G),
-  rdfs_assert_label(stcno:landcode, [nl]-'land van uitgave', G),
-  rdf_assert_string(stcno:landcode, stcno:kb_name, 'KMC 1700', G),
-  rdfs_assert_seeAlso(
-    stcno:landcode,
-    'http://www.kb.nl/kbhtml/stcnhandleiding/1700.html',
-    G
-  ),
-  rdfs_assert_seeAlso(
-    stcno:landcode,
-    'http://support.oclc.org/ggc/richtlijnen/?id=12&ln=nl&sec=k-1700',
-    G
-  ),
-  rdfs_assert_domain(stcno:landcode, stcno:'Publication', G),
-  rdfs_assert_range(stcno:landcode, 'iso3166-1':'Country', G),
-
-  rdfs_assert_subproperty(stcno:displayed_country, stcno:landcode, G),
-  rdfs_assert_label(
-    stcno:displayed_country,
-    [nl]-'weergegeven land van uitgave',
-    G
-  ),
-  rdfs_assert_comment(
-    stcno:displayed_country,
-    [nl]-'In geval van een gefingeerd of onjuist impressum wordt in /2 de \c
-          landcode opgenomen die hoort bij het juiste impressum zoals dat \c
-          in een annotatie is verantwoord.',
-    G
-  ),
-
-  rdfs_assert_subproperty(stcno:actual_country, stcno:landcode, G),
-  rdfs_assert_label(
-    stcno:actual_country,
-    [nl]-'daadwerkelijk land van uitgave',
-    G
-  ),
-
-  rdfs_assert_class(stcno:'Country', G),
-  rdfs_assert_label(
-    stcno:'Country',
-    'OCLC country code not supported by ISO',
-    G
-  ),
-
-  forall(
-     unrecognized_country(Abbr1, Name),
-     (
-        atomic_list_concat(['Country',Abbr1], '/', Abbr2),
-        rdf_global_id(stcno:Abbr2, Abbr3),
-        rdf_assert_instance(Abbr3, stcno:'Country', G),
-        rdfs_assert_label(Abbr3, Name, G)
-     )
-  ),
-  % Add Dutch labels for countries that occur in the OCLC.
-  rdf_load_any(stcn('rdf/iso3166-1.ttl'), [format(turtle),graph('iso3166-1')]),
-  forall(
-    (
-      recognized_country(LocalName0, NL_Name),
-      upcase_atom(LocalName0, LocalName),
-      rdf_global_id('iso3166-1':LocalName, Country)
-    ),
-    rdfs_assert_label(Country, [nl]-NL_Name, G)
-  ).
-
-%! kmc_1700(+Graph:atom, +PPN:uri)// is det.
-
-kmc_1700(G, PPN) -->
-  "/",
-  country_property(P),
-  atom(LocalName0),
-  (   {
-        upcase_atom(LocalName0, LocalName),
-        rdf_global_id('iso3166-1':LocalName, Country),
-        rdf(Country, _, _, 'iso3166-1')
-      }
-  ;   {unrecognized_country(LocalName0, _)},
-      {
-        debug(
-          kmc_1700,
-          '[PPN ~w] Unrecognized country code: ~w.',
-          [PPN,LocalName0]
-        ),
-        atomic_list_concat(['Country',LocalName0], '/', LocalName00),
-        rdf_global_id(stcno:LocalName00, Country)
-    }
-  ), !,
-
-  {rdf_assert(PPN, P, Country, G)}, !,
-  kmc_1700(G, PPN).
-kmc_1700(_, _PPN) --> [].
-
-% The country that is mentioned in the publication itself.
-country_property(Pred) -->
-  "1",
-  {rdf_global_id(stcno:displayed_country, Pred)}.
-% Actual country of publication.
-country_property(Pred) -->
-  "2",
-  {rdf_global_id(stcno:actual_country, Pred)}.
-
+%! recognized_country(?Code:atom, ?Name:atom) is nondet.
 % KMC 1700 country codes that are in ISO 3166-1.
 
 recognized_country(Code, Name):-
@@ -414,6 +313,8 @@ recognized_country(za, 'Zuid Afrika').
 recognized_country(zm, 'Zambia').
 recognized_country(zw, 'Zimbabwe', period(date(1979),inf)).
 
+
+
 %! same_country(?AlternativeName:atom, ?Name:atom) is nondet.
 % Relates alternative country names to the country abbreviation codes list.
 % OCLC defines these country names as denoting the same country.
@@ -455,22 +356,9 @@ same_country('Svalbard', 'Spitsbergen').
 same_country('Verenigde Arabische Republiek', 'Egypte').
 same_country('Zuid-West Afrika', 'Namibië').
 
-statistics_kmc_1700(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4]]):-
-  A1 = 'Publications with some country',
-  count_subjects(stcno:landcode, _, G, V1),
-  debug(stcn_statistics, '~w: ~w', [A1, V1]),
 
-  A2 = 'Publication with at least one displayed country',
-  count_subjects(stcno:displayed_country, _, G, V2),
-  debug(stcn_statistics, '-- ~w: ~w', [A2, V2]),
 
-  A3 = 'Publications with at least one actual country',
-  count_subjects(stcno:actual_country, _, G, V3),
-  debug(stcn_statistics, '-- ~w: ~w', [A3, V3]),
-
-  A4 = 'Countries used',
-  count_objects(_, stcno:country, G, V4),
-  debug(stcn_statistics, '-- ~w: ~w', [A4, V4]).
+%! unrecognized_country(?Code:atom, ?Name:atom) is nondet.
 
 % Not in ISO 3166-1.
 unrecognized_country(Code, Name):-
@@ -496,4 +384,3 @@ unrecognized_country(wk, 'Wake').
 unrecognized_country(xx, 'Onbekend').
 unrecognized_country(yd, 'Jemen [Volksrepubliek]').
 unrecognized_country(zr, 'Zaïre', period(date(1971,10,27),date(1997,05,17))).
-

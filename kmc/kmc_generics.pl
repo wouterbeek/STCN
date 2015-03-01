@@ -21,8 +21,8 @@
 :- use_module(plc(generics/atom_ext)).
 :- use_module(plc(math/radix)).
 
+:- discontiguous(kmc_code/1).
 :- discontiguous(kmc_code/2).
-:- discontiguous(kmc_code/3).
 
 :- rdf_meta(stcn_code(?,r)).
 

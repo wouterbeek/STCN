@@ -21,10 +21,10 @@ These predicate should be converted to some other module or be removed.
 
 :- use_module(plRdf(management/rdf_save_any)).
 
-:- use_module(stcn(stcn_schema)).
 :- use_module(stcn(stcn_settings)).
 :- use_module(stcn(stcn_void)).
 :- use_module(stcn(parse/stcn_parse_script)).
+:- use_module(stcn(schema/stcn_schema)).
 :- use_module(stcn(scrape/stcn_scrape_script)).
 
 

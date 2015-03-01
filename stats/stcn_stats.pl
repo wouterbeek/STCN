@@ -110,28 +110,32 @@ Note that only includes about half of the STCN data.
 :- use_module(stcn(stats/kmc_stats_3011)).
 :- use_module(stcn(stats/kmc_stats_4062)).
 
+:- multifile(kmc:kmc_stats//2).
+
 
 
 
 
 stcn_stats -->
   html([
+    h1('STCN Statistics'),
     h3('Parsed PPNs'),
     {count_instances_by_class(stcno:'Publication', stcn, V1)},
     \html_pl_term(thousands_integer(V1)),
-    
-    \kmc_stats(500),
-    \kmc_stats(1100),
-    \kmc_stats(1200),
-    \kmc_stats(1500),
-    \kmc_stats(1700),
-    \kmc_stats(3000),
-    \kmc_stats(3011),
-    \kmc_stats(4062)
-  ]).
-
-kmc_stats(500) -->
-  html([
-    h2('Status (KMC 0500)'),
-    \rdf_html_triple_table(_, stcno:status, _, stcn, plTabular)
+    h2('KMC 0500'),
+    \(kmc:kmc_stats(500, Graph)),
+    h2('KMC 1100'),
+    \(kmc:kmc_stats(1100, Graph)),
+    h2('KMC 1200'),
+    \(kmc:kmc_stats(1200, Graph)),
+    h2('KMC 1500'),
+    \(kmc:kmc_stats(1500, Graph)),
+    h2('KMC 1700'),
+    \(kmc:kmc_stats(1700, Graph)),
+    h2('KMC 3000'),
+    \(kmc:kmc_stats(3000, Graph)),
+    h2('KMC 3011'),
+    \(kmc:kmc_stats(3011, Graph)),
+    h2('KMC 4062'),
+    \(kmc:kmc_stats(4062, Graph))
   ]).

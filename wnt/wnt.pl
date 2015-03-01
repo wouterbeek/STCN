@@ -6,7 +6,7 @@ Woordenboek der Nederlandse Taal
 
 ## First query
 
-~~~
+```
 http://gtb.inl.nl/iWDB/search?
   %5F%5Flzbc%5F%5F=1361390809819%2E61
   &actie=results
@@ -16,11 +16,11 @@ http://gtb.inl.nl/iWDB/search?
   &conc=true
   &sensitive=false
   &xmlerror=true
-~~~
+```
 
 ## Second query
 
-~~~
+```
 http://gtb.inl.nl/iWDB/search?
   actie=article
   &wdb=WNT

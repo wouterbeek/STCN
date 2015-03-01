@@ -152,4 +152,4 @@ double_digit -->
 
 peek_kmc_start -->
   dcg_peek(5, Codes),
-  {phrase(kmc_start(_), Codes)}.
+  {phrase(kmc_start(_, _), Codes)}.

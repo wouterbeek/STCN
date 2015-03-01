@@ -33,10 +33,10 @@ This parses 139.817 PPN entries in the redactiebladen file.
 
 
 
-redactiebladen(G, Ppn) -->
+redactiebladen(Graph, Ppn) -->
   end_of_line, !,
-  redactiebladen(G, Ppn).
-redactiebladen(G, _) -->
+  redactiebladen(Graph, Ppn).
+redactiebladen(Graph, _) -->
   "SET", !,
   '...',
   "PPN: ", !,
@@ -47,34 +47,34 @@ redactiebladen(G, _) -->
     ->  debug(stcn_parse, 'PPNs extracted: ~D', [N])
     ;   true
     ),
-    rdf_assert_instance(Ppn, stcno:'Publication', G)
+    rdf_assert_instance(Ppn, stcno:'Publication', Graph)
   },
   '...',
   end_of_line, !,
-  redactiebladen(G, Ppn).
-redactiebladen(G, Ppn) -->
+  redactiebladen(Graph, Ppn).
+redactiebladen(Graph, Ppn) -->
   "Ingevoerd", !,
   '...',
   end_of_line, !,
-  redactiebladen(G, Ppn).
-redactiebladen(G, Ppn) -->
-  kmc_start(Kmc0), !,
+  redactiebladen(Graph, Ppn).
+redactiebladen(Graph, Ppn) -->
+  kmc_start(Kmc0, _), !,
   '...'(Content0),
   end_of_line, !,
   {
     atom_number(Kmc, Kmc0),
     rdf_global_id(stcno:Kmc, P),
     atom_codes(Content, Content0),
-    rdf_assert_string(Ppn, P, Content, G)
+    rdf_assert_string(Ppn, P, Content, Graph)
   },
-  redactiebladen(G, Ppn).
-redactiebladen(G, Ppn) -->
+  redactiebladen(Graph, Ppn).
+redactiebladen(Graph, Ppn) -->
   '...'(Line),
   end_of_line, !,
   {
     atom_codes(Atom, Line),
     debug(stcn_parse, 'Could not process line: ~a of PPN ~w', [Atom,Ppn])
   },
-  redactiebladen(G, Ppn).
+  redactiebladen(Graph, Ppn).
 redactiebladen(_, _) -->
   dcg_end, !.
