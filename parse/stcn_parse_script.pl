@@ -35,7 +35,7 @@ Script for parsing the STCN from redactiebladen.
 %! stcn_parse_script(+Uri:atom, +Graph:atom) is det.
 
 stcn_parse_script(Uri, G):-
-  absolute_file_name(data('lines1.txt'), F1),
+  absolute_file_name(stcn(rdf/'lines1.txt'), F1),
   (   exists_file(F1)
   ->  true
   ;   download_to_file(Uri, ArchiveFile, []),
@@ -55,8 +55,7 @@ stcn_parse_script(Uri, G):-
       flag(collected_lines, N, 0),
       debug(stcn_parse_script, 'Collected ~D lines.', [N])
   ),
-
-  absolute_file_name(data('lines2.txt'), F2),
+  absolute_file_name(stcn(rdf/'lines2.txt'), F2),
   (   exists_file(F2)
   ->  true
   ;   trim_spaces(F1, F2)

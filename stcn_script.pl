@@ -40,7 +40,7 @@ stcn_script:-
   % Parse the redactiebladen.
   setting(stcn_settings:input_location, Location),
   stcn_parse_script(Location, PGraph),
-
+gtrace,
   % Scrape Picarta.
   stcn_scrape_script(PGraph),
 
