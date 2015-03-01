@@ -2,16 +2,16 @@
   stcn_generics,
   [
     ppn//0,
-    ppn//1, % -PPN:atom
+    ppn//1, % -PpnCode:atom
     ppn//2, % +Category:atom
-            % -PPN:atom
+            % -Ppn:iri
     ppn_resource/3 % +Category:atom
-                   % +PPN_Name:atom
-                   % -PPN:iri
+                   % +PpnName:atom
+                   % -Ppn:iri
   ]
 ).
 
-/** <module> STCN generics
+/** <module> STCN: Generics
 
 Things that are used throughout the STCN project,
 but are not generic enough to be in PGC.
@@ -23,7 +23,6 @@ but are not generic enough to be in PGC.
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
 :- use_module(plc(dcg/dcg_ascii)).
-:- use_module(plc(dcg/dcg_abnf)).
 :- use_module(plc(generics/atom_ext)).
 
 :- rdf_meta(category_class(?,r)).
@@ -33,34 +32,43 @@ but are not generic enough to be in PGC.
 
 
 ppn -->
-  ppn(_PPN).
+  ppn(_).
 
 
 
-%! ppn(-PPN:atom)//
+%! ppn(-PpnCode:atom)//
 
-ppn(PPN) -->
-  '#'(9, ppn_char, PPN, [convert(codes_atom)]).
-
-
-
-%! ppn(+Category:atom, -PPN:iri)// is det.
-% Parses a PPN identifier and returns its IRI.
-%
-% There are 3*10**8 possibilities, so don't use this for generation.
-
-ppn(Category, PPN2) -->
-  ppn(PPN1),
-  {ppn_resource(Category, PPN1, PPN2)}.
+ppn(PpnCode) -->
+  ppn_char(C1),
+  ppn_char(C2),
+  ppn_char(C3),
+  ppn_char(C4),
+  ppn_char(C5),
+  ppn_char(C6),
+  ppn_char(C7),
+  ppn_char(C8),
+  ppn_char(C9),
+  {atom_codes(PpnCode, [C1,C2,C3,C4,C5,C6,C7,C8,C9])}.
 
 ppn_char(C) --> decimal_digit(C).
 ppn_char(C) --> x(C).
 
 
 
-%! ppn_resource(+Category:atom, +PPN_Name:atom, -PPN:iri) is det.
+%! ppn(+Category:atom, -Ppn:iri)// is det.
+% Parses a PPN identifier and returns its IRI.
+%
+% There are 3*10^8 possibilities, so don't use this for generation.
 
-ppn_resource(Category, PPN_Name1, PPN):-
-  atomic_list_concat([Category,PPN_Name1], '/', PPN_Name2),
-  rdf_global_id(stcn:PPN_Name2, PPN).
+ppn(Category, Ppn) -->
+  ppn(PpnCode), !,
+  {ppn_resource(Category, PpnCode, Ppn)}.
+
+
+
+%! ppn_resource(+Category:atom, +PpnName:atom, -PPN:iri) is det.
+
+ppn_resource(Category, PpnName0, Ppn):-
+  atomic_list_concat([Category,PpnName0], '/', PpnName),
+  rdf_global_id(stcn:PpnName, Ppn).
 

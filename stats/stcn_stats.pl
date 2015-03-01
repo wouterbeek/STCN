@@ -89,58 +89,49 @@ Note that only includes about half of the STCN data.
 | -- PPNs with format 64mo | 2 |
 | -- PPNs with unknown format | 2 |
 
-# 2013/02
-
-New parse results are coming soon!
+---
 
 @author Wouter Beek
 @version 2013/01-2013/03, 2013/06, 2015/02
 */
 
 :- use_module(library(debug)).
+:- use_module(library(http/html_write)).
 :- use_module(library(lists)).
-
-:- use_module(plRdf(vocabulary/rdf_stat)).
 
 :- use_module(plRdfEntailment(rdf_ent_stat)).
 
-:- use_module(stcn(kmc/kmc_0500)).
-:- use_module(stcn(kmc/kmc_1100)).
-:- use_module(stcn(kmc/kmc_1200)).
-:- use_module(stcn(kmc/kmc_1500)).
-:- use_module(stcn(kmc/kmc_1700)).
-:- use_module(stcn(kmc/kmc_3000)).
-:- use_module(stcn(kmc/kmc_3011)).
-:- use_module(stcn(kmc/kmc_4062)).
+:- use_module(stcn(stats/kmc_stats_0500)).
+:- use_module(stcn(stats/kmc_stats_1100)).
+:- use_module(stcn(stats/kmc_stats_1200)).
+:- use_module(stcn(stats/kmc_stats_1500)).
+:- use_module(stcn(stats/kmc_stats_1700)).
+:- use_module(stcn(stats/kmc_stats_3000)).
+:- use_module(stcn(stats/kmc_stats_3011)).
+:- use_module(stcn(stats/kmc_stats_4062)).
 
 
 
 
 
-stcn_stats([[A1,V1]|Rows]):-
-  % Generic statistics.
-  A1 = 'Parsed PPNs',
-  count_instances_by_class(stcno:'Publication', stcn, V1),
-  debug(stcn_statistics, '~w: ~w', [A1, V1]),
+stcn_stats -->
+  html([
+    h3('Parsed PPNs'),
+    {count_instances_by_class(stcno:'Publication', stcn, V1)},
+    \html_pl_term(thousands_integer(V1)),
+    
+    \kmc_stats(500),
+    \kmc_stats(1100),
+    \kmc_stats(1200),
+    \kmc_stats(1500),
+    \kmc_stats(1700),
+    \kmc_stats(3000),
+    \kmc_stats(3011),
+    \kmc_stats(4062)
+  ]).
 
-  statistics_kmc_0500(_, Rows0500),
-  statistics_kmc_1100(_, Rows1100),
-  statistics_kmc_1200(_, Rows1200),
-  statistics_kmc_1500(_, Rows1500),
-  statistics_kmc_1700(_, Rows1700),
-  statistics_kmc_3000(_, Rows3000),
-  statistics_kmc_3011(_, Rows3011),
-  statistics_kmc_4062(_, Rows4062),
-  append(
-    [
-      Rows0500,
-      Rows1100,
-      Rows1200,
-      Rows1500,
-      Rows1700,
-      Rows3000,
-      Rows3011,
-      Rows4062
-    ],
-    Rows
-  ).
+kmc_stats(500) -->
+  html([
+    h2('Status (KMC 0500)'),
+    \rdf_html_triple_table(_, stcno:status, _, stcn, plTabular)
+  ]).

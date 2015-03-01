@@ -2,10 +2,6 @@
   kmc_30xx,
   [
     assert_schema_kmc_30xx/1, % +Graph:graph
-    kmc_30xx//3, % +Graph:atom
-                 % +PPN:uri
-                 % +Predicate
-    populate_dbpedia/0,
     statistics_kmc30xx/2 % +Graph:atom
                           % -Rows:list(list)
   ]
@@ -29,6 +25,7 @@ These are considered to be the same. Mapped to upper case X using option
 
 :- use_module(library(aggregate)).
 :- use_module(library(debug)).
+:- use_module(library(http/html_write)).
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 :- use_module(library(semweb/rdfs)).
 
@@ -53,11 +50,15 @@ These are considered to be the same. Mapped to upper case X using option
 
 :- use_module(stcn(stcn_generics)).
 
+:- multifile(kmc:kmc_value//3).
+
 :- rdf_meta(link_to_dbpedia_agent(+,r)).
 
 
 
 
+
+% SCHEMA %
 
 assert_schema_kmc_30xx(G):-
   % Author.
@@ -75,124 +76,89 @@ assert_schema_kmc_30xx(G):-
   rdfs_assert_label(stcno:author_name, 'has author name', G),
   rdfs_assert_label(stcno:author_name, [nl]-'heeft auteursnaam', G).
 
-link_to_dbpedia_agent(G, Agent):-
-  rdf_string(Agent, foaf:name, Name, G),
 
-  rdf_typed_literal(Agent, stcno:birth, Birth, xsd:gYear, G),
-  rdfs_assert_label(stcno:birth, [nl]-geboortejaar, G),
 
-  rdf_typed_literal(Agent, stcno:death, Death, xsd:gYear, G),
-  rdfs_assert_label(stcno:death, [nl]-sterftejaar, G),
 
-  sparql_select(
-    dbpedia,
-    [dbp,foaf],
-    [writer],
-    [
-      rdf(var(writer), rdf:type, foaf:'Person'),
-      rdf(var(writer), rdfs:label, var(label)),
-      filter(regex(var(label), string(Name), [case_insensitive])),
-      rdf(var(writer), dbpprop:dateOfBirth, var(birth)),
-      filter(regex(var(birth), string(Birth))),
-      rdf(var(writer), dbpprop:dateOfDeath, var(death)),
-      filter(regex(var(death), string(Death)))
-    ],
-    DBpediaAgent,
-    [distinct(true),limit(1)]
-  ),
-  owl_assert_resource_identity(Agent, DBpediaAgent, G),
-  debug(
-    dbpedia,
-    'Agent ~w linked to DBpedia agent ~w.',
-    [Agent,DBpediaAgent]
-  ).
 
-link_to_dbpedia_agents(G):-
-  aggregate_all(
-    set(Agent),
-    (
-      rdfs_individual_of(Agent, foaf:'Agent'),
-      rdf_subject(Agent, G)
-    ),
-    Agents
-  ),
-  run_on_sublists(Agents, link_to_dbpedia_agents(G), 10).
+% GRAMMAR %
 
-link_to_dbpedia_agents(G, Agents):-
-  maplist(link_to_dbpedia_agent(G), Agents).
-
-kmc_30xx(G, PPN, Pred) -->
-  dcg_until(exclamation_mark, _, [end_mode(exclusive)]),
-  ppn('Author', AuthorPPN),
+kmc:kmc_value(KmcCode, Publication, Graph) -->
+  {between(3000, 3099, KmcCode)}, !,
+  '...',
+  "!",
+  ppn('Author', AuthorCode),
   "!",
   {
-    rdf_global_id(stcn:AuthorPPN, Author),
-    rdf_assert(PPN, Pred, Author, G)
+    rdf_global_id(stcno:AuthorCode, Author),
+    atom_number(KmcLocalName, KmcCode),
+    rdf_global_id(stcno:KmcLocalName, P),
+    rdf_assert(Publication, P, Author, Graph)
   }.
 
-populate_dbpedia:-
-  forall(
-    (
-      rdfs_individual_of(Agent, foaf:'Agent'),
-      owl_resource_identity(Agent, DBpedia_Agent),
-      rdf_global_id(dbpedia:_, DBpedia_Agent)
-    ),
-    lod_cache_assert(DBpedia_Agent, [])
-  ).
 
-statistics_kmc30xx(G, [[A1,V1],[A2,V2],[A3,V3],[A4,V4],[A5,V5],[A6,V6]]):-
-  A1 = 'Publications with at least one author',
-  count_subjects(stcno:author, _, G, V1),
-  debug(stcn_statistics, '~w: ~w', [A1,V1]),
 
-  A2 = 'Publications with at least one DBpedia author',
-  aggregate_all(
-    set(DBpediaAuthorPPN),
-    (
-      rdf(DBpediaAuthorPPN, stcno:author, AuthorPPN, G),
-      owl_resource_identity(AuthorPPN, _DBpediaAuthor),
-      rdf_global_id(dbpedia:_, DBpediaAuthor)
-    ),
-    DBpediaAuthorPPNs
-  ),
-  length(DBpediaAuthorPPNs, V2),
-  debug(stcn_statistics, '-- ~w: ~w', [A2,V2]),
 
-  A3 = 'Number of authors (including pseudonyms)',
-  count_instances_by_class(stcno:'Author', V3),
-  debug(stcn_statistics, '-- ~w: ~w', [A3,V3]),
 
-  A4 = 'Number of DBpedia authors (including pseudonyms)',
-  aggregate_all(
-    set(DBpediaAuthor),
-    (
-      rdf(_, stcno:author, AuthorPPN, G),
-      owl_resource_identity(AuthorPPN, DBpediaAuthor),
-      rdf_global_id(dbpedia:_, DBpediaAuthor)
-    ),
-    DBpediaAuthors
-  ),
-  length(DBpediaAuthors, V4),
-  debug(stcn_statistics, '-- ~w: ~w', [A4,V4]),
+% STATISTICS %
 
-  A5 = 'Publications written under at least one pseudonym',
-  aggregate_all(
-    set(PPN_Pseudonym),
-    (
-      rdf(PPN_Pseudonym, stcno:author, Author, G),
-      rdf_string(Author, stcno:pseudonym, Pseudonym, G)
-    ),
-    PPN_Pseudonyms
-  ),
-  length(PPN_Pseudonyms, V5),
-  debug(stcn_statistics, '-- ~w: ~w', [A5,V5]),
-
-  A6 = 'Number of pseudonyms',
-  aggregate_all(
-    set(Pseudonym),
-    rdf_string(_, stcno:pseudonym, Pseudonym, G),
-    NumberOfPseudonyms
-  ),
-  length(NumberOfPseudonyms, V6),
-  debug(stcn_statistics, '-- ~w: ~w', [A6,V6]).
-
+statistics_kmc30xx(Graph) -->
+  html([
+    h3('Publications with at least one author'),
+    {count_subjects(stcno:author, _, G, V1)},
+    \html_pl_term(thousands_integer(V1)),
+    
+    h3('Publications with at least one DBpedia author'),
+    {
+      aggregate_all(
+        count,
+        (
+          rdf(DBpediaAuthorPPN, stcno:author, AuthorPPN, G),
+          owl_resource_identity(AuthorPPN, _DBpediaAuthor),
+          rdf_global_id(dbpedia:_, DBpediaAuthor)
+        ),
+        V2
+      )
+    },
+    \html_pl_term(thousands_integer(V2)),
+    
+    h3('Number of authors (including pseudonyms)'),
+    {count_instances_by_class(stcno:'Author', V3)},
+    \html_pl_term(V3),
+    
+    h3('Number of DBpedia authors (including pseudonyms)'),
+    {
+      aggregate_all(
+        count,
+        (
+          rdf(_, stcno:author, AuthorPPN, G),
+          owl_resource_identity(AuthorPPN, DBpediaAuthor),
+          rdf_global_id(dbpedia:_, DBpediaAuthor)
+        ),
+        V4
+      )
+    },
+    \html_pl_term(thousands_integer(V4)),
+    
+    h3('Publications written under at least one pseudonym'),
+    {
+      aggregate_all(
+        count,
+        (
+          rdf(PPN_Pseudonym, stcno:author, Author, G),
+          rdf_string(Author, stcno:pseudonym, Pseudonym, G)
+        ),
+        V5
+      )
+    },
+    \html_pl_term(thousands_integer(V5)),
+    
+    h3('Number of pseudonyms'),
+    {
+      aggregate_all(
+        count,
+        rdf_string(_, stcno:pseudonym, Pseudonym, G),
+        V6
+      )
+    },
+    \html_pl_term(thousands_integer(V6))
+  ]).

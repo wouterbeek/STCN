@@ -20,7 +20,6 @@ The database dump is ambiguous.
 
 :- use_module(library(pio)).
 
-:- use_module(plc(dcg/dcg_abnf)).
 :- use_module(plc(dcg/dcg_ascii)).
 :- use_module(plc(dcg/dcg_atom)).
 :- use_module(plc(dcg/dcg_content)).
@@ -29,7 +28,7 @@ The database dump is ambiguous.
 :- use_module(plc(generics/code_ext)).
 :- use_module(plc(io/file_ext)).
 
-:- use_module(stcn(stcn_kmc)).
+:- use_module(stcn(parse/stcn_parse_generics)).
 
 
 
@@ -41,15 +40,15 @@ The database dump is ambiguous.
 collect_line(Line) -->
   dcg_peek(atom('SET')), !,
   '...'(Line),
-  end_of_collected_line.
+  end_of_line.
 % Ingevoerd line, always spans two rows.
 collect_line(Line) -->
   dcg_peek(atom('Ingevoerd')), !,
   '...'(Line1),
-  end_of_collected_line,
-  (   dcg_peek('#'(2, decimal_digit, []))
+  end_of_line,
+  (   dcg_peek(double_digit)
   ->  '...'(Line2),
-      end_of_collected_line,
+      end_of_line,
       {append(Line1, Line2, Line)}
   ;   {Line = Line1}
   ).
@@ -57,7 +56,7 @@ collect_line(Line) -->
 collect_line(Line) -->
   peek_kmc_start, !,
   '...'(Line1),
-  end_of_collected_line,
+  end_of_line,
   collect_the_rest_of_a_kmc_line(Line2),
   {append(Line1, Line2, Line)}.
 
@@ -66,7 +65,7 @@ collect_line(Line) -->
 % We are now inside a KMC line...
 % A blank line ends a KMC line.
 collect_the_rest_of_a_kmc_line([]) -->
-  end_of_collected_line, !.
+  end_of_line, !.
 % Another KMC ends a KMC line.
 collect_the_rest_of_a_kmc_line([]) -->
   peek_kmc_start, !.
@@ -82,7 +81,7 @@ collect_the_rest_of_a_kmc_line([]) -->
 % The KMC line continues.
 collect_the_rest_of_a_kmc_line(Line) -->
   '...'(Line0),
-  end_of_collected_line, !,
+  end_of_line, !,
   collect_the_rest_of_a_kmc_line(Line2),
   % We sometimes have to add spaces and sometimes not.
   % We add a space in very circumstance and trim spaces later.
@@ -95,7 +94,7 @@ collect_the_rest_of_a_kmc_line(Line) -->
 
 % Skip empty lines.
 collect_lines(Out) -->
-  end_of_collected_line, !,
+  end_of_line, !,
   collect_lines(Out).
 /*
 % Line  contains the erratic character sequences:
@@ -105,7 +104,7 @@ collect_lines(Out) -->
 %    - `¿`, Inverted Question Mark
 collect_lines(Out) -->
   [239,187,191],
-  end_of_collected_line, !,
+  end_of_line, !,
   {
     flag(collected_lines, N, N),
     debug(collect_lines, 'Irregular content [239,187,191] at line ~D.', [N])
@@ -116,7 +115,7 @@ collect_lines(Out) -->
 % at line 2,946,252.
 collect_lines(Out) -->
   [65279],
-  end_of_collected_line, !,
+  end_of_line, !,
   {
     flag(collected_lines, N, N),
     debug(collect_lines, 'Irregular content [65279] at line ~D.', [N])
@@ -141,13 +140,16 @@ collect_lines(_) -->
 
 % HELPERS %
 
+%! double_digit// is semidet.
+
+double_digit -->
+  decimal_digit,
+  decimal_digit.
+
+
+
+%! peek_kmc_start// is semidet.
+
 peek_kmc_start -->
   dcg_peek(5, Codes),
   {phrase(kmc_start(_), Codes)}.
-
-end_of_collected_line -->
-  end_of_line,
-  {
-    flag(collected_lines, N, N + 1)
-    %%%%debug(collect_lines, 'COLLECT-LINES ~D', [N])
-  }.

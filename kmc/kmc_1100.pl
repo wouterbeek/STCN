@@ -1,12 +1,7 @@
 :- module(
   kmc_1100,
   [
-% SCHEMA ASSERTION
     assert_schema_kmc_1100/1, % +Graph:graph
-% GRAMMAR
-    kmc_1100//2, % +Graph:atom
-                 % +PPN:uri
-% STATISTICS
     statistics_kmc_1100/2 % +Graph:atom
                          % -Rows:list(list)
   ]
@@ -81,6 +76,8 @@ Also see kmc_4040.pl for dating.
 
 
 
+% SCHEMA %
+
 assert_schema_kmc_1100(G):-
   rdf_assert_property(stcno:publication_year, G),
   rdfs_assert_label(stcno:publication_year, 'publication year', G),
@@ -148,44 +145,55 @@ assert_schema_kmc_1100(G):-
     G
   ).
 
+
+
+
+% GRAMMAR %
+
 % Year interval.
-kmc_1100(G, PPN) -->
+kmc:kmc_value(1100, Publication, Graph) -->
   year_interval(_, Y1-Y2), !,
   {
     newDateTime(Y1, _, _, _, _, _, _, DT1),
     rdf_assert_typed_literal(
-      PPN,
+      Publication,
       stcno:earliest_publication_year,
       DT1,
       xsd:gYear,
-      G
+      Graph
     ),
     newDateTime(Y2, _, _, _, _, _, _, DT2),
     rdf_assert_typed_literal(
-      PPN,
+      Publication,
       stcno:latest_publication_year,
       DT2,
       xsd:gYear,
-      G
+      Graph
     )
   }.
 % Year point.
-kmc_1100(G, PPN) -->
+kmc:kmc_value(1100, Publication, Graph) -->
   year_point(_, Y), !,
   {
     newDateTime(Y, _, _, _, _, _, _, DT),
     rdf_assert_typed_literal(
-      PPN,
+      Publication,
       stcno:exact_publication_year,
       DT,
       xsd:gYear,
-      G
+      Graph
     )
   }.
 % Cannot parse.
-kmc_1100(_G, PPN) -->
-  dcg_until(end_of_line, Line, [end_mode(exclusive),output_format(atom)]),
-  {debug(kmc_1100, '[PPN ~w] Could not parse KMC 1100: ~w', [PPN,Line])}.
+kmc:kmc_value(1100, Publication, _) -->
+  '...',
+  end_of_line, !,
+  {debug(kmc_1100, '[PPN ~w] Could not parse KMC 1100.', [Publication])}.
+
+
+
+
+% STATISTICS %
 
 statistics_kmc_1100(G, [[A1,V1],[A2,V2],[A3,V3]|T]):-
   A1 = 'Publications that are dated',

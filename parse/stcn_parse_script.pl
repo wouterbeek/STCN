@@ -62,23 +62,10 @@ stcn_parse_script(Uri, G):-
   ;   trim_spaces(F1, F2)
   ),
 
-gtrace,
-  absolute_file_name(data('lines3.txt'), F3),
-  (   exists_file(F3)
-  ->  true
-  ;   replace_in_file(F2, "Â°", "°", F3)
-  ),
-
-  absolute_file_name(data('lines4.txt'), F4),
-  (   exists_file(F4)
-  ->  true
-  ;   replace_in_file(F3, "Ãª", "°", F4)
-  ),
-
   % Parse input document.
   flag(publications, _, 0),
   G = 'Redactiebladen',
-  phrase_from_file(redactiebladen(G, _), F4, [encoding(utf8),type(text)]),
+  phrase_from_file(redactiebladen(G, _), F2, [encoding(utf8),type(text)]),
   flag(publications, N, 0),
   debug(stcn_parse_script, 'Number of PPNs processed: ~D.', [N]),
   absolute_file_name(

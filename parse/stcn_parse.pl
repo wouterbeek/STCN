@@ -2,7 +2,7 @@
   stcn_parse,
   [
     redactiebladen//2 % +Graph:atom
-                      % -PPN:atom
+                      % -Ppn:atom
   ]
 ).
 
@@ -17,17 +17,15 @@ This parses 139.817 PPN entries in the redactiebladen file.
 */
 
 :- use_module(library(debug)).
-:- use_module(library(pio)).
 
 :- use_module(plc(dcg/dcg_ascii)).
-:- use_module(plc(dcg/dcg_atom)).
 :- use_module(plc(dcg/dcg_content)).
-:- use_module(plc(dcg/dcg_generics)).
+:- use_module(plc(dcg/dcg_generics)). % Meta-argument.
 
 :- use_module(plRdf(api/rdf_build)).
 
 :- use_module(stcn(stcn_generics)).
-:- use_module(stcn(stcn_kmc)).
+:- use_module(stcn(parse/stcn_parse_generics)).
 
 :- assert(user:prolog_file_type(txt, text)).
 
@@ -35,54 +33,48 @@ This parses 139.817 PPN entries in the redactiebladen file.
 
 
 
-redactiebladen(G, PPN) -->
-  end_of_redactiebladen_line, !,
-  redactiebladen(G, PPN).
-redactiebladen(G, _PPN) -->
+redactiebladen(G, Ppn) -->
+  end_of_line, !,
+  redactiebladen(G, Ppn).
+redactiebladen(G, _) -->
   "SET", !,
-  dcg_until(atom('PPN: '), _, [end_mode(inclusive)]),
-  ppn('Publication', PPN),
+  '...',
+  "PPN: ", !,
+  ppn('Publication', Ppn),
   {
     flag(publications, N, N + 1),
-    (   N rem 1000 =:= 0
-    ->  debug(stcn_parse, '~w PPNs parsed.', [N])
+    (   N rem 1 =:= 0
+    ->  debug(stcn_parse, 'PPNs extracted: ~D', [N])
     ;   true
     ),
-    rdf_assert_instance(PPN, stcno:'Publication', G)
+    rdf_assert_instance(Ppn, stcno:'Publication', G)
   },
   '...',
-  end_of_redactiebladen_line, !,
-  redactiebladen(G, PPN).
-redactiebladen(G, PPN) -->
+  end_of_line, !,
+  redactiebladen(G, Ppn).
+redactiebladen(G, Ppn) -->
   "Ingevoerd", !,
   '...',
-  end_of_redactiebladen_line, !,
-  redactiebladen(G, PPN).
-redactiebladen(G, PPN) -->
-  kmc_start(KMC), !,
-  kmc(KMC, G, PPN),
-  end_of_redactiebladen_line, !,
-  redactiebladen(G, PPN).
-redactiebladen(G, PPN) -->
+  end_of_line, !,
+  redactiebladen(G, Ppn).
+redactiebladen(G, Ppn) -->
+  kmc_start(Kmc0), !,
+  '...'(Content0),
+  end_of_line, !,
+  {
+    atom_number(Kmc, Kmc0),
+    rdf_global_id(stcno:Kmc, P),
+    atom_codes(Content, Content0),
+    rdf_assert_string(Ppn, P, Content, G)
+  },
+  redactiebladen(G, Ppn).
+redactiebladen(G, Ppn) -->
   '...'(Line),
-  end_of_redactiebladen_line, !,
+  end_of_line, !,
   {
     atom_codes(Atom, Line),
-    debug(stcn_parse, 'Could not process line: ~a of PPN ~w', [Atom,PPN])
+    debug(stcn_parse, 'Could not process line: ~a of PPN ~w', [Atom,Ppn])
   },
-  redactiebladen(G, PPN).
+  redactiebladen(G, Ppn).
 redactiebladen(_, _) -->
   dcg_end, !.
-
-
-
-
-
-% HELPERS %
-
-end_of_redactiebladen_line -->
-  end_of_line,
-  {
-    flag(redactiebladen_lines, N, N + 1),
-    debug(stcn_parse, 'PARSE: ~D', [N])
-  }.

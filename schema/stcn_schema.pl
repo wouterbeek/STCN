@@ -19,7 +19,7 @@ Schema for the STCN database.
 :- use_module(plRdf(api/rdf_build)).
 :- use_module(plRdf(api/rdfs_build)).
 
-:- use_module(stcn(stcn_kmc)).
+:- use_module(stcn(kmc/kmc_generics)).
 :- use_module(stcn(picarta/picarta_query)). % Make private call.
 
 
