@@ -10,9 +10,9 @@
 :- use_module(library(http/html_write)).
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
+:- use_module(plRdf(api/owl_read)).
 :- use_module(plRdf(api/rdf_read)).
-:- use_module(plRdf(owl/owl_read)).
-:- use_module(plRdf(vocabulary/rdf_read)).
+:- use_module(plRdf(vocabulary/rdf_stats)).
 
 :- use_module(plRdfHtml(html_pl_term)).
 

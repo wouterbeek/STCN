@@ -12,7 +12,7 @@ Script for parsing the STCN from redactiebladen.
 
 @author Wouter Beek
 @tbd Unable to phrase_from_stream/2 on the URI directly; due to dcg_peek//1.
-@version 2015/02
+@version 2015/02-2015/03
 */
 
 :- use_module(library(debug)).
@@ -60,6 +60,7 @@ stcn_parse_script(Uri, G):-
   ->  true
   ;   trim_spaces(F1, F2)
   ),
+gtrace,
 
   % Parse input document.
   flag(publications, _, 0),

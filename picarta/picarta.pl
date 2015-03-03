@@ -45,11 +45,11 @@ We make a distinction between three portions of code in this module:
 :- use_module(plc(generics/list_ext)).
 :- use_module(plc(process/thread_ext)).
 
+:- use_module(plRdf(api/owl_build)).
 :- use_module(plRdf(api/rdf_build)).
 :- use_module(plRdf(api/rdf_read)).
 :- use_module(plRdf(api/rdfs_build)).
 :- use_module(plRdf(api/rdfs_read)).
-:- use_module(plRdf(owl/owl_build)).
 :- use_module(plRdf(vocabulary/rdf_stat)).
 
 :- use_module(plRdfEntailment(rdf_ent_stat)).

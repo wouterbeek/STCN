@@ -11,9 +11,9 @@
 
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 
+:- use_module(plRdf(api/owl_build)).
 :- use_module(plRdf(api/rdf_build)).
 :- use_module(plRdf(api/rdfs_build)).
-:- use_module(plRdf(owl/owl_build)).
 
 :- multifile(kmc:assert_kmc_schema/2).
 

@@ -19,9 +19,9 @@ Predicates for asserting links between the STCN and other datasets.
 :- use_module(library(semweb/rdf_db), except([rdf_node/1])).
 :- use_module(library(semweb/rdfs)).
 
+:- use_module(plRdf(api/owl_build)).
 :- use_module(plRdf(api/rdf_read)).
 :- use_module(plRdf(api/rdfs_build)).
-:- use_module(plRdf(owl/owl_build)).
 
 :- use_module(plSparql(query/sparql_query_api)).
 
