@@ -35,7 +35,10 @@ stcn_script:-
   % Assert the STCN Ontology.
   OGraph = 'STCN-Ontology',
   stcn_schema(OGraph),
-  rdf_save_any([format(turtle),graph(OGraph)]),
+  rdf_save_any(
+    file_spec(stcn('rdf/OGraph.ttl')),
+    [format(turtle),graph(OGraph)]
+  ),
 
   % Parse the redactiebladen.
   setting(stcn_settings:input_location, Location),
@@ -47,5 +50,8 @@ gtrace,
   % STCN-VoID
   VGraph = 'STCN-VoID',
   stcn_void(VGraph),
-  rdf_save_any([format(turtle),graph(VGraph)]).
+  rdf_save_any(
+    file_spec(stcn('rdf/VGraph.ttl')),
+    [format(turtle),graph(VGraph)]
+  ).
 

@@ -67,10 +67,9 @@ stcn_parse_script(Uri, G):-
   phrase_from_file(redactiebladen(G, _), F2, [encoding(utf8),type(text)]),
   flag(publications, N, 0),
   debug(stcn_parse_script, 'Number of PPNs processed: ~D.', [N]),
-  absolute_file_name(
-    stcn(rdf/parsed),
-    RdfFile,
-    [access(write),file_type(turtle)]
+  rdf_save_any(
+    file_spec(stcn('rdf/parsed.ttl')),
+    [format(turtle),graph(G)]
   ),
-  rdf_save_any(RdfFile, [format(turtle),graph(G)]),
   debug(stcn_parse_script, 'Done saving the parsed redactiebladen.', []).
+

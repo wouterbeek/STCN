@@ -36,11 +36,6 @@ stcn_scrape_script(PGraph):-
   % Picarta scraping for publications.
   rdf_new_graph(PGraph, SGraph),
   debug(stcn_script, 'Done scraping publications.', []),
-  absolute_file_name(
-    stcn(rdf/SGraph),
-    SFile,
-    [access(write),file_type(turtle)]
-  ),
   debug(stcn_script, 'Done scraping Picarta for publications.', []),
 
   % Turn PPN literals into IRIs.
@@ -98,12 +93,11 @@ stcn_scrape_script(PGraph):-
       atomic_list_concat(['Picarta',C,'s'], ToG),
       stcn_scrape(SGraph, C, ToG),
       debug(stcn_script, 'Done scraping class ~w from Picarta.', [C]),
-      absolute_file_name(
-        stcn(rdf/ToG),
-        ToFile,
-        [access(write),file_type(turtle)]
+      format(atom(Path), 'rdf/~a.ttl', [C]),
+      rdf_save_any(
+        file_spec(stcn(Path)),
+        [format(turtle),graph(ToG)]
       ),
-      rdf_save_any(ToFile, [format(turtle),graph(ToG)]),
       debug(
         stcn_script,
         'Done saving the scraped class ~w from Picarta.',
@@ -114,5 +108,8 @@ stcn_scrape_script(PGraph):-
     Msg
   ),
 
-  rdf_save_any(SFile, [format(turtle),graph(SGraph)]).
+  rdf_save_any(
+    file_spec(stcn('rdf/SGraph.ttl')),
+    [format(turtle),graph(SGraph)]
+  ).
 
