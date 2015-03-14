@@ -60,7 +60,6 @@ stcn_parse_script(Uri, G):-
   ->  true
   ;   trim_spaces(F1, F2)
   ),
-gtrace,
 
   % Parse input document.
   flag(publications, _, 0),
@@ -68,6 +67,7 @@ gtrace,
   phrase_from_file(redactiebladen(G, _), F2, [encoding(utf8),type(text)]),
   flag(publications, N, 0),
   debug(stcn_parse_script, 'Number of PPNs processed: ~D.', [N]),
+gtrace,
   rdf_save_any(
     file_spec(stcn('rdf/parsed.ttl')),
     [format(turtle),graph(G)]

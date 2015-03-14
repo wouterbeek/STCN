@@ -49,5 +49,14 @@ user:project('STCN', 'Short Title Catalogue of the Netherlands', stcn).
 :- rdf_register_prefix(stcno, 'http://stcn.org/ontology/').
 
 
-:- use_module(stcn(stcn_script)).
+:- use_module(library(filesex)).
 
+:- initialization(set_rdf_subdirectory).
+
+set_rdf_subdirectory:-
+  absolute_file_name(stcn(.), Dir, [access(write),file_type(directory)]),
+  directory_file_path(Dir, rdf, RdfDir),
+  make_directory_path(RdfDir).
+
+
+:- use_module(stcn(stcn_script)).
