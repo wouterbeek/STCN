@@ -50,7 +50,7 @@ ppn(PpnCode) -->
   ppn_char(C9),
   {atom_codes(PpnCode, [C1,C2,C3,C4,C5,C6,C7,C8,C9])}.
 
-ppn_char(C) --> decimal_digit(C).
+ppn_char(C) --> decimal_digit(_, C).
 ppn_char(C) --> x(C).
 
 
