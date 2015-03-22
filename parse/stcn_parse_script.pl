@@ -23,6 +23,7 @@ Script for parsing the STCN from redactiebladen.
 
 :- use_module(plHttp(download_to_file)).
 
+:- use_module(plRdf(management/rdf_load_any)).
 :- use_module(plRdf(management/rdf_save_any)).
 
 :- use_module(stcn(parse/collect_lines)).
@@ -34,7 +35,7 @@ Script for parsing the STCN from redactiebladen.
 
 %! stcn_parse_script(+Uri:atom, +Graph:atom) is det.
 
-stcn_parse_script(Uri, G):-
+stcn_parse_script(Uri, Graph):-
   absolute_file_name(stcn(data/'lines1.txt'), F1),
   (   exists_file(F1)
   ->  true
@@ -62,15 +63,20 @@ stcn_parse_script(Uri, G):-
   ),
 
   % Parse input document.
-  flag(publications, _, 0),
-  G = 'Redactiebladen',
-  phrase_from_file(redactiebladen(G, _), F2, [encoding(utf8),type(text)]),
-  flag(publications, N, 0),
-  debug(stcn_parse_script, 'Number of PPNs processed: ~D.', [N]),
-gtrace,
-  rdf_save_any(
-    file_spec(stcn('rdf/parsed.ttl')),
-    [format(turtle),graph(G)]
-  ),
-  debug(stcn_parse_script, 'Done saving the parsed redactiebladen.', []).
-
+  absolute_file_name(stcn('rdf/parsed.ttl'), File, [access(write)]),
+  Graph = 'Redactiebladen',
+  (   rdf_graph(Graph)
+  ->  true
+  ;   exists_file(File)
+  ->  rdf_load_any(file(File), [format(turtle),graph(Graph)])
+  ;   flag(publications, _, 0),
+      phrase_from_file(
+        redactiebladen(Graph, _),
+        F2,
+        [encoding(utf8),type(text)]
+      ),
+      flag(publications, N, 0),
+      debug(stcn_parse_script, 'Number of PPNs processed: ~D.', [N]),
+      rdf_save_any(file(File), [format(turtle),graph(Graph)]),
+      debug(stcn_parse_script, 'Done saving the parsed redactiebladen.', [])
+  ).

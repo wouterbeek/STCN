@@ -13,7 +13,7 @@ This module contains predicate for querying the Picarta online dataset
 via its URI-baset/REST API.
 
 @author Wouter Beek
-@version 2013/01-2013/04, 2013/06, 2013/09-2013/10, 2015/02
+@version 2013/01-2013/04, 2013/06, 2013/09-2013/10, 2015/02-2015/03
 */
 
 :- use_module(library(debug)).
@@ -89,7 +89,7 @@ picarta_query_ppn(PPN, Uri, Pairs):-
     Uri,
     uri_components(Scheme, Authority, Path, Search, Fragment)
   ),
-  download_html_dom(Uri, Dom, [dialect(html4)]),
+  download_html_dom(Uri, Dom, [dialect(html4),max_errors(-1),silent(true)]),
   findall(
     TranslatedAttribute/ProcessedValue,
     (

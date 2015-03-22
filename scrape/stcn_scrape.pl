@@ -52,12 +52,10 @@ Fully automated scrape for the STCN.
 %   * `TranslatorEditor`
 
 % Scrape from remote Website (Picarta),
-% Without a prior TODO file.
-stcn_scrape(FromG, C, ToG):-
-  stcn_scrape_ppns(FromG, C, PPNs),
-  % Write the PPNs of the given category to a TODO file.
+stcn_scrape(FromG, Class, ToG):-
+  stcn_scrape_ppns(FromG, Class, PPNs),
   list_script(
-    picarta_scrape(C, ToG),
+    picarta_scrape(Class, ToG),
     PPNs,
     [message('PPN'),overview(true)]
   ).

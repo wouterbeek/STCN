@@ -10,7 +10,7 @@
 Script for scraping the STCN from Picarta.
 
 @author Wouter Beek
-@version 2015/02
+@version 2015/02-2015/03
 */
 
 :- use_module(library(debug)).
@@ -35,9 +35,34 @@ Script for scraping the STCN from Picarta.
 stcn_scrape_script(PGraph):-
   % Picarta scraping for publications.
   rdf_new_graph(PGraph, SGraph),
-  debug(stcn_script, 'Done scraping publications.', []),
-  debug(stcn_script, 'Done scraping Picarta for publications.', []),
+  debug(stcn_scrape_script, 'Done scraping publications.', []),
+  debug(stcn_scrape_script, 'Done scraping Picarta for publications.', []),
 
+  forall(
+    member(
+      Class,
+      ['Publication','Author','PrinterPublisher','TranslatorEditor']
+    ),
+    scrape_class(Class, SGraph)
+  ),
+  
+  rdf_save_any(
+    file_spec(stcn('rdf/SGraph.ttl')),
+    [format(turtle),graph(SGraph)]
+  ).
+
+scrape_class(Class, FromG):-
+  atomic_list_concat(['Picarta',Class,'s'], ToG),
+  stcn_scrape(FromG, Class, ToG),
+  format(atom(Path), 'rdf/~a.ttl', [Class]),
+  rdf_save_any(file_spec(stcn(Path)), [format(turtle),graph(ToG)]),
+  debug(
+    stcn_scrape_script,
+    'Done saving the scraped class ~w from Picarta.',
+    [Class]
+  ).
+
+/*
   % Turn PPN literals into IRIs.
   forall(
     member(
@@ -66,7 +91,6 @@ stcn_scrape_script(PGraph):-
     )
   ),
 
-/*
   % Load the Picarta topics.
   absolute_file_name(
     input('PicartaTopics'),
@@ -83,33 +107,3 @@ stcn_scrape_script(PGraph):-
     )
   ),
 */
-
-  forall_thread(
-    (
-      member(C, ['Author','PrinterPublisher','TranslatorEditor']),
-      format(atom(Msg), 'Scraping Picarta for class ~w', [C])
-    ),
-    (
-      atomic_list_concat(['Picarta',C,'s'], ToG),
-      stcn_scrape(SGraph, C, ToG),
-      debug(stcn_script, 'Done scraping class ~w from Picarta.', [C]),
-      format(atom(Path), 'rdf/~a.ttl', [C]),
-      rdf_save_any(
-        file_spec(stcn(Path)),
-        [format(turtle),graph(ToG)]
-      ),
-      debug(
-        stcn_script,
-        'Done saving the scraped class ~w from Picarta.',
-        [C]
-      )
-    ),
-    stcn_script,
-    Msg
-  ),
-
-  rdf_save_any(
-    file_spec(stcn('rdf/SGraph.ttl')),
-    [format(turtle),graph(SGraph)]
-  ).
-
